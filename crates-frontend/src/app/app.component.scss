@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.main-content-row {
+  overflow-y: auto;
+}
+
+@media (max-width: 576px) {
+  .main-content {
+    padding-bottom: 5em; /* Adjust this value as necessary */
+  }
+}
+
+.way-on-top {
+  z-index: 1051;
+}

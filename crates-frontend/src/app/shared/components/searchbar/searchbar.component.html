@@ -1,0 +1,13 @@
+<div class="input-group bg-dark">
+  <span class="input-group-text bg-dark">
+    <i class="bi bi-search"></i>
+  </span>
+  <input #searchInput
+         type="text"
+         class="form-control"
+         [(ngModel)]="searchTerm"
+         [placeholder]="placeholder"/>
+  <span class="input-group-text search-clear-button bg-dark" *ngIf="searchTerm" (click)="clearSearch()">
+    <i class="bi bi-x-circle"></i>
+  </span>
+</div>

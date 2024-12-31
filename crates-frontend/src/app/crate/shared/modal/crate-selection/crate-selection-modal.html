@@ -1,0 +1,48 @@
+<ng-container *ngIf="cratePage">
+  <div class="crate-selection-dialog">
+    <h4 class="text-center py-2">Add to crate</h4>
+    <div class="text-center">
+      <button class="btn btn-light mb-2"
+              *ngIf="!creating"
+              (click)="crateCrateClicked()">Create Crate
+      </button>
+    </div>
+    <ng-container *ngIf="creating">
+      <div class="text-center">
+        <div class="d-flex flex-column justify-content-center align-content-center align-items-center text-center">
+          <label for="crateName" class="pb-2">Give your crate a name</label>
+          <input [(ngModel)]="crateName"
+                 type="text"
+                 name="crateName"
+                 id="crateName"
+                 class="form-control w-75 mb-2"/>
+          <button class="btn btn-primary mb-5"
+                  (click)="createCrate(crateName)">Create
+          </button>
+        </div>
+      </div>
+    </ng-container>
+    <ul class="list-group bg-dark" *ngIf="!creating">
+      <li *ngFor="let crate of cratePage.content"
+          class="crate-list-item"
+          (click)="selectCrate(crate)">
+        <div class="container">
+          <div class="row">
+            <div class="col-12 pb-3">
+                <span class="crate-select-list-image">
+                  <img *ngIf="!!crate.imageUri"
+                       [ngSrc]="crate.imageUri" width="50" height="50" [alt]="crate.name"/>
+                  <img *ngIf="!crate.imageUri"
+                       [ngSrc]="'../../../../../assets/images/crate-placeholder.webp'"
+                       width="50" height="50" [alt]="crate.name">
+                </span>
+              <span class="crate-select-list-name">
+                  {{ crate.name }}
+                </span>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</ng-container>

@@ -1,0 +1,16 @@
+<div class="remove-album-modal text-center bg-dark">
+  <h1 class="remove-album-modal-header">Remove Album</h1>
+  <h5>Remove <span class="text-primary">{{ album.name }}</span> from <span class="text-primary">{{ crate.name }}</span>?</h5>
+  <div class="container w-100 h-100">
+    <div class="row py-4">
+      <div class="col">
+        <button class="btn btn-primary px-1"
+                (click)="confirm()">Remove</button>
+      </div>
+      <div class="col">
+        <button class="btn btn-outline-secondary"
+                (click)="cancel()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

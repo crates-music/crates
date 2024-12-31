@@ -1,0 +1,3 @@
+CREATE USER crates WITH PASSWORD 'cratesforfun';
+CREATE DATABASE crates;
+GRANT ALL PRIVILEGES ON DATABASE crates to crates;

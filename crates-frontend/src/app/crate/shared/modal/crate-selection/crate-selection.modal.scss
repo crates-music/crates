@@ -1,0 +1,28 @@
+@import "../../../../../styles";
+
+.crate-selection-dialog {
+  color: $white;
+  background: $dark;
+}
+
+.crate-list-item {
+  color: $primary;
+  background: $dark;
+  cursor: pointer;
+
+  &:hover {
+    background: black;
+    font-weight: bold;
+  }
+}
+
+.crate-select-list-image {
+  width: 10% !important;
+}
+
+.crate-select-list-name {
+  width: 90% !important;
+  margin-left: 0.5em;
+  align-content: center;
+  justify-content: center;
+}

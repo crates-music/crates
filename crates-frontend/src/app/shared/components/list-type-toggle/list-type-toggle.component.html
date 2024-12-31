@@ -1,0 +1,10 @@
+<button class="btn btn-outline-light border-0"
+        *ngIf="listType === ListType.List"
+        (click)="toggleListType(ListType.Grid)">
+  <i class="bi bi-grid-fill"></i>
+</button>
+<button class="btn btn-outline-light border-0"
+        *ngIf="listType === ListType.Grid"
+        (click)="toggleListType(ListType.List)">
+  <i class="bi bi-list"></i>
+</button>

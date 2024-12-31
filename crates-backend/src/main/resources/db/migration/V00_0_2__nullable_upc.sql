@@ -1,0 +1,2 @@
+ALTER TABLE album
+    ALTER COLUMN upc DROP NOT NULL;

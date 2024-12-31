@@ -1,0 +1,2 @@
+ALTER TABLE library_album
+    ADD COLUMN crated BOOLEAN NOT NULL DEFAULT false;

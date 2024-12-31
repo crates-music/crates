@@ -1,0 +1,43 @@
+<div class="container-fluid overflow-hidden">
+  <div class="row vh-100 overflow-auto">
+    <div class="col-12 col-sm-3 col-xl-2 px-sm-2 px-0 d-flex sticky-top way-on-top">
+      <div class="d-flex flex-sm-column flex-row flex-grow-1 align-items-center align-items-sm-start px-3 pt-2 text-white">
+<!--        <a href="/" class="d-flex align-items-center pb-sm-3 mb-md-0 me-md-auto text-white text-decoration-none">-->
+<!--          <span class="fs-5">Crates</span>-->
+<!--        </a>-->
+        <ul class="nav nav-pills flex-sm-column flex-row flex-nowrap flex-shrink-1 flex-sm-grow-0 flex-grow-1 mb-sm-auto mb-0 justify-content-center align-items-center align-items-sm-start d-none d-sm-flex" id="menu">
+          <li class="nav-item">
+            <a routerLink="/crate/list" data-bs-toggle="collapse" class="nav-link px-sm-0 px-2">
+              <i class="fs-5 bi-box-seam"></i><span class="ms-1 d-none d-sm-inline">Crates</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/library" class="nav-link px-sm-0 px-2">
+              <i class="fs-5 bi-disc"></i><span class="ms-1 d-none d-sm-inline">Library</span></a>
+          </li>
+        </ul>
+        <div class="py-sm-4 mt-sm-auto ms-auto ms-sm-0 flex-shrink-1"
+             *ngIf="loggedIn()">
+          <div class="text-center d-none d-sm-block" *ngIf="userLoaded$ | async">{{ (user$ | async).spotifyId }}</div>
+          <button (click)="logout()"
+                  class="btn btn-darker btn-block">
+            <span *ngIf="userLoaded$ | async"
+                  class="d-sm-none px-1 pb-5">{{ (user$ | async).spotifyId }}</span>
+            <i class="fs-5 bi-power"></i>
+            <span class="ms-1 d-none d-sm-inline">Log Out</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col d-flex flex-column h-100 overflow-x-hidden main-content">
+      <div class="container-fluid flex-grow-1">
+        <main class="row">
+          <div class="col">
+            <router-outlet></router-outlet>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <crates-mobile-footer></crates-mobile-footer>
+</div>

@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "crates.encryption-key",
+      "type": "java.lang.String",
+      "description": "The encryption key used to encrypt Spotify tokens."
+    },
+    {
+      "name": "spotify.client-id",
+      "type": "java.lang.String",
+      "description": "The spotify client ID"
+    },
+    {
+      "name": "spotify.client-secret",
+      "type": "java.lang.String",
+      "description": "The spotify client secret"
+    },
+    {
+      "name": "spotify.redirect_uri",
+      "type": "java.lang.String",
+      "description": "The authentication redirect URI that our app listens on."
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+<div class="row p-0" *ngIf="!(libraryLoading$ | async) && !(libraryLoaded$ | async)">
+  <button class="btn btn-outline-light"
+          (click)="syncLibrary()"
+          *ngIf="!(libraryLoading$ | async)">
+    Import Your Spotify Library
+  </button>
+</div>
+<div class="row p-0 sticky-top bg-black list-header" *ngIf="library$ | async as library">
+  <div class="container-fluid p-0">
+    <div class="row p-0">
+      <div class="col-4 col-md-1 title-col">
+        <h1>LIBRARY</h1>
+      </div>
+      <div class="col sync-col">
+        <button class="btn btn-outline-light border-0"
+                *ngIf="library.state === LibraryState.Imported
+                       || library.state === LibraryState.ImportingAfterFirstPage
+                       || library.state === LibraryState.Updated
+                       || library.state === LibraryState.UpdateFailed"
+                (click)="syncLibrary()">
+          <i class="bi bi-arrow-clockwise h4"></i>
+        </button>
+        <div class="spinner-border text-light"
+             role="status"
+             *ngIf="library.state === LibraryState.Importing
+              || library.state === LibraryState.Updating">
+          <span class="sr-only"></span>
+        </div>
+      </div>
+    </div>
+    <div class="row py-2 g-0">
+      <div class="col-9 col-md-11">
+        <crates-searchbar placeholder="Search albums..."
+                          (search)="handleSearch($event)"></crates-searchbar>
+      </div>
+      <div class="col-3 col-md-1 text-center justify-content-center align-content-center">
+        <div class="btn-group" role="group">
+          <div ngbDropdown>
+            <button id="settingsButton" class="btn btn-outline-light border-0" ngbDropdownToggle>
+              <i class="bi bi-filter"></i>
+            </button>
+
+            <ul class="dropdown-menu" aria-labelledby="settingsButton" ngbDropdownMenu>
+              <li>
+                <div class="form-check form-switch crated-switch">
+                  <input class="form-check-input"
+                         type="checkbox"
+                         role="switch"
+                         id="hideCrated"
+                         [(ngModel)]="hideCrated"
+                         (change)="reloadAlbums()">
+                  <label class="form-check-label" for="hideCrated">Hide Crated</label>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <crates-list-type-toggle [listType]="libraryListType"
+                                   (toggle)="toggleLibraryListType($event)"></crates-list-type-toggle>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row p-0"
+     infinite-scroll
+     [infiniteScrollDistance]="2"
+     [infiniteScrollThrottle]="1000"
+     (scrolled)="loadMore()">
+  <ng-container *ngIf="libraryListType === ListType.Grid">
+    <div class="col-6 col-sm-6 col-md-4 col-xl-3 p-0" *ngFor="let album of albums$ | async; trackBy: trackByAlbumId">
+      <div class="album-card-container m-4">
+        <div class="card bg-dark text-white album-card"
+             [ngClass]="{ 'selected': album.selected }"
+             (click)="toggledSelected(album)">
+          <div class="album-gradient">
+            <img class="card-img album-image" [src]="album.images[0].url" alt="{{ album.name }} artwork"/>
+          </div>
+          <div class="card-img-overlay h-100 d-flex align-items-end">
+            <div class="card-group">
+              <div class="container-fluid">
+                <div class="row">
+                  <h4 class="card-title bg-black album-title">{{ album.name }}</h4>
+                </div>
+                <div class="row">
+                  <h5 class="card-text bg-black">{{ getArtistNames(album) }}</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="libraryListType === ListType.List">
+    <div class="col-12 p-md-0">
+      <div class="container-fluid p-0">
+        <div class="row list-album-row"
+             *ngFor="let album of albums$ | async; trackBy: trackByAlbumId"
+             (click)="toggledSelected(album)">
+          <div class="col-2 col-md-1">
+            <img class="list-album-image"
+                 [src]="album.images[0].url"
+                 alt="{{ album.name }} artwork"
+                 [ngClass]="{ 'selected': album.selected }"/>
+          </div>
+          <div class="col-10 col-md-11">
+            <div class="container-fluid p-0">
+              <div class="row p-0">
+                <p class="list-album-title">{{ album.name }}</p>
+              </div>
+              <div class="row p-0">
+                <p class="list-album-artist">{{ getArtistNames(album) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <div class="row p-0"
+       *ngIf="hasNextPage$ | async">
+    <div class="col justify-content-center text-center align-content-center">
+      <button class="btn btn-light"
+              (click)="loadMore()">
+        Load More
+      </button>
+    </div>
+  </div>
+</div>
+<footer class="footer fixed-bottom bg-black library-footer" *ngIf="albumsSelected">
+  <div class="row m-3 d-flex justify-items-center">
+    <div class="col text-center">
+      <button class="btn btn-primary mx-5"
+              (click)="addAlbumsToCrate()">Add {{ selectedAlbumCount }} Album(s) to Crate
+      </button>
+      <button class="btn btn-secondary mt-2"
+              (click)="clearSelection()">Cancel
+      </button>
+    </div>
+  </div>
+</footer>
