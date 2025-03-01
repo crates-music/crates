@@ -1,5 +1,7 @@
 # crates
 
+![CRATES](https://app.crates.page/assets/images/crates-card-cropped.png)
+
 Crates is a tool to organize your Spotify library albums into categories or "crates."
 
 Crates lets you organize your albums into custom categories, making it easier to find the perfect soundtrack for any moment. Sync your Spotify library, organize your Crates, and rediscover the joy of full albums curated just the way you like.
