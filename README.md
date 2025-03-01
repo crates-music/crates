@@ -1,6 +1,8 @@
 # crates
 
-This is crates!
+Crates is a tool to organize your Spotify library albums into categories or "crates."
+
+Crates lets you organize your albums into custom categories, making it easier to find the perfect soundtrack for any moment. Sync your Spotify library, organize your Crates, and rediscover the joy of full albums curated just the way you like.
 
 ## Live Version
 check out the live version of this running at [app.crates.page](https://app.crates.page)
@@ -21,7 +23,36 @@ check out the live version of this running at [app.crates.page](https://app.crat
 - [ ] Home - better shit
 - [ ] Library Sync - stop syncing after first existing is hit
 - [ ] Library Sync - check for removed albums
-- [ ] tommy idea - [📦] Create playlists with box icon at the front for each crate. 
+- [ ] tommy idea - [📦] Create playlists with box icon at the front for each crate.
+
+## Building and Running
+
+### Requirements
+You'll need java, maven, and docker.
+
+### Running the Thing
+
+1. Start up the database.
+   ```shell
+   cd crates-database
+   ./mvnw clean install docker:start
+   ```
+2. Setup an `application-dev.properties` file in the resources folder with your spotify client ID and secret. See `application-dev-example.properties` for the format. 
+3. Start up the backend.
+   ```shell
+   cd crates-backend
+   ./restart.sh
+   ```
+4. Start up the frontend.
+   ```shell
+   cd crates-frontend
+   yarn start
+   ```
+5. Open the UI [in the browser](http://localhost:4311)
+   
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
 
