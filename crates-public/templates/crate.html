@@ -37,8 +37,8 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-primary" href="/">
-                <i class="bi-vinyl-fill me-2"></i>Crates
+            <a class="navbar-brand fw-bold text-white" href="/">
+                <img src="/static/images/logo.png" alt="Crates Logo" class="me-2" height="32">crates
             </a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link" href="https://app.crates.page" target="_blank">
@@ -154,7 +154,7 @@
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="album-card card bg-dark border-secondary h-100 position-relative overflow-hidden">
                         <div class="album-image-container">
-                            <img :src="album.album.images && album.album.images.length > 0 ? album.album.images[0].url : '/static/images/album-placeholder.svg'" 
+                            <img :src="getAlbumImage(album.album)" 
                                  :alt="album.album.name"
                                  class="card-img-top album-image"
                                  onerror="this.src='/static/images/album-placeholder.svg'">
@@ -182,7 +182,7 @@
                    rel="noopener noreferrer"
                    class="list-group-item list-group-item-action bg-dark border-secondary text-white d-flex align-items-center p-3">
                     <div class="flex-shrink-0 me-3">
-                        <img :src="album.album.images && album.album.images.length > 0 ? album.album.images[0].url : '/static/images/album-placeholder.svg'" 
+                        <img :src="getAlbumImage(album.album)" 
                              :alt="album.album.name"
                              class="album-thumbnail rounded"
                              onerror="this.src='/static/images/album-placeholder.svg'">
@@ -306,7 +306,13 @@ function crateApp() {
 
         getAlbumImage(album) {
             if (album.images && album.images.length > 0) {
-                return album.images[0].url;
+                // Find the largest image by area (width * height)
+                const largestImage = album.images.reduce((largest, current) => {
+                    const largestArea = (largest.width || 0) * (largest.height || 0);
+                    const currentArea = (current.width || 0) * (current.height || 0);
+                    return currentArea > largestArea ? current : largest;
+                });
+                return largestImage.url;
             }
             return '/static/images/album-placeholder.svg';
         },
