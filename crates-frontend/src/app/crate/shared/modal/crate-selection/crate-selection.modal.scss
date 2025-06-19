@@ -3,26 +3,148 @@
 .crate-selection-dialog {
   color: $white;
   background: $dark;
-}
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
 
-.crate-list-item {
-  color: $primary;
-  background: $dark;
-  cursor: pointer;
+  .modal-header {
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
 
-  &:hover {
-    background: black;
-    font-weight: bold;
+  .modal-search {
+    flex-shrink: 0;
+    padding: 0 1rem;
+
+    .search-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: $white;
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      &:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: $primary;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        color: $white;
+      }
+    }
+  }
+
+  .create-crate-form {
+    flex-shrink: 0;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    margin: 0 1rem 1rem 1rem;
+  }
+
+  .crates-list-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 1rem;
+    max-height: 400px;
+
+    .crates-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
   }
 }
 
-.crate-select-list-image {
-  width: 10% !important;
+.crate-list-item {
+  color: $white;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: $primary;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    .crate-arrow {
+      color: $primary;
+      transform: translateX(2px);
+    }
+  }
+
+  .crate-item-content {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+
+    .crate-image {
+      flex-shrink: 0;
+
+      img {
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        transition: border-color 0.2s ease;
+      }
+    }
+
+    .crate-info {
+      flex: 1;
+
+      .crate-name {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.2;
+        color: $primary;
+      }
+    }
+
+    .crate-arrow {
+      flex-shrink: 0;
+      color: rgba(255, 255, 255, 0.4);
+      transition: all 0.2s ease;
+
+      i {
+        font-size: 1.2rem;
+      }
+    }
+  }
 }
 
-.crate-select-list-name {
-  width: 90% !important;
-  margin-left: 0.5em;
-  align-content: center;
-  justify-content: center;
+.loading-indicator {
+  color: rgba(255, 255, 255, 0.7);
+
+  .spinner-border {
+    color: $primary;
+  }
+}
+
+.no-results {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.load-more-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 1rem;
+
+  .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: $white;
+    }
+  }
+}
+
+.end-of-list {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 1rem;
 }

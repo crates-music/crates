@@ -1,6 +1,7 @@
 <div class="row p-0 sticky-top bg-black list-header" *ngIf="(crates$ | async) as crates">
   <div class="container-fluid p-0">
-    <ng-container *ngIf="!(cratesLoading$ | async) && (!crates || crates.length === 0)">
+    <!-- Welcome message - only show when no crates exist at all AND no search is active -->
+    <ng-container *ngIf="!(cratesLoading$ | async) && (!crates || crates.length === 0) && !(search$ | async)">
       <div class="container-fluid p-0">
         <div class="row p-0 justify-content-center">
           <div class="col getting-started-container">
@@ -8,7 +9,8 @@
               <h1 class="mb-4">Welcome to Crates!</h1>
               <div class="text-center">
                 <img src="../../../assets/images/crates-icon.png"
-                     class="empty-crate-image">
+                     class="empty-crate-image"
+                     alt="Crates icon">
               </div>
               <h4 class="mb-4 text-primary">You don't have any Crates yet. Let's get you started!</h4>
               <p><strong>Crates</strong> allows you to organize your albums into custom categories, making it easier to
@@ -37,7 +39,8 @@
         </div>
       </div>
     </ng-container>
-    <ng-container *ngIf="!!crates && crates.length > 0">
+    
+    <ng-container *ngIf="!!crates && crates.length > 0 || (search$ | async)">
       <div class="row p-0">
         <div class="col-1 title-col">
           <h1>CRATES</h1>
@@ -64,7 +67,23 @@
      [infiniteScrollDistance]="2"
      [infiniteScrollThrottle]="1000"
      (scrolled)="loadMore()">
-  <ng-container *ngIf="cratesListType === ListType.Grid">
+  
+  <!-- No search results message - show when search is active but yields no results -->
+  <ng-container *ngIf="!(cratesLoading$ | async) && (!crates || crates.length === 0) && (search$ | async)">
+    <div class="col-12 p-0">
+      <div class="container-fluid p-0">
+        <div class="row p-0 justify-content-center py-5">
+          <div class="col text-center">
+            <h4 class="mb-4 text-muted">No crates found matching "{{ search$ | async }}"</h4>
+            <p class="text-muted">Try adjusting your search terms or <button class="btn btn-link p-0 text-decoration-underline" (click)="handleSearch('')">clear the search</button> to see all crates.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Grid view crates -->
+  <ng-container *ngIf="cratesListType === ListType.Grid && crates && crates.length > 0">
     <div class="col-6 col-sm-6 col-md-4 col-xl-3 p-0" *ngFor="let crate of crates">
       <div class="album-card-container m-4">
         <div class="card bg-dark text-white album-card"
@@ -92,7 +111,9 @@
       </div>
     </div>
   </ng-container>
-  <ng-container *ngIf="cratesListType === ListType.List">
+  
+  <!-- List view crates -->
+  <ng-container *ngIf="cratesListType === ListType.List && crates && crates.length > 0">
     <div class="col-12 p-md-0">
       <div class="container-fluid p-0">
         <div class="row list-crate-row"

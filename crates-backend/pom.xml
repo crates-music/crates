@@ -24,8 +24,6 @@
         <mapstruct.version>1.5.3.Final</mapstruct.version>
         <guava.version>31.1-jre</guava.version>
 
-        <docker.verbose>true</docker.verbose>
-        <docker.plugin.version>0.33.0</docker.plugin.version>
     </properties>
 
     <dependencies>
@@ -188,33 +186,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>${docker.plugin.version}</version>
-                <configuration>
-                    <images>
-                        <image>
-                            <name>crates/${project.artifactId}:${project.version}</name>
-                            <alias>${project.artifactId}</alias>
-                            <run>
-                                <namingStrategy>alias</namingStrategy>
-                                <network>
-                                    <mode>custom</mode>
-                                    <name>crates-network</name>
-                                    <alias>${project.artifactId}</alias>
-                                </network>
-                                <ports>
-                                    <port>8980:8080</port>
-                                </ports>
-                                <env>
-                                    <SPRING_PROFILES_ACTIVE>dev</SPRING_PROFILES_ACTIVE>
-                                </env>
-                            </run>
-                        </image>
-                    </images>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
@@ -243,29 +214,4 @@
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>docker</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>build-image</goal>
-                                </goals>
-                                <configuration>
-                                    <image>
-                                        <name>crates/${project.artifactId}:${project.version}</name>
-                                    </image>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

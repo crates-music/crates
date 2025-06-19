@@ -8,7 +8,8 @@ import {
   selectAllCrates,
   selectCratesHasNextPage,
   selectCratesListType,
-  selectCratesLoading
+  selectCratesLoading,
+  selectCratesSearch
 } from '../store/selectors/crate.selectors';
 import { loadCrates, toggleCratesListType, reloadCrates } from '../store/actions/load-crates.actions';
 import { ListType } from '../../shared/model/list-type.model';
@@ -23,6 +24,7 @@ export class CrateListComponent implements OnDestroy {
   crates$: Observable<Crate[]>;
   cratesLoading$: Observable<boolean>;
   hasNextPage$: Observable<boolean>;
+  search$: Observable<string | undefined>;
   destroy$ = new Subject<boolean>();
 
   ListType = ListType;
@@ -36,6 +38,7 @@ export class CrateListComponent implements OnDestroy {
     this.crates$ = this.store.select(selectAllCrates);
     this.cratesLoading$ = this.store.select(selectCratesLoading);
     this.hasNextPage$ = this.store.select(selectCratesHasNextPage);
+    this.search$ = this.store.select(selectCratesSearch);
 
     this.store.select(selectCratesListType).pipe(
       tap(listType => this.cratesListType = listType),

@@ -4,7 +4,7 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { CrateRoutingModule } from './crate-routing.module';
 import { CrateListComponent } from './crate-list/crate-list.component';
 import { CrateSelectionModal } from './shared/modal/crate-selection/crate-selection.modal';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { CrateComponent } from './crate/crate.component';
 import { StoreModule } from '@ngrx/store';
@@ -27,6 +27,7 @@ import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/n
     CommonModule,
     CrateRoutingModule,
     FormsModule,
+    ReactiveFormsModule,
     InfiniteScrollModule,
     StoreModule.forFeature('crate', fromCrate.reducer),
     EffectsModule.forFeature([CrateEffects]),
