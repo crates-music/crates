@@ -14,6 +14,7 @@ import { CrateEffects } from './store/effects/crate.effects';
 import { SharedModule } from '../shared/shared.module';
 import { RemoveAlbumModalComponent } from './shared/modal/remove-album/remove-album-modal.component';
 import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap';
+import { CrateSettingsComponent } from './crate-settings/crate-settings.component';
 
 
 @NgModule({
@@ -21,7 +22,8 @@ import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/n
     CrateListComponent,
     CrateSelectionModal,
     CrateComponent,
-    RemoveAlbumModalComponent
+    RemoveAlbumModalComponent,
+    CrateSettingsComponent
   ],
   imports: [
     CommonModule,

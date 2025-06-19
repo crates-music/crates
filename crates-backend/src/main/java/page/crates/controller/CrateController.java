@@ -120,8 +120,9 @@ public class CrateController implements CrateApi {
     @Override
     @PutMapping("/{id}")
     @SpotifyAuthorization
-    public Crate updateCrate(final @RequestBody @Validated Crate crate) {
-        // TODO: Do this.
-        return null;
+    public Crate updateCrate(final @PathVariable Long id, final @RequestBody @Validated Crate crate) {
+        log.info("request received to update crate: {}", id);
+        return crateMapper.map(
+                crateService.updateCrate(id, crateMapper.map(crate)));
     }
 }

@@ -102,4 +102,11 @@ export class CrateService {
         })
       )
   }
+
+  updateCrate(id: number, crateUpdate: Partial<Crate>): Observable<Crate> {
+    return this.http.put(`${environment.baseUri}/v1/crate/${id}`, crateUpdate)
+      .pipe(
+        map(response => Object.assign(new Crate(), response))
+      );
+  }
 }

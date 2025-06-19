@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Crate } from '../shared/model/crate.model';
 import { Album } from '../../library/shared/model/album.model';
 import { DEFAULT_PAGE_SIZE, Pageable } from '../../shared/model/pageable.model';
@@ -37,7 +37,8 @@ export class CrateComponent implements OnInit, OnDestroy {
 
   constructor(private activatedRoute: ActivatedRoute,
               private store: Store,
-              private modal: NgbModal) {
+              private modal: NgbModal,
+              private router: Router) {
     this.loadCrate();
     this.page = Pageable.of(0, DEFAULT_PAGE_SIZE);
     this.store.select(selectCrate).pipe(
@@ -136,6 +137,10 @@ export class CrateComponent implements OnInit, OnDestroy {
 
   trackByAlbumId(index: number, album: Album): string {
     return String(album.id);
+  }
+
+  openSettings() {
+    this.router.navigate(['/crate', this.crate.id, 'settings']);
   }
 
   protected readonly ListType = ListType;

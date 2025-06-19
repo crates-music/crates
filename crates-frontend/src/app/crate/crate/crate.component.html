@@ -2,8 +2,13 @@
   <div class="row p-0 sticky-top bg-black list-header">
     <div class="container-fluid p-0">
       <div class="row p-0">
-        <div class="col title-col">
-          <h1>{{ crate.name }}</h1>
+        <div class="col title-col d-flex align-items-center">
+          <h1 class="mb-0 me-3">{{ crate.name }}</h1>
+          <button class="btn btn-sm text-light" 
+                  (click)="openSettings()"
+                  title="Crate Settings">
+            <i class="bi-gear"></i>
+          </button>
         </div>
       </div>
       <div class="row py-2 g-0">

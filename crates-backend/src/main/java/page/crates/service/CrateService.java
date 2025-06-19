@@ -26,4 +26,6 @@ public interface CrateService {
     Page<Crate> searchActive(String search, Pageable pageable);
 
     Page<CrateAlbum> searchAlbums(Long crateId, String search, Pageable pageable);
+
+    Crate updateCrate(Long crateId, Crate crateUpdate);
 }

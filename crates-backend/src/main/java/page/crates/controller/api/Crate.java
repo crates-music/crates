@@ -20,4 +20,5 @@ public class Crate {
     private Instant updatedAt;
     private CrateState state;
     private String imageUri;
+    private Boolean publicCrate;
 }

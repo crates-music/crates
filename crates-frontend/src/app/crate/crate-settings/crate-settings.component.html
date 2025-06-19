@@ -1,0 +1,74 @@
+<div class="container-fluid p-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex align-items-center mb-4">
+        <button class="btn btn-outline-light me-3" (click)="onCancel()">
+          <i class="bi-arrow-left"></i>
+        </button>
+        <h2 class="mb-0">Crate Settings</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="card bg-dark text-white">
+        <div class="card-body">
+          <form [formGroup]="settingsForm" (ngSubmit)="onSave()">
+            <!-- Crate Name -->
+            <div class="mb-4">
+              <label for="crateName" class="form-label">Crate Name</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="crateName"
+                formControlName="name"
+                [class.is-invalid]="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched">
+              <div class="invalid-feedback" *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched">
+                <div *ngIf="settingsForm.get('name')?.errors?.['required']">
+                  Crate name is required
+                </div>
+                <div *ngIf="settingsForm.get('name')?.errors?.['maxlength']">
+                  Crate name cannot exceed 255 characters
+                </div>
+              </div>
+            </div>
+
+            <!-- Public Crate Toggle -->
+            <div class="mb-4">
+              <div class="form-check form-switch">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  id="publicCrate"
+                  formControlName="publicCrate">
+                <label class="form-check-label" for="publicCrate">
+                  Make this crate public
+                </label>
+              </div>
+              <small class="form-text text-muted">
+                Public crates can be viewed by other users
+              </small>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2">
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="settingsForm.invalid">
+                Save Changes
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary"
+                (click)="onCancel()">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

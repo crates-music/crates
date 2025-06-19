@@ -48,4 +48,6 @@ public class Crate {
     @Column(name = "state", nullable = false)
     @Enumerated(EnumType.STRING)
     private CrateState state;
+    @Column(name = "public", nullable = false)
+    private Boolean publicCrate;
 }

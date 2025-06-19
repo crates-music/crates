@@ -16,5 +16,5 @@ public interface CrateApi {
 
     Crate removeAlbumFromCrate(Long crateId, Long albumId);
 
-    Crate updateCrate(Crate crate);
+    Crate updateCrate(Long id, Crate crate);
 }

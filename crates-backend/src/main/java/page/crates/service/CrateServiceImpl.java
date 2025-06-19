@@ -151,4 +151,22 @@ public class CrateServiceImpl implements CrateService {
         accessService.assertAccess(crate);
         return crateAlbumRepository.findActiveByCrateAndSearch(crate, search, pageable);
     }
+
+    @Override
+    @Transactional
+    public Crate updateCrate(Long crateId, Crate crateUpdate) {
+        final Crate crate = crateRepository.findById(crateId)
+                .orElseThrow(() -> new CrateNotFoundException(crateId));
+        accessService.assertAccess(crate);
+        
+        if (crateUpdate.getName() != null) {
+            crate.setName(crateUpdate.getName());
+        }
+        if (crateUpdate.getPublicCrate() != null) {
+            crate.setPublicCrate(crateUpdate.getPublicCrate());
+        }
+        
+        crate.setUpdatedAt(systemTimeFacade.now());
+        return crateRepository.save(crate);
+    }
 }

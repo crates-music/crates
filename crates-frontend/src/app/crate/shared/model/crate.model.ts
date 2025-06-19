@@ -6,4 +6,5 @@ export class Crate {
   updatedAt: Date;
   state: string;
   imageUri: string;
+  publicCrate: boolean;
 }
