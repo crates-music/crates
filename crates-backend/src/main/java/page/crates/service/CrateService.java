@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import page.crates.controller.AlbumList;
 import page.crates.entity.Crate;
 import page.crates.entity.CrateAlbum;
+import page.crates.entity.SpotifyUser;
 
 public interface CrateService {
     Crate addAlbum(Long crateId, String spotifyAlbumId);
@@ -28,4 +29,14 @@ public interface CrateService {
     Page<CrateAlbum> searchAlbums(Long crateId, String search, Pageable pageable);
 
     Crate updateCrate(Long crateId, Crate crateUpdate);
+
+    Page<Crate> findPublicByUser(SpotifyUser user, Pageable pageable);
+
+    Page<Crate> searchPublicByUser(SpotifyUser user, String search, Pageable pageable);
+
+    Crate findByUserAndHandle(SpotifyUser user, String handle);
+
+    Page<CrateAlbum> getPublicAlbums(Long crateId, Pageable pageable);
+
+    Page<CrateAlbum> searchPublicAlbums(Long crateId, String search, Pageable pageable);
 }

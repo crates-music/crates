@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{.ogTitle}}">
+    <meta property="og:description" content="{{.ogDesc}}">
+    <meta property="og:url" content="{{.ogURL}}">
+    {{if .ogImage}}<meta property="og:image" content="{{.ogImage}}">{{end}}
+    <meta property="og:site_name" content="Crates">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{.ogTitle}}">
+    <meta name="twitter:description" content="{{.ogDesc}}">
+    {{if .ogImage}}<meta name="twitter:image" content="{{.ogImage}}">{{end}}
+    
+    <!-- General meta tags -->
+    <meta name="description" content="{{.ogDesc}}">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="/static/css/style.css" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+</head>
+<body class="bg-black text-white">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-primary" href="/">
+                <i class="bi-vinyl-fill me-2"></i>Crates
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="https://app.crates.page" target="_blank">
+                    <i class="bi-box-arrow-up-right me-1"></i>Open App
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid p-0">
+<div x-data="crateApp()" x-init="init()">
+    <!-- Crate Header -->
+    <div class="crate-header bg-gradient-dark p-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <a href="/{{.user.SpotifyID}}" class="btn btn-outline-light btn-sm">
+                        <i class="bi-arrow-left me-1"></i>Back to Profile
+                    </a>
+                </div>
+            </div>
+            <div class="row align-items-center mt-3">
+                <div class="col-auto">
+                    {{if .crate.ImageURI}}
+                        <img src="{{.crate.ImageURI}}" 
+                             alt="{{.crate.Name}}" 
+                             class="crate-cover rounded">
+                    {{else}}
+                        <div class="crate-cover bg-gradient-primary d-flex align-items-center justify-content-center rounded">
+                            <i class="bi-vinyl-fill display-3 text-white"></i>
+                        </div>
+                    {{end}}
+                </div>
+                <div class="col">
+                    <h1 class="display-4 mb-2 text-primary">{{.crate.Name}}</h1>
+                    <p class="lead mb-2">
+                        by <a href="/{{.user.SpotifyID}}" class="text-white text-decoration-none fw-bold">{{.user.DisplayName}}</a>
+                    </p>
+                    <p class="text-white-50">
+                        <span x-text="stats.totalAlbums"></span> albums
+                        <span class="mx-2">•</span>
+                        Created {{.crate.CreatedAt.Format "January 2, 2006"}}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="container pb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary">
+                        <i class="bi-search"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control bg-dark border-secondary text-white mb-1"
+                           placeholder="Search albums..."
+                           x-model="searchTerm"
+                           @input.debounce.500ms="searchAlbums()"
+                           @keyup.escape="clearSearch()">
+                    <button class="btn btn-outline-secondary" 
+                            type="button" 
+                            x-show="searchTerm"
+                            @click="clearSearch()">
+                        <i class="bi-x"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="btn-group w-100" role="group">
+                    <button type="button" 
+                            class="btn btn-outline-primary" 
+                            :class="{'active': viewMode === 'grid'}"
+                            @click="setViewMode('grid')">
+                        <i class="bi-grid-3x3-gap"></i>
+                    </button>
+                    <button type="button" 
+                            class="btn btn-outline-primary"
+                            :class="{'active': viewMode === 'list'}"
+                            @click="setViewMode('list')">
+                        <i class="bi-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Albums -->
+    <div class="container pb-5">
+        <!-- Loading State -->
+        <div x-show="loading && albums.length === 0" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <!-- No Results -->
+        <div x-show="!loading && albums.length === 0" class="text-center py-5">
+            <i class="bi-disc display-1 text-muted"></i>
+            <h3 class="mt-3 text-muted">No albums found</h3>
+            <p class="text-muted">
+                <span x-show="searchTerm">Try adjusting your search terms.</span>
+                <span x-show="!searchTerm">This crate is empty.</span>
+            </p>
+        </div>
+
+        <!-- Grid View -->
+        <div x-show="viewMode === 'grid'" class="row g-4">
+            <template x-for="album in albums" :key="album.id">
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="album-card card bg-dark border-secondary h-100 position-relative overflow-hidden">
+                        <div class="album-image-container">
+                            <img :src="album.album.images && album.album.images.length > 0 ? album.album.images[0].url : '/static/images/album-placeholder.svg'" 
+                                 :alt="album.album.name"
+                                 class="card-img-top album-image"
+                                 onerror="this.src='/static/images/album-placeholder.svg'">
+                            <div class="card-img-overlay d-flex align-items-end p-0">
+                                <div class="w-100 bg-gradient-overlay p-3">
+                                    <h6 class="card-title text-white mb-1 fw-bold" x-text="album.album.name"></h6>
+                                    <p class="card-text text-white-50 small mb-0" x-text="getArtistNames(album.album)"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <a :href="'https://open.spotify.com/album/' + album.album.spotifyId" 
+                           target="_blank"
+                           class="stretched-link"
+                           rel="noopener noreferrer"></a>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- List View -->
+        <div x-show="viewMode === 'list'" class="list-group list-group-flush">
+            <template x-for="album in albums" :key="album.id">
+                <a :href="'https://open.spotify.com/album/' + album.album.spotifyId" 
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="list-group-item list-group-item-action bg-dark border-secondary text-white d-flex align-items-center p-3">
+                    <div class="flex-shrink-0 me-3">
+                        <img :src="album.album.images && album.album.images.length > 0 ? album.album.images[0].url : '/static/images/album-placeholder.svg'" 
+                             :alt="album.album.name"
+                             class="album-thumbnail rounded"
+                             onerror="this.src='/static/images/album-placeholder.svg'">
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 text-primary fw-bold" x-text="album.album.name"></h6>
+                        <p class="mb-1 text-white" x-text="getArtistNames(album.album)"></p>
+                        <p class="mb-0 text-white-50 small">
+                            <span x-text="formatDate(album.album.releaseDate)"></span>
+                            <span class="mx-2">•</span>
+                            Added <span x-text="formatDate(album.createdAt)"></span>
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi-music-note-beamed text-primary opacity-75"></i>
+                    </div>
+                </a>
+            </template>
+        </div>
+
+        <!-- Load More -->
+        <div class="text-center mt-4" x-show="hasMore && !loading">
+            <button class="btn btn-outline-primary" @click="loadMore()">
+                <i class="bi-arrow-clockwise me-2"></i>Load More
+            </button>
+        </div>
+
+        <!-- Loading More -->
+        <div class="text-center mt-4" x-show="loading && albums.length > 0">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading more...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Intersection Observer Target -->
+    <div x-ref="loadMoreTrigger" x-show="hasMore" class="load-more-trigger"></div>
+</div>
+
+<script>
+function crateApp() {
+    return {
+        albums: {{.albums | json}} || [],
+        hasMore: {{.hasMore}},
+        loading: false,
+        searchTerm: '',
+        viewMode: localStorage.getItem('viewMode') || 'grid',
+        currentPage: 0,
+        stats: {
+            totalAlbums: 0
+        },
+
+        init() {
+            console.log('Crate app initializing with albums:', this.albums);
+            this.updateStats();
+            this.setupIntersectionObserver();
+        },
+
+        updateStats() {
+            this.stats.totalAlbums = (this.albums || []).length;
+        },
+
+        setupIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && this.hasMore && !this.loading) {
+                    this.loadMore();
+                }
+            }, { threshold: 0.1 });
+
+            if (this.$refs.loadMoreTrigger) {
+                observer.observe(this.$refs.loadMoreTrigger);
+            }
+        },
+
+        setViewMode(mode) {
+            this.viewMode = mode;
+            localStorage.setItem('viewMode', mode);
+        },
+
+        async searchAlbums() {
+            this.loading = true;
+            this.currentPage = 0;
+            
+            try {
+                const response = await fetch(`/api/{{.user.SpotifyID}}/{{.crate.Handle}}/albums?search=${encodeURIComponent(this.searchTerm)}&page=0&size=20`);
+                const data = await response.json();
+                this.albums = data.content || [];
+                this.hasMore = !data.last;
+                this.updateStats();
+            } catch (error) {
+                console.error('Error searching albums:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        clearSearch() {
+            this.searchTerm = '';
+            this.searchAlbums();
+        },
+
+        async loadMore() {
+            if (this.loading || !this.hasMore) return;
+            
+            this.loading = true;
+            const nextPage = this.currentPage + 1;
+            
+            try {
+                const response = await fetch(`/api/{{.user.SpotifyID}}/{{.crate.Handle}}/albums?search=${encodeURIComponent(this.searchTerm)}&page=${nextPage}&size=20`);
+                const data = await response.json();
+                this.albums = [...this.albums, ...(data.content || [])];
+                this.hasMore = !data.last;
+                this.currentPage = nextPage;
+                this.updateStats();
+            } catch (error) {
+                console.error('Error loading more albums:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        getAlbumImage(album) {
+            if (album.images && album.images.length > 0) {
+                return album.images[0].url;
+            }
+            return '/static/images/album-placeholder.svg';
+        },
+
+        getArtistNames(album) {
+            if (album.artists && album.artists.length > 0) {
+                return album.artists.map(artist => artist.name).join(', ');
+            }
+            return 'Unknown Artist';
+        },
+
+        formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    }
+}
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Alpine.js -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+</main>
+</body>
+</html>

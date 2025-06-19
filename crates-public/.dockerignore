@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+LICENSE
+
+# Development files
+.env
+.env.local
+
+# Build artifacts
+main
+*.exe
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

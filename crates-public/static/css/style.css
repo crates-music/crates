@@ -1,0 +1,585 @@
+/* Crates Public Sharing - Modern Design */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #1DB954;
+    --primary-hover: #1ed760;
+    --primary-dark: #169c46;
+    --bg-black: #000000;
+    --bg-dark: #0f0f0f;
+    --bg-darker: #050505;
+    --bg-card: #161616;
+    --bg-card-hover: #1a1a1a;
+    --text-white: #ffffff;
+    --text-muted: #a0a0a0;
+    --text-dim: #707070;
+    --border-color: #2a2a2a;
+    --border-subtle: #1a1a1a;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-primary: 0 4px 20px rgba(29, 185, 84, 0.2);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Bootstrap theme overrides */
+:root, [data-bs-theme="dark"] {
+    --bs-primary: var(--primary);
+    --bs-body-bg: var(--bg-black);
+    --bs-body-color: var(--text-white);
+    --bs-dark: var(--bg-dark);
+    --bs-secondary: var(--text-muted);
+    --bs-border-color: var(--border-color);
+}
+
+/* Base styles */
+body {
+    background: var(--bg-black);
+    color: var(--text-white) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Gradients */
+.bg-gradient-dark {
+    background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, #159f44 100%);
+}
+
+.bg-gradient-overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+}
+
+/* Profile Header */
+.profile-header {
+    min-height: 120px;
+    background: var(--bg-black);
+    padding: 2rem 0 0 0 !important;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+}
+
+/* Crate Header */
+.crate-header {
+    min-height: 140px;
+    background: var(--bg-black);
+    padding: 2rem 0 0 0 !important;
+}
+
+.crate-cover {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+}
+
+/* Crate Cards */
+.crate-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.crate-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(29, 185, 84, 0.2);
+}
+
+.crate-image-container {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+.crate-image, .crate-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.crate-placeholder {
+    background: linear-gradient(135deg, var(--primary) 0%, #159f44 100%);
+}
+
+.crate-thumbnail {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+}
+
+/* Modern Album Cards */
+.album-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-lg) !important;
+    transition: var(--transition);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.album-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: var(--shadow-primary);
+    border-color: rgba(29, 185, 84, 0.3) !important;
+    background: var(--bg-card-hover) !important;
+}
+
+.album-image-container {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.album-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-slow);
+    filter: brightness(0.9);
+}
+
+.album-card:hover .album-image {
+    transform: scale(1.08);
+    filter: brightness(1);
+}
+
+.album-thumbnail {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.album-thumbnail:hover {
+    transform: scale(1.05);
+}
+
+/* Modern List View */
+.list-group-item {
+    background: transparent !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-white) !important;
+    margin-bottom: 8px;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.list-group-item-action:hover {
+    background: var(--bg-card) !important;
+    border-color: rgba(29, 185, 84, 0.3) !important;
+    transform: translateX(4px);
+    box-shadow: var(--shadow-sm);
+}
+
+.list-group-flush .list-group-item {
+    border-left: 1px solid var(--border-subtle) !important;
+    border-right: 1px solid var(--border-subtle) !important;
+}
+
+/* Modern Form Controls */
+.form-control {
+    background: transparent !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-white) !important;
+    font-weight: 500;
+    transition: var(--transition);
+    padding: 10px 14px;
+    font-size: 14px;
+    height: 42px;
+}
+
+.form-control:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1) !important;
+    background: rgba(29, 185, 84, 0.02) !important;
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: var(--text-dim);
+    font-weight: 400;
+}
+
+.input-group-text {
+    background: transparent !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-right: none !important;
+    color: var(--text-dim) !important;
+    padding: 10px 14px;
+    border-radius: var(--radius-md) 0 0 var(--radius-md) !important;
+    height: 42px;
+    display: flex;
+    align-items: center;
+}
+
+.input-group .form-control {
+    border-left: none !important;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
+}
+
+.input-group .form-control:focus + .input-group-text,
+.input-group-text:has(+ .form-control:focus) {
+    border-color: var(--primary) !important;
+}
+
+/* Modern Buttons */
+.btn {
+    border-radius: var(--radius-md) !important;
+    font-weight: 500;
+    transition: var(--transition);
+    padding: 10px 16px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--border-subtle);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-outline-primary.active {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: var(--shadow-primary);
+}
+
+.btn-outline-secondary {
+    border-color: var(--border-subtle);
+    color: var(--text-muted);
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-white);
+}
+
+/* View Mode Toggle */
+.btn-group .btn {
+    min-width: 42px;
+    border-radius: 0 !important;
+}
+
+.btn-group .btn:first-child {
+    border-radius: var(--radius-md) 0 0 var(--radius-md) !important;
+}
+
+.btn-group .btn:last-child {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
+}
+
+/* Search Controls Spacing - Only target the controls row */
+.container.py-4 > .row:has(.input-group) {
+    gap: 16px;
+}
+
+.container.py-4 > .row:has(.input-group) .col-md-8,
+.container.py-4 > .row:has(.input-group) .col-md-4 {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Reset any grid interference for album grids */
+.row.g-4 {
+    gap: 0 !important;
+}
+
+/* Loading States */
+.spinner-border-primary {
+    color: var(--primary);
+}
+
+/* Load More Trigger */
+.load-more-trigger {
+    height: 10px;
+    width: 100%;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-avatar, .crate-cover {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .crate-thumbnail, .album-thumbnail {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .profile-header, .crate-header {
+        min-height: 150px;
+    }
+    
+    .profile-avatar, .crate-cover {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* Modern Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.display-4 {
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    font-size: 2.5rem !important;
+}
+
+.lead {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    font-size: 1rem !important;
+}
+
+/* Compact spacing for header sections */
+.container.py-4 {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+}
+
+/* Compact back button */
+.crate-header .btn-sm {
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
+    height: auto !important;
+    border-radius: 6px !important;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.crate-header .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    background: transparent !important;
+}
+
+.crate-header .btn-outline-light:hover {
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+    background: rgba(29, 185, 84, 0.1) !important;
+    transform: none !important;
+}
+
+.card-title {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.small {
+    font-weight: 500;
+}
+
+/* Modern Animations */
+@keyframes fadeInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(24px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.album-card {
+    animation: fadeInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-fill-mode: both;
+}
+
+.list-group-item {
+    animation: slideInLeft 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-fill-mode: both;
+}
+
+.crate-header {
+    animation: scaleIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Staggered animations */
+.album-card:nth-child(1) { animation-delay: 0ms; }
+.album-card:nth-child(2) { animation-delay: 50ms; }
+.album-card:nth-child(3) { animation-delay: 100ms; }
+.album-card:nth-child(4) { animation-delay: 150ms; }
+.album-card:nth-child(5) { animation-delay: 200ms; }
+.album-card:nth-child(6) { animation-delay: 250ms; }
+.album-card:nth-child(7) { animation-delay: 300ms; }
+.album-card:nth-child(8) { animation-delay: 350ms; }
+
+.list-group-item:nth-child(1) { animation-delay: 0ms; }
+.list-group-item:nth-child(2) { animation-delay: 75ms; }
+.list-group-item:nth-child(3) { animation-delay: 150ms; }
+.list-group-item:nth-child(4) { animation-delay: 225ms; }
+.list-group-item:nth-child(5) { animation-delay: 300ms; }
+
+/* Focus States for Accessibility */
+.crate-card:focus-within,
+.album-card:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Text Utilities */
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Custom Spacing */
+.pb-5 {
+    padding-bottom: 3rem !important;
+}
+
+/* Card Border Radius */
+.card {
+    border-radius: 12px;
+}
+
+/* Enhanced Visual States */
+.stretched-link:focus::before {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Dark Theme Form Elements */
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+}
+
+/* Custom Bootstrap Icon Colors */
+.bi-spotify {
+    color: var(--primary) !important;
+}
+
+/* Improved Contrast */
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.border-secondary {
+    border-color: var(--border-color) !important;
+}
+
+/* Error Page Styling */
+.error-container {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Utility Classes */
+.disable-select {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}

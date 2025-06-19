@@ -11,6 +11,7 @@ import page.crates.controller.api.mapper.AlbumMapper;
 import page.crates.entity.Album;
 import page.crates.entity.Crate;
 import page.crates.entity.CrateAlbum;
+import page.crates.entity.SpotifyUser;
 import page.crates.entity.enums.CrateState;
 import page.crates.exception.CrateNotFoundException;
 import page.crates.repository.CrateAlbumRepository;
@@ -168,5 +169,42 @@ public class CrateServiceImpl implements CrateService {
         
         crate.setUpdatedAt(systemTimeFacade.now());
         return crateRepository.save(crate);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Crate> findPublicByUser(SpotifyUser user, Pageable pageable) {
+        return crateRepository.findPublicByUser(user, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Crate> searchPublicByUser(SpotifyUser user, String search, Pageable pageable) {
+        return crateRepository.findPublicByUserAndNameLike(user, search, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Crate findByUserAndHandle(SpotifyUser user, String handle) {
+        return crateRepository.findByUserAndHandle(user, handle)
+                .orElseThrow(() -> new CrateNotFoundException(handle));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CrateAlbum> getPublicAlbums(Long crateId, Pageable pageable) {
+        final Crate crate = crateRepository.findById(crateId)
+                .orElseThrow(() -> new CrateNotFoundException(crateId));
+        // No access check for public albums - the caller should verify it's public
+        return crateAlbumRepository.findActiveByCrate(crate, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CrateAlbum> searchPublicAlbums(Long crateId, String search, Pageable pageable) {
+        final Crate crate = crateRepository.findById(crateId)
+                .orElseThrow(() -> new CrateNotFoundException(crateId));
+        // No access check for public albums - the caller should verify it's public
+        return crateAlbumRepository.findActiveByCrateAndSearch(crate, search, pageable);
     }
 }

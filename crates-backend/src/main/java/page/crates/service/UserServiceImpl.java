@@ -67,4 +67,10 @@ public class UserServiceImpl implements UserService {
         final Token savedToken = tokenRepository.save(token);
         return createOrUpdateUser(savedToken);
     }
+
+    @Override
+    public SpotifyUser findBySpotifyId(String spotifyId) {
+        return spotifyUserRepository.findOneBySpotifyId(spotifyId)
+                .orElseThrow(() -> new RuntimeException("User not found with spotifyId: " + spotifyId));
+    }
 }

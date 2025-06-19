@@ -1,0 +1,21 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <i class="bi-exclamation-triangle display-1 text-warning mb-4"></i>
+            <h1 class="display-4 text-white mb-3">{{.title}}</h1>
+            <p class="lead text-white-50 mb-4">{{.message}}</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="/" class="btn btn-primary">
+                    <i class="bi-house me-2"></i>Go Home
+                </a>
+                <button onclick="history.back()" class="btn btn-outline-light">
+                    <i class="bi-arrow-left me-2"></i>Go Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

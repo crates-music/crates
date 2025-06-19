@@ -1,0 +1,252 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div x-data="profileApp()" x-init="init()">
+    <!-- User Profile Header -->
+    <div class="profile-header bg-gradient-dark p-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    {{if .user.Images}}
+                        {{$firstImage := index .user.Images 0}}
+                        <img src="{{$firstImage.URL}}" 
+                             alt="{{.user.DisplayName}}" 
+                             class="profile-avatar rounded-circle">
+                    {{else}}
+                        <div class="profile-avatar bg-secondary rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi-person-fill fs-1"></i>
+                        </div>
+                    {{end}}
+                </div>
+                <div class="col">
+                    <h1 class="display-4 mb-2 text-primary">{{.user.DisplayName}}</h1>
+                    <p class="lead mb-0 text-light">
+                        <span x-text="stats.totalCrates"></span> public crates
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Controls -->
+    <div class="container pb-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary">
+                        <i class="bi-search"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control bg-dark border-secondary text-white mb-1"
+                           placeholder="Search crates..."
+                           x-model="searchTerm"
+                           @input.debounce.500ms="searchCrates()"
+                           @keyup.escape="clearSearch()">
+                    <button class="btn btn-outline-secondary" 
+                            type="button" 
+                            x-show="searchTerm"
+                            @click="clearSearch()">
+                        <i class="bi-x"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="btn-group w-100" role="group">
+                    <button type="button" 
+                            class="btn btn-outline-primary" 
+                            :class="{'active': viewMode === 'grid'}"
+                            @click="setViewMode('grid')">
+                        <i class="bi-grid-3x3-gap"></i>
+                    </button>
+                    <button type="button" 
+                            class="btn btn-outline-primary"
+                            :class="{'active': viewMode === 'list'}"
+                            @click="setViewMode('list')">
+                        <i class="bi-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crates Grid -->
+    <div class="container pb-5">
+        <!-- Loading State -->
+        <div x-show="loading && crates.length === 0" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <!-- No Results -->
+        <div x-show="!loading && crates.length === 0" class="text-center py-5">
+            <i class="bi-vinyl display-1 text-muted"></i>
+            <h3 class="mt-3 text-muted">No crates found</h3>
+            <p class="text-muted">
+                <span x-show="searchTerm">Try adjusting your search terms.</span>
+                <span x-show="!searchTerm">This user hasn't created any public crates yet.</span>
+            </p>
+        </div>
+
+        <!-- Grid View -->
+        <div x-show="viewMode === 'grid'" class="row g-4">
+            <template x-for="crate in crates" :key="crate.id">
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="crate-card card bg-dark border-secondary h-100 position-relative overflow-hidden">
+                        <div class="crate-image-container">
+                            <img :src="crate.imageUri || '/static/images/album-placeholder.svg'" 
+                                 :alt="crate.name"
+                                 class="card-img-top crate-image"
+                                 onerror="this.src='/static/images/album-placeholder.svg'">
+                            <div class="card-img-overlay d-flex align-items-end p-0">
+                                <div class="w-100 bg-gradient-overlay p-3">
+                                    <h5 class="card-title text-white mb-1 fw-bold" x-text="crate.name"></h5>
+                                    <p class="card-text text-white-50 small mb-0">
+                                        <span x-text="formatDate(crate.createdAt)"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <a :href="'/' + '{{.user.SpotifyID}}' + '/' + crate.handle" 
+                           class="stretched-link"></a>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- List View -->
+        <div x-show="viewMode === 'list'" class="list-group list-group-flush">
+            <template x-for="crate in crates" :key="crate.id">
+                <a :href="'/' + '{{.user.SpotifyID}}' + '/' + crate.handle" 
+                   class="list-group-item list-group-item-action bg-dark border-secondary text-white d-flex align-items-center p-3">
+                    <div class="flex-shrink-0 me-3">
+                        <img :src="crate.imageUri || '/static/images/album-placeholder.svg'" 
+                             :alt="crate.name"
+                             class="crate-thumbnail rounded"
+                             onerror="this.src='/static/images/album-placeholder.svg'">
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 text-primary fw-bold" x-text="crate.name"></h6>
+                        <p class="mb-0 text-white-50 small">
+                            Created <span x-text="formatDate(crate.createdAt)"></span>
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </template>
+        </div>
+
+        <!-- Load More -->
+        <div class="text-center mt-4" x-show="hasMore && !loading">
+            <button class="btn btn-outline-primary" @click="loadMore()">
+                <i class="bi-arrow-clockwise me-2"></i>Load More
+            </button>
+        </div>
+
+        <!-- Loading More -->
+        <div class="text-center mt-4" x-show="loading && crates.length > 0">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading more...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Intersection Observer Target -->
+    <div x-ref="loadMoreTrigger" x-show="hasMore" class="load-more-trigger"></div>
+</div>
+
+<script>
+function profileApp() {
+    return {
+        crates: {{.crates | json}},
+        hasMore: {{.hasMore}},
+        loading: false,
+        searchTerm: '',
+        viewMode: localStorage.getItem('viewMode') || 'grid',
+        currentPage: 0,
+        stats: {
+            totalCrates: 0,
+            totalAlbums: 0
+        },
+
+        init() {
+            console.log('Profile app initializing with crates:', this.crates);
+            this.updateStats();
+            this.setupIntersectionObserver();
+        },
+
+        updateStats() {
+            this.stats.totalCrates = this.crates.length;
+            // Calculate total albums from crates (you'd need this data from backend)
+        },
+
+        setupIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && this.hasMore && !this.loading) {
+                    this.loadMore();
+                }
+            }, { threshold: 0.1 });
+
+            if (this.$refs.loadMoreTrigger) {
+                observer.observe(this.$refs.loadMoreTrigger);
+            }
+        },
+
+        setViewMode(mode) {
+            this.viewMode = mode;
+            localStorage.setItem('viewMode', mode);
+        },
+
+        async searchCrates() {
+            this.loading = true;
+            this.currentPage = 0;
+            
+            try {
+                const response = await fetch(`/api/{{.user.SpotifyID}}/crates?search=${encodeURIComponent(this.searchTerm)}&page=0&size=12`);
+                const data = await response.json();
+                this.crates = data.content || [];
+                this.hasMore = !data.last;
+            } catch (error) {
+                console.error('Error searching crates:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        clearSearch() {
+            this.searchTerm = '';
+            this.searchCrates();
+        },
+
+        async loadMore() {
+            if (this.loading || !this.hasMore) return;
+            
+            this.loading = true;
+            this.currentPage++;
+            
+            try {
+                const response = await fetch(`/api/{{.user.SpotifyID}}/crates?search=${encodeURIComponent(this.searchTerm)}&page=${this.currentPage}&size=12`);
+                const data = await response.json();
+                this.crates = [...this.crates, ...(data.content || [])];
+                this.hasMore = !data.last;
+            } catch (error) {
+                console.error('Error loading more crates:', error);
+                this.currentPage--; // Revert page increment on error
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    }
+}
+</script>
+{{end}}

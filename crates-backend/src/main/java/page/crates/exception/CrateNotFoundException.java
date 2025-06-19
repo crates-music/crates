@@ -8,4 +8,8 @@ public class CrateNotFoundException extends RuntimeException {
     public CrateNotFoundException(Long crateId) {
         super(String.valueOf(crateId));
     }
+
+    public CrateNotFoundException(String message) {
+        super(message);
+    }
 }
