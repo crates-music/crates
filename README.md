@@ -26,6 +26,13 @@ check out the live version of this running at [app.crates.page](https://app.crat
 - [X] Library Sync - stop syncing after first existing is hit
 - [X] Library Sync - check for removed albums
 - [ ] tommy idea - [📦] Create playlists with box icon at the front for each crate.
+- [ ] swap to root domain for share UI
+- [ ] links from app to share UI for profiles and crates
+- [ ] handles for profiles
+- [ ] no slashes allowed in handles (other special character handling too, consider URL-encoding)
+- [ ] following crates & users
+- [ ] share landing page
+- [ ] discover section in app
 
 ## Building and Running
 
