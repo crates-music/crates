@@ -1,0 +1,102 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="bi-person-gear me-2"></i>
+            Profile Settings
+          </h5>
+        </div>
+        <div class="card-body">
+          
+          <!-- Success Message -->
+          <div *ngIf="successMessage" class="alert alert-success alert-dismissible" role="alert">
+            <i class="bi-check-circle me-2"></i>
+            {{ successMessage }}
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible" role="alert">
+            <i class="bi-exclamation-triangle me-2"></i>
+            {{ errorMessage }}
+          </div>
+
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            
+            <!-- Handle Field -->
+            <div class="mb-3">
+              <label for="handle" class="form-label text-white">
+                Custom Handle
+                <small class="text-muted ms-2">(Optional)</small>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-secondary text-white border-secondary">@</span>
+                <input
+                  type="text"
+                  id="handle"
+                  class="form-control bg-dark text-white border-secondary"
+                  [class.is-invalid]="handleErrors"
+                  formControlName="handle"
+                  placeholder="your-custom-handle"
+                  maxlength="64">
+              </div>
+              <div class="form-text text-muted">
+                This will be used in your profile URL. Only letters, numbers, and hyphens allowed.
+              </div>
+              <div *ngIf="handleErrors" class="invalid-feedback">
+                {{ handleErrors }}
+              </div>
+            </div>
+
+            <!-- Bio Field -->
+            <div class="mb-4">
+              <label for="bio" class="form-label text-white">
+                Bio
+                <small class="text-muted ms-2">(Optional)</small>
+              </label>
+              <textarea
+                id="bio"
+                class="form-control bg-dark text-white border-secondary"
+                [class.is-invalid]="bioErrors"
+                formControlName="bio"
+                rows="4"
+                placeholder="Tell us about yourself..."
+                maxlength="280"></textarea>
+              <div class="form-text text-muted d-flex justify-content-between">
+                <span>A short description that appears on your profile.</span>
+                <span class="character-count" [class.text-warning]="bioCharacterCount > 250">
+                  {{ bioCharacterCount }}/280
+                </span>
+              </div>
+              <div *ngIf="bioErrors" class="invalid-feedback">
+                {{ bioErrors }}
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="!profileForm.valid || isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                <i *ngIf="!isLoading" class="bi-check-lg me-2"></i>
+                {{ isLoading ? 'Saving...' : 'Save Changes' }}
+              </button>
+              
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="onCancel()"
+                [disabled]="isLoading">
+                <i class="bi-x-lg me-2"></i>
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

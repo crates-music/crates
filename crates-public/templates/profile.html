@@ -20,6 +20,9 @@
                 </div>
                 <div class="col">
                     <h1 class="display-4 mb-2 text-primary">{{.user.DisplayName}}</h1>
+                    {{if .user.Bio}}
+                        <p class="mb-2 text-light">{{.user.Bio}}</p>
+                    {{end}}
                     <p class="lead mb-0 text-light">
                         <span x-text="stats.totalCrates"></span> public crates
                     </p>

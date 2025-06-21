@@ -41,7 +41,7 @@ public class PublicController {
     @GetMapping("/user/{username}")
     public SpotifyUser getPublicUserProfile(@PathVariable String username) {
         log.info("Request received for public user profile: {}", username);
-        page.crates.entity.SpotifyUser user = userService.findBySpotifyId(username);
+        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
         return userMapper.map(user);
     }
 
@@ -50,7 +50,7 @@ public class PublicController {
                                           @RequestParam(value = "search", required = false) String search,
                                           final Pageable pageable) {
         log.info("Request received for public crates for user: {}", username);
-        page.crates.entity.SpotifyUser user = userService.findBySpotifyId(username);
+        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
         
         if (StringUtils.isBlank(search)) {
             return crateService.findPublicByUser(user, pageable)
@@ -65,7 +65,7 @@ public class PublicController {
     @GetMapping("/user/{username}/crate/{handle}")
     public Crate getPublicCrate(@PathVariable String username, @PathVariable String handle) {
         log.info("Request received for public crate: {} by user: {}", handle, username);
-        page.crates.entity.SpotifyUser user = userService.findBySpotifyId(username);
+        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
         page.crates.entity.Crate crate = crateService.findByUserAndHandle(user, handle);
         
         if (!Boolean.TRUE.equals(crate.getPublicCrate())) {
@@ -81,7 +81,7 @@ public class PublicController {
                                                  @RequestParam(value = "search", required = false) String search,
                                                  final Pageable pageable) {
         log.info("Request received for albums in public crate: {} by user: {}", handle, username);
-        page.crates.entity.SpotifyUser user = userService.findBySpotifyId(username);
+        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
         page.crates.entity.Crate crate = crateService.findByUserAndHandle(user, handle);
         
         if (!Boolean.TRUE.equals(crate.getPublicCrate())) {

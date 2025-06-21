@@ -1,0 +1,29 @@
+<div class="user-menu" *ngIf="user">
+  <!-- Desktop dropdown using ng-bootstrap -->
+  <div class="dropdown" *ngIf="!isMobile" ngbDropdown placement="top-end">
+    <button 
+      class="btn btn-link text-white p-0 dropdown-toggle-custom" 
+      type="button" 
+      ngbDropdownToggle
+      id="userMenuButton">
+      <span class="user-display-name">{{ getDisplayName() }}</span>
+    </button>
+    
+    <div class="dropdown-menu" ngbDropdownMenu aria-labelledby="userMenuButton">
+      <button class="dropdown-item" type="button" (click)="navigateToSettings()">
+        <i class="bi-gear me-2"></i>
+        Profile Settings
+      </button>
+      <div class="dropdown-divider"></div>
+      <button class="dropdown-item" type="button" (click)="onLogout()">
+        <i class="bi-power me-2"></i>
+        Log Out
+      </button>
+    </div>
+  </div>
+  
+  <!-- Mobile - show just the name, logout handled by parent -->
+  <div class="mobile-user-name text-center" *ngIf="isMobile">
+    {{ getDisplayName() }}
+  </div>
+</div>

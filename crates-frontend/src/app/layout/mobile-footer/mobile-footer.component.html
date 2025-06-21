@@ -1,7 +1,7 @@
 <!-- Mobile Footer Tabs -->
 <nav class="navbar navbar-dark bg-black fixed-bottom d-flex d-sm-none" *ngIf="currentTab">
   <div class="container-fluid justify-content-around">
-    <a class="nav-link tab  d-flex flex-column align-items-center" routerLink="/crate/list"
+    <a class="nav-link tab d-flex flex-column align-items-center" routerLink="/crate/list"
        [ngClass]="{ 'active-tab': currentTab === Tab.Crates }">
       <i class="bi-box-seam fs-5"></i>
       <span class="d-block">Crates</span>
@@ -10,6 +10,11 @@
        [ngClass]="{ 'active-tab': currentTab === Tab.Library }">
       <i class="bi-disc fs-5"></i>
       <span class="d-block">Library</span>
+    </a>
+    <a class="nav-link tab d-flex flex-column align-items-center" routerLink="/user/profile/settings"
+       [ngClass]="{ 'active-tab': currentTab === Tab.Profile }">
+      <i class="bi-person fs-5"></i>
+      <span class="d-block">Profile</span>
     </a>
   </div>
 </nav>

@@ -13,6 +13,7 @@ import { UserModule } from './user/user.module';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { UserEffects } from './user/store/effects/user.effects';
 import { MobileFooterComponent } from './layout/mobile-footer/mobile-footer.component';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { MobileFooterComponent } from './layout/mobile-footer/mobile-footer.comp
     AppRoutingModule,
     NgbModule,
     HttpClientModule,
+    SharedModule,
     UserModule,
     StoreModule.forRoot(reducers, {
       metaReducers

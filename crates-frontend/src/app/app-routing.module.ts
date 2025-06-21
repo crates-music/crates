@@ -15,6 +15,10 @@ const routes: Routes = [
     loadChildren: () => import('./crate/crate.module').then(m => m.CrateModule)
   },
   {
+    path: 'user',
+    loadChildren: () => import('./user/user.module').then(m => m.UserModule)
+  },
+  {
     path: '**',
     redirectTo: 'crate/list'
   }

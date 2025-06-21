@@ -18,6 +18,8 @@ public class SpotifyUser {
     private String href;
     private String displayName;
     private String email;
+    private String handle;
+    private String bio;
     private String spotifyUri;
     private Instant createdAt;
     private Instant updatedAt;

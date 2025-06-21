@@ -11,4 +11,6 @@ public interface SpotifyUserRepository extends JpaRepository<SpotifyUser, Long> 
     Optional<SpotifyUser> findOneBySpotifyId(String spotifyId);
 
     Optional<SpotifyUser> findOneByTokenAuthToken(String authToken);
+    
+    Optional<SpotifyUser> findByHandle(String handle);
 }

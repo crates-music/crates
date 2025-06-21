@@ -7,6 +7,8 @@ export class User {
   href: string;
   displayName: string;
   email: string;
+  handle?: string;
+  bio?: string;
   spotifyUri: string;
   createdAt: Date;
   updatedAt: Date;

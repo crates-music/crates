@@ -1,0 +1,32 @@
+.character-count {
+  font-size: 0.875rem;
+  
+  &.text-warning {
+    font-weight: 500;
+  }
+}
+
+.alert {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-control:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.input-group-text {
+  min-width: 3rem;
+  justify-content: center;
+}

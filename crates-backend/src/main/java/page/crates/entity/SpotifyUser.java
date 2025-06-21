@@ -47,6 +47,12 @@ public class SpotifyUser {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "handle", length = 64)
+    private String handle;
+
+    @Column(name = "bio", length = 280)
+    private String bio;
+
     @Column(name = "spotify_uri", nullable = false)
     private String spotifyUri;
 

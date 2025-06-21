@@ -1,0 +1,66 @@
+.user-menu {
+  .dropdown-toggle-custom {
+    border: none;
+    background: none;
+    text-decoration: none !important;
+    
+    &:hover {
+      color: var(--bs-primary) !important;
+    }
+    
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+      border-radius: 0.375rem;
+    }
+  }
+  
+  .user-display-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  
+  .bi-chevron-up {
+    font-size: 0.75rem;
+  }
+  
+  // Override Bootstrap dropdown styling for dark theme
+  .dropdown-menu {
+    background-color: var(--bs-dark);
+    border: 1px solid var(--bs-secondary);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+    
+    .dropdown-item {
+      color: var(--bs-light);
+      
+      &:hover,
+      &:focus {
+        color: var(--bs-white);
+        background-color: var(--bs-primary);
+      }
+      
+      i {
+        width: 1rem;
+      }
+    }
+    
+    .dropdown-divider {
+      border-top-color: var(--bs-secondary);
+    }
+  }
+}
+
+.mobile-user-name {
+  font-size: 0.875rem;
+  color: var(--bs-light);
+  padding: 0.25rem 0;
+}
+
+// Responsive adjustments
+@media (max-width: 576px) {
+  .user-menu .user-display-name {
+    max-width: 80px;
+  }
+}

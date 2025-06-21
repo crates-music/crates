@@ -16,10 +16,12 @@ type BackendClient struct {
 }
 
 type User struct {
-	ID          int64  `json:"id"`
-	SpotifyID   string `json:"spotifyId"`
-	DisplayName string `json:"displayName"`
-	Email       string `json:"email"`
+	ID          int64   `json:"id"`
+	SpotifyID   string  `json:"spotifyId"`
+	DisplayName string  `json:"displayName"`
+	Email       string  `json:"email"`
+	Handle      *string `json:"handle"`
+	Bio         *string `json:"bio"`
 	Images      []Image `json:"images"`
 }
 

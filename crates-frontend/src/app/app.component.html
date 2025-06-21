@@ -18,14 +18,26 @@
         </ul>
         <div class="py-sm-4 mt-sm-auto ms-auto ms-sm-0 flex-shrink-1"
              *ngIf="loggedIn()">
-          <div class="text-center d-none d-sm-block" *ngIf="userLoaded$ | async">{{ (user$ | async).spotifyId }}</div>
-          <button (click)="logout()"
-                  class="btn btn-darker btn-block">
-            <span *ngIf="userLoaded$ | async"
-                  class="d-sm-none px-1 pb-5">{{ (user$ | async).spotifyId }}</span>
-            <i class="fs-5 bi-power"></i>
-            <span class="ms-1 d-none d-sm-inline">Log Out</span>
-          </button>
+          <!-- Desktop user menu -->
+          <div class="d-none d-sm-block" *ngIf="userLoaded$ | async">
+            <crates-user-menu 
+              [user]="user$ | async"
+              [isMobile]="false"
+              (logout)="logout()">
+            </crates-user-menu>
+          </div>
+          
+          <!-- Mobile user display with logout button -->
+          <div class="d-sm-none" *ngIf="userLoaded$ | async">
+            <crates-user-menu 
+              [user]="user$ | async"
+              [isMobile]="true">
+            </crates-user-menu>
+            <button (click)="logout()" class="btn btn-darker btn-block mt-2">
+              <i class="fs-5 bi-power"></i>
+              <span class="ms-1">Log Out</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

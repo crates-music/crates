@@ -73,4 +73,41 @@ public class UserServiceImpl implements UserService {
         return spotifyUserRepository.findOneBySpotifyId(spotifyId)
                 .orElseThrow(() -> new RuntimeException("User not found with spotifyId: " + spotifyId));
     }
+
+    @Override
+    public SpotifyUser findByHandleOrSpotifyId(String identifier) {
+        // First try to find by custom handle
+        Optional<SpotifyUser> userByHandle = spotifyUserRepository.findByHandle(identifier);
+        if (userByHandle.isPresent()) {
+            return userByHandle.get();
+        }
+        
+        // Fall back to Spotify ID lookup
+        return spotifyUserRepository.findOneBySpotifyId(identifier)
+                .orElseThrow(() -> new RuntimeException("User not found with handle or spotifyId: " + identifier));
+    }
+
+    @Override
+    public SpotifyUser updateProfile(Long userId, String handle, String bio) {
+        SpotifyUser user = spotifyUserRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        
+        // Validate handle uniqueness if provided
+        if (handle != null && !handle.trim().isEmpty()) {
+            String trimmedHandle = handle.trim();
+            Optional<SpotifyUser> existingUser = spotifyUserRepository.findByHandle(trimmedHandle);
+            if (existingUser.isPresent() && !existingUser.get().getId().equals(userId)) {
+                throw new RuntimeException("Handle already taken: " + trimmedHandle);
+            }
+            user.setHandle(trimmedHandle);
+        }
+        
+        // Update bio if provided (can be null to clear it)
+        if (bio != null) {
+            user.setBio(bio.trim().isEmpty() ? null : bio.trim());
+        }
+        
+        user.setUpdatedAt(systemTimeFacade.now());
+        return spotifyUserRepository.save(user);
+    }
 }
