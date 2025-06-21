@@ -1,32 +1,206 @@
-.character-count {
-  font-size: 0.875rem;
-  
-  &.text-warning {
-    font-weight: 500;
-  }
+/* Profile Settings - Modern Minimal Design */
+
+.profile-settings-container {
+    min-height: 100vh;
+    background: var(--bg-black);
+    padding: 2rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
 }
 
+.settings-content {
+    width: 100%;
+    max-width: 600px;
+    animation: fadeInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Header */
+.settings-header {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.settings-title {
+    color: var(--text-white);
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-title i {
+    color: var(--primary);
+}
+
+.settings-subtitle {
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+/* Form Styling */
+.settings-form {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-subtle);
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    color: var(--text-white);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    letter-spacing: -0.01em;
+}
+
+.form-label-optional {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+}
+
+.form-help {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+}
+
+.form-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.character-count {
+    font-size: 0.875rem;
+    color: var(--text-dim);
+    font-weight: 500;
+    
+    &.text-warning {
+        color: #ffc107;
+        font-weight: 600;
+    }
+}
+
+/* Form Actions */
+.form-actions {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+    
+    @media (max-width: 576px) {
+        flex-direction: column;
+    }
+}
+
+.form-actions .btn {
+    @media (max-width: 576px) {
+        width: 100%;
+    }
+}
+
+/* Alert Messages */
 .alert {
-  animation: slideDown 0.3s ease-out;
+    border-radius: var(--radius-md);
+    border: none;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    font-weight: 500;
+    animation: slideDown 0.3s ease-out;
+    box-shadow: var(--shadow-sm);
+}
+
+.alert-success {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.2);
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.form-control:focus {
-  border-color: var(--bs-primary);
-  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+/* Textarea Specific */
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
 }
 
-.input-group-text {
-  min-width: 3rem;
-  justify-content: center;
+/* Form Validation */
+.form-control.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-settings-container {
+        padding: 1rem;
+    }
+    
+    .settings-content {
+        max-width: 100%;
+    }
+    
+    .settings-form {
+        padding: 2rem 1.5rem;
+    }
+    
+    .settings-title {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .settings-form {
+        padding: 1.5rem 1rem;
+    }
+    
+    .settings-title {
+        font-size: 1.5rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .settings-title i {
+        font-size: 2rem;
+    }
+    
+    .form-help {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
 }

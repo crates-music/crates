@@ -1,1 +1,14 @@
-
+/* Modern View Toggle Styling */
+.view-toggle {
+  .btn {
+    min-width: 42px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn i {
+    font-size: 1.1rem;
+  }
+}

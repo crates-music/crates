@@ -1,10 +1,14 @@
-<button class="btn btn-outline-light border-0"
-        *ngIf="listType === ListType.List"
-        (click)="toggleListType(ListType.Grid)">
-  <i class="bi bi-grid-fill"></i>
-</button>
-<button class="btn btn-outline-light border-0"
-        *ngIf="listType === ListType.Grid"
-        (click)="toggleListType(ListType.List)">
-  <i class="bi bi-list"></i>
-</button>
+<div class="btn-group view-toggle" role="group">
+  <button type="button" 
+          class="btn btn-outline-primary" 
+          [class.active]="listType === ListType.Grid"
+          (click)="toggleListType(ListType.Grid)">
+    <i class="bi-grid-3x3-gap"></i>
+  </button>
+  <button type="button" 
+          class="btn btn-outline-primary"
+          [class.active]="listType === ListType.List"
+          (click)="toggleListType(ListType.List)">
+    <i class="bi-list"></i>
+  </button>
+</div>

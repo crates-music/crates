@@ -1,3 +1,4 @@
+<!-- Initial Library Import -->
 <div class="row p-0" *ngIf="!(libraryLoading$ | async) && !(libraryLoaded$ | async)">
   <button class="btn btn-outline-light"
           (click)="syncLibrary()"
@@ -5,86 +6,97 @@
     Import Your Spotify Library
   </button>
 </div>
-<div class="row p-0 sticky-top bg-black list-header" *ngIf="library$ | async as library">
-  <div class="container-fluid p-0">
-    <div class="row p-0">
-      <div class="col-4 col-md-1 title-col">
-        <h1>LIBRARY</h1>
-      </div>
-      <div class="col sync-col">
-        <button class="btn btn-outline-light border-0"
-                *ngIf="library.state === LibraryState.Imported
-                       || library.state === LibraryState.ImportingAfterFirstPage
-                       || library.state === LibraryState.Updated
-                       || library.state === LibraryState.UpdateFailed"
-                (click)="syncLibrary()">
-          <i class="bi bi-arrow-clockwise h4"></i>
-        </button>
-        <div class="spinner-border text-light"
-             role="status"
-             *ngIf="library.state === LibraryState.Importing
-              || library.state === LibraryState.Updating">
-          <span class="sr-only"></span>
-        </div>
-      </div>
-    </div>
-    <div class="row py-2 g-0">
-      <div class="col-9 col-md-11">
-        <crates-searchbar placeholder="Search albums..."
-                          (search)="handleSearch($event)"></crates-searchbar>
-      </div>
-      <div class="col-3 col-md-1 text-center justify-content-center align-content-center">
-        <div class="btn-group" role="group">
-          <div ngbDropdown>
-            <button id="settingsButton" class="btn btn-outline-light border-0" ngbDropdownToggle>
-              <i class="bi bi-filter"></i>
-            </button>
 
-            <ul class="dropdown-menu" aria-labelledby="settingsButton" ngbDropdownMenu>
-              <li>
-                <div class="form-check form-switch crated-switch">
-                  <input class="form-check-input"
-                         type="checkbox"
-                         role="switch"
-                         id="hideCrated"
-                         [(ngModel)]="hideCrated"
-                         (change)="reloadAlbums()">
-                  <label class="form-check-label" for="hideCrated">Hide Crated</label>
-                </div>
-              </li>
-            </ul>
+<!-- Complete Library Container with Pull-to-Refresh -->
+<div class="library-container" 
+     #libraryContainer
+     *ngIf="library$ | async as library"
+     [class.pulling]="isPulling">
+  
+  <!-- Pull to Refresh Indicator -->
+  <div class="pull-refresh-indicator">
+    <div class="pull-refresh-content">
+      <i class="bi-arrow-clockwise" [class.spinning]="isPulling && pullDistance >= pullToRefreshThreshold"></i>
+      <span>{{ pullDistance >= pullToRefreshThreshold ? 'Release to refresh' : 'Pull to refresh' }}</span>
+    </div>
+  </div>
+
+  <!-- Header Section -->
+  <div class="library-header">
+    <div class="row p-0 bg-black list-header">
+      <div class="container-fluid p-0">
+        <div class="row p-0">
+          <div class="col-4 col-md-1 title-col">
+            <h1>LIBRARY</h1>
           </div>
-          <crates-list-type-toggle [listType]="libraryListType"
-                                   (toggle)="toggleLibraryListType($event)"></crates-list-type-toggle>
+          <div class="col sync-col">
+            <button class="btn sync-button"
+                    [class.syncing]="library.state === LibraryState.Importing || library.state === LibraryState.Updating"
+                    *ngIf="library.state === LibraryState.Imported
+                           || library.state === LibraryState.ImportingAfterFirstPage
+                           || library.state === LibraryState.Updated
+                           || library.state === LibraryState.UpdateFailed
+                           || library.state === LibraryState.Importing
+                           || library.state === LibraryState.Updating"
+                    (click)="syncLibrary()"
+                    [disabled]="library.state === LibraryState.Importing || library.state === LibraryState.Updating"
+                    title="Sync your Spotify library">
+              <i class="bi-arrow-clockwise"></i>
+            </button>
+          </div>
+        </div>
+        <div class="row search-controls-row align-items-center">
+          <div class="col-8 col-md-9 col-lg-10">
+            <crates-searchbar placeholder="Search albums..."
+                              (search)="handleSearch($event)"></crates-searchbar>
+          </div>
+          <div class="col-4 col-md-3 col-lg-2">
+            <div class="d-flex align-items-center justify-content-end">
+              <crates-list-type-toggle [listType]="libraryListType"
+                                       (toggle)="toggleLibraryListType($event)"></crates-list-type-toggle>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Filter Section -->
+        <div class="row p-0">
+          <div class="container-fluid p-0">
+            <div class="filter-section">
+              <div class="form-check form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       role="switch"
+                       id="hideCrated"
+                       [(ngModel)]="hideCrated"
+                       (change)="reloadAlbums()">
+                <label class="form-check-label" for="hideCrated">Hide albums already in crates</label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="row p-0"
-     infinite-scroll
-     [infiniteScrollDistance]="2"
-     [infiniteScrollThrottle]="1000"
-     (scrolled)="loadMore()">
+  <!-- Content Section -->
+  <div class="library-content"
+       infinite-scroll
+       [infiniteScrollDistance]="2"
+       [infiniteScrollThrottle]="1000"
+       (scrolled)="loadMore()">
+    <div class="row p-0">
   <ng-container *ngIf="libraryListType === ListType.Grid">
     <div class="col-6 col-sm-6 col-md-4 col-xl-3 p-0" *ngFor="let album of albums$ | async; trackBy: trackByAlbumId">
       <div class="album-card-container m-4">
-        <div class="card bg-dark text-white album-card"
+        <div class="card album-card"
              [ngClass]="{ 'selected': album.selected }"
              (click)="toggledSelected(album)">
-          <div class="album-gradient">
-            <img class="card-img album-image" [src]="album.images[0].url" alt="{{ album.name }} artwork"/>
-          </div>
-          <div class="card-img-overlay h-100 d-flex align-items-end">
-            <div class="card-group">
-              <div class="container-fluid">
-                <div class="row">
-                  <h4 class="card-title bg-black album-title">{{ album.name }}</h4>
-                </div>
-                <div class="row">
-                  <h5 class="card-text bg-black">{{ getArtistNames(album) }}</h5>
-                </div>
+          <div class="album-image-container">
+            <img class="album-image" [src]="album.images[0].url" alt="{{ album.name }} artwork"/>
+            <div class="card-img-overlay d-flex align-items-end p-0">
+              <div class="w-100 album-gradient p-3">
+                <h6 class="card-title text-white mb-1 fw-bold album-title">{{ album.name }}</h6>
+                <p class="card-text text-white-50 small mb-0">{{ getArtistNames(album) }}</p>
               </div>
             </div>
           </div>
@@ -95,24 +107,21 @@
   <ng-container *ngIf="libraryListType === ListType.List">
     <div class="col-12 p-md-0">
       <div class="container-fluid p-0">
-        <div class="row list-album-row"
+        <div class="list-album-row"
              *ngFor="let album of albums$ | async; trackBy: trackByAlbumId"
+             [ngClass]="{ 'selected': album.selected }"
              (click)="toggledSelected(album)">
-          <div class="col-2 col-md-1">
+          <div class="flex-shrink-0">
             <img class="list-album-image"
                  [src]="album.images[0].url"
-                 alt="{{ album.name }} artwork"
-                 [ngClass]="{ 'selected': album.selected }"/>
+                 alt="{{ album.name }} artwork"/>
           </div>
-          <div class="col-10 col-md-11">
-            <div class="container-fluid p-0">
-              <div class="row p-0">
-                <p class="list-album-title">{{ album.name }}</p>
-              </div>
-              <div class="row p-0">
-                <p class="list-album-artist">{{ getArtistNames(album) }}</p>
-              </div>
-            </div>
+          <div class="flex-grow-1">
+            <h6 class="list-album-title">{{ album.name }}</h6>
+            <p class="list-album-artist">{{ getArtistNames(album) }}</p>
+          </div>
+          <div class="flex-shrink-0">
+            <i class="bi-music-note-beamed text-primary opacity-75"></i>
           </div>
         </div>
       </div>
@@ -126,6 +135,8 @@
         Load More
       </button>
     </div>
+  </div>
+  </div>
   </div>
 </div>
 <footer class="footer fixed-bottom bg-black library-footer" *ngIf="albumsSelected">
