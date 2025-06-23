@@ -27,8 +27,8 @@ check out the live version of this running at [app.crates.page](https://app.crat
 - [ ] links from app to share UI for profiles and crates
 - [X] handles for profiles
 - [X] no slashes allowed in handles (other special character handling too, consider URL-encoding)
-- [ ] main landing page isn't centered anymore
-- [ ] need max width on the view layout
+- [X] main landing page isn't centered anymore
+- [X] need max width on the view layout
 - [ ] fix double-tap issue on crate albums
 - [ ] Profile - only show save if changes made
 - [ ] Profile - Cancel should go "back", not always to Crates 

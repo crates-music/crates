@@ -1,33 +1,55 @@
-<div class="user-header" *ngIf="user">
-  <div class="user-info">
-    <span class="user-name">{{ getDisplayName() }}</span>
-  </div>
-  
-  <div class="user-actions">
-    <!-- Desktop: Show settings and logout -->
-    <div class="d-none d-sm-flex align-items-center gap-2">
-      <button 
-        class="btn btn-sm btn-outline-secondary" 
-        (click)="navigateToSettings()"
-        title="Profile Settings">
-        <i class="bi-gear"></i>
-      </button>
-      <button 
-        class="btn btn-sm btn-outline-secondary" 
-        (click)="onLogout()"
-        title="Logout">
-        <i class="bi-power"></i>
-      </button>
-    </div>
-    
-    <!-- Mobile: Show just logout -->
-    <div class="d-sm-none">
-      <button 
-        class="btn btn-sm btn-outline-secondary" 
-        (click)="onLogout()"
-        title="Logout">
-        <i class="bi-power"></i>
-      </button>
+<div class="user-header-wrapper" *ngIf="user">
+  <div class="header-container">
+    <div class="user-header">
+      <div class="user-info">
+        <span class="user-name">{{ getDisplayName() }}</span>
+      </div>
+      
+      <!-- Desktop Navigation Tabs -->
+      <div class="nav-tabs d-none d-sm-flex">
+        <button 
+          class="nav-tab" 
+          [class.active]="isCurrentRoute('/crate')"
+          (click)="navigateToCrates()">
+          <i class="bi-box-seam"></i>
+          <span>Crates</span>
+        </button>
+        <button 
+          class="nav-tab" 
+          [class.active]="isCurrentRoute('/library')"
+          (click)="navigateToLibrary()">
+          <i class="bi-disc"></i>
+          <span>Library</span>
+        </button>
+      </div>
+      
+      <div class="user-actions">
+        <!-- Desktop: Show settings and logout -->
+        <div class="d-none d-sm-flex align-items-center gap-2">
+          <button 
+            class="btn btn-sm btn-outline-secondary" 
+            (click)="navigateToSettings()"
+            title="Profile Settings">
+            <i class="bi-gear"></i>
+          </button>
+          <button 
+            class="btn btn-sm btn-outline-secondary" 
+            (click)="onLogout()"
+            title="Logout">
+            <i class="bi-power"></i>
+          </button>
+        </div>
+        
+        <!-- Mobile: Show just logout -->
+        <div class="d-sm-none">
+          <button 
+            class="btn btn-sm btn-outline-secondary" 
+            (click)="onLogout()"
+            title="Logout">
+            <i class="bi-power"></i>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

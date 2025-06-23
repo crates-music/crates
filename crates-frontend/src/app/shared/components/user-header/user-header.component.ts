@@ -26,11 +26,23 @@ export class UserHeaderComponent {
     return this.user.spotifyId;
   }
 
+  navigateToCrates(): void {
+    this.router.navigate(['/crate/list']);
+  }
+
+  navigateToLibrary(): void {
+    this.router.navigate(['/library']);
+  }
+
   navigateToSettings(): void {
     this.router.navigate(['/user/profile/settings']);
   }
 
   onLogout(): void {
     this.logout.emit();
+  }
+
+  isCurrentRoute(route: string): boolean {
+    return this.router.url.startsWith(route);
   }
 }

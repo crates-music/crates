@@ -1,64 +1,60 @@
 <div class="view-header">
-  <div class="header-main">
-    <div class="container-fluid">
-      <!-- Title Row -->
-      <div class="row p-0" *ngIf="title">
-        <div class="col title-col d-flex align-items-center">
-          <h1 class="mb-0 me-3">{{ title }}</h1>
+  <div class="header-container">
+    <!-- Title Row -->
+    <div class="header-row" *ngIf="title">
+      <div class="title-section d-flex align-items-center">
+        <h1 class="mb-0 me-3">{{ title }}</h1>
 
-          <!-- Settings button (for individual crates) -->
-          <button class="btn btn-sm text-light"
-                  *ngIf="showSettings"
-                  (click)="onSettings()"
-                  title="Settings">
-            <i class="bi-gear"></i>
-          </button>
-        </div>
-
-        <!-- Sync button (for library) -->
-        <div class="col-auto sync-col" *ngIf="showSyncButton">
-          <button class="btn sync-button"
-                  [class.syncing]="syncLoading"
-                  [disabled]="syncDisabled || syncLoading"
-                  (click)="onSync()"
-                  title="Sync">
-            <i class="bi-arrow-clockwise"></i>
-          </button>
-        </div>
+        <!-- Settings button (for individual crates) -->
+        <button class="btn btn-sm text-light"
+                *ngIf="showSettings"
+                (click)="onSettings()"
+                title="Settings">
+          <i class="bi-gear"></i>
+        </button>
       </div>
 
-      <!-- Search and Controls Row -->
-      <div class="row search-controls-row align-items-center" *ngIf="showSearch || showListToggle">
-        <div class="col" *ngIf="showSearch">
-          <crates-searchbar
-            [placeholder]="searchPlaceholder"
-            (search)="onSearch($event)">
-          </crates-searchbar>
-        </div>
-        <div class="col-auto" *ngIf="showListToggle">
-          <div class="d-flex align-items-center justify-content-end">
-            <crates-list-type-toggle
-              [listType]="listType"
-              (toggle)="onListTypeToggle($event)">
-            </crates-list-type-toggle>
-          </div>
+      <!-- Sync button (for library) -->
+      <div class="sync-section" *ngIf="showSyncButton">
+        <button class="btn sync-button"
+                [class.syncing]="syncLoading"
+                [disabled]="syncDisabled || syncLoading"
+                (click)="onSync()"
+                title="Sync">
+          <i class="bi-arrow-clockwise"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search and Controls Row -->
+    <div class="search-controls-row align-items-center" *ngIf="showSearch || showListToggle">
+      <div class="search-section" *ngIf="showSearch">
+        <crates-searchbar
+          [placeholder]="searchPlaceholder"
+          (search)="onSearch($event)">
+        </crates-searchbar>
+      </div>
+      <div class="toggle-section" *ngIf="showListToggle">
+        <div class="d-flex align-items-center justify-content-end">
+          <crates-list-type-toggle
+            [listType]="listType"
+            (toggle)="onListTypeToggle($event)">
+          </crates-list-type-toggle>
         </div>
       </div>
+    </div>
 
-      <!-- Filter Section -->
-      <div class="row p-0" *ngIf="showFilters">
-        <div class="container-fluid p-0">
-          <div class="filter-section">
-            <div class="form-check form-switch">
-              <input class="form-check-input"
-                     type="checkbox"
-                     role="switch"
-                     id="hideCratedFilter"
-                     [checked]="hideCrated"
-                     (change)="onFilterChange($event)">
-              <label class="form-check-label" for="hideCratedFilter">{{ hideCratedLabel }}</label>
-            </div>
-          </div>
+    <!-- Filter Section -->
+    <div class="filter-row" *ngIf="showFilters">
+      <div class="filter-section">
+        <div class="form-check form-switch">
+          <input class="form-check-input"
+                 type="checkbox"
+                 role="switch"
+                 id="hideCratedFilter"
+                 [checked]="hideCrated"
+                 (change)="onFilterChange($event)">
+          <label class="form-check-label" for="hideCratedFilter">{{ hideCratedLabel }}</label>
         </div>
       </div>
     </div>

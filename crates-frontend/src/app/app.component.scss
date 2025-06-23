@@ -65,15 +65,13 @@
     grid-template-areas: 
       "user-header"
       "main-content";
+    /* Center the entire app container */
+    max-width: 1200px;
+    margin: 0 auto;
   }
   
   .mobile-footer-section {
     display: none;
-  }
-  
-  /* Add some padding to main content on desktop */
-  .main-content-section {
-    padding: 0 1rem;
   }
 }
 

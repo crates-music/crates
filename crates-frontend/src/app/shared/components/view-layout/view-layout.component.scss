@@ -20,4 +20,13 @@
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  
+  /* Add padding for content spacing - centering handled by app container */
+  @media (min-width: 768px) {
+    padding: 0 2rem;
+  }
+  
+  @media (min-width: 1200px) {
+    padding: 0 3rem;
+  }
 }
