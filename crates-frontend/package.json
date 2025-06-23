@@ -29,7 +29,7 @@
     "bootstrap": "^5.2.3",
     "bootstrap-icons": "^1.11.2",
     "ng-bootstrap": "^1.6.3",
-    "ngx-infinite-scroll": "^14.0.1",
+    "ngx-infinite-scroll": "^15.0.0",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"

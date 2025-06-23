@@ -1,15 +1,9 @@
-<div class="profile-settings-container">
-  <div class="settings-content">
+<crates-view-layout 
+  title="PROFILE"
+  [showSearch]="false"
+  [showListToggle]="false">
+  <div class="profile-content">
     
-    <!-- Header -->
-    <div class="settings-header">
-      <h2 class="settings-title">
-        <i class="bi-person-gear me-3"></i>
-        Profile Settings
-      </h2>
-      <p class="settings-subtitle">Customize your public profile information</p>
-    </div>
-
     <!-- Success Message -->
     <div *ngIf="successMessage" class="alert alert-success" role="alert">
       <i class="bi-check-circle me-2"></i>
@@ -17,19 +11,18 @@
     </div>
 
     <!-- Error Message -->
-    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    <div *ngIf="error$ | async as error" class="alert alert-danger" role="alert">
       <i class="bi-exclamation-triangle me-2"></i>
-      {{ errorMessage }}
+      {{ error.message || 'Failed to update profile. Please try again.' }}
     </div>
 
     <!-- Form -->
     <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="settings-form">
       
-      <!-- Handle Field -->
+      <!-- Username Field -->
       <div class="form-group">
         <label for="handle" class="form-label">
-          Custom Handle
-          <span class="form-label-optional">(Optional)</span>
+          Username
         </label>
         <div class="input-group">
           <span class="input-group-text">@</span>
@@ -39,7 +32,7 @@
             class="form-control"
             [class.is-invalid]="handleErrors"
             formControlName="handle"
-            placeholder="your-custom-handle"
+            placeholder="your-username"
             maxlength="64">
         </div>
         <div class="form-help">
@@ -80,21 +73,21 @@
         <button
           type="submit"
           class="btn btn-primary"
-          [disabled]="!profileForm.valid || isLoading">
-          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-          <i *ngIf="!isLoading" class="bi-check-lg me-2"></i>
-          {{ isLoading ? 'Saving...' : 'Save Changes' }}
+          [disabled]="!profileForm.valid || (isLoading$ | async)">
+          <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          <i *ngIf="!(isLoading$ | async)" class="bi-check-lg me-2"></i>
+          {{ (isLoading$ | async) ? 'Saving...' : 'Save Changes' }}
         </button>
         
         <button
           type="button"
           class="btn btn-outline-secondary"
           (click)="onCancel()"
-          [disabled]="isLoading">
+          [disabled]="isLoading$ | async">
           <i class="bi-x-lg me-2"></i>
           Cancel
         </button>
       </div>
     </form>
   </div>
-</div>
+</crates-view-layout>

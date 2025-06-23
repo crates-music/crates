@@ -1,0 +1,93 @@
+<div class="list-content">
+  
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="showEmptyState && (!items || items.length === 0) && !loading">
+    <ng-container *ngIf="emptyStateTemplate; else defaultEmptyState">
+      <ng-container *ngTemplateOutlet="emptyStateTemplate"></ng-container>
+    </ng-container>
+    <ng-template #defaultEmptyState>
+      <div class="text-center py-5">
+        <h4 class="mb-3 text-muted">{{ emptyStateTitle }}</h4>
+        <p class="text-muted">{{ emptyStateMessage }}</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Content Container -->
+  <div class="row p-0" *ngIf="items && items.length > 0">
+    
+    <!-- Grid View -->
+    <ng-container *ngIf="listType === ListType.Grid">
+      <div class="col-6 col-sm-6 col-md-4 col-xl-3 p-0" 
+           *ngFor="let item of items; trackBy: trackByFn">
+        <ng-container *ngIf="gridItemTemplate; else defaultGridItem">
+          <ng-container *ngTemplateOutlet="gridItemTemplate; context: { $implicit: item }"></ng-container>
+        </ng-container>
+        <ng-template #defaultGridItem>
+          <div class="item-card-container m-4">
+            <div class="card item-card"
+                 (click)="onItemClick(item)"
+                 longPress
+                 (mouseLongPress)="onItemLongPress(item)">
+              <div class="item-image-container">
+                <img class="item-image" 
+                     [src]="item.images?.[0]?.url || item.imageUri || '/assets/images/crate-placeholder.webp'" 
+                     [alt]="item.name + ' artwork'"/>
+                <div class="card-img-overlay d-flex align-items-end p-0">
+                  <div class="w-100 item-gradient p-3">
+                    <h6 class="card-title text-white mb-1 fw-bold item-title">{{ item.name }}</h6>
+                    <p class="card-text text-white-50 small mb-0">
+                      {{ getItemSubtitle(item) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </ng-container>
+    
+    <!-- List View -->
+    <ng-container *ngIf="listType === ListType.List">
+      <div class="col-12 p-md-0">
+        <div class="container-fluid p-0">
+          <div class="list-item-row"
+               *ngFor="let item of items; trackBy: trackByFn"
+               (click)="onItemClick(item)"
+               longPress
+               (mouseLongPress)="onItemLongPress(item)">
+            <ng-container *ngIf="listItemTemplate; else defaultListItem">
+              <ng-container *ngTemplateOutlet="listItemTemplate; context: { $implicit: item }"></ng-container>
+            </ng-container>
+            <ng-template #defaultListItem>
+              <div class="flex-shrink-0">
+                <img class="list-item-image"
+                     [src]="item.images?.[0]?.url || item.imageUri || '/assets/images/crate-placeholder.webp'"
+                     [alt]="item.name + ' artwork'"/>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="list-item-title">{{ item.name }}</h6>
+                <p class="list-item-subtitle">
+                  {{ getItemSubtitle(item) }}
+                </p>
+              </div>
+              <div class="flex-shrink-0">
+                <i class="bi-chevron-right text-muted"></i>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+  
+  <!-- Load More Button -->
+  <div class="row p-0" *ngIf="hasNextPage && showLoadMore">
+    <div class="col justify-content-center text-center align-content-center">
+      <button class="btn btn-light" (click)="onLoadMore()">
+        {{ loadMoreText }}
+      </button>
+    </div>
+  </div>
+</div>

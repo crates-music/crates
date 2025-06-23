@@ -98,13 +98,14 @@ const libraryReducer = createReducer(initialState,
     };
   }),
   on(toggleAlbumSelection, (state, action): LibraryState => {
+    console.log('toggleAlbumSelection reducer called for:', action.album.name, 'current selected:', action.album.selected, 'will be:', !action.album.selected);
     return {
       ...state,
       albums: {
         ...state.albums,
-        value: albumAdapter.upsertOne({
-          ...action.album,
-          selected: !action.album.selected,
+        value: albumAdapter.updateOne({
+          id: action.album.id,
+          changes: { selected: !action.album.selected }
         }, state.albums.value),
       }
     }

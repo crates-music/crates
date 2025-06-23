@@ -1,0 +1,74 @@
+@import "../../../../overrides";
+
+.user-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--bg-black);
+  border-bottom: 1px solid var(--border-subtle);
+  min-height: 60px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-name {
+  color: var(--text-white);
+  font-weight: 600;
+  font-size: 0.95rem;
+  
+  @media (max-width: 576px) {
+    font-size: 0.875rem;
+  }
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+}
+
+.user-actions .btn {
+  background: transparent;
+  border-color: var(--border-subtle);
+  color: var(--text-muted);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  
+  &:hover {
+    background: var(--bg-card);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  i {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .user-header {
+    padding: 0.5rem 1rem;
+    min-height: 50px;
+  }
+  
+  .user-actions .btn {
+    width: 32px;
+    height: 32px;
+    
+    i {
+      font-size: 0.8rem;
+    }
+  }
+}

@@ -10,6 +10,7 @@ import {
   selectAllCrateAlbums,
   selectCrate, selectCrateAlbumListType,
   selectCrateAlbumsHasNextPage,
+  selectCrateAlbumsLoading,
   selectCratesListType
 } from '../store/selectors/crate.selectors';
 import { loadCrateAlbums, reloadCrateAlbums, toggleCrateAlbumListType } from '../store/actions/crate-album.actions';
@@ -29,6 +30,7 @@ export class CrateComponent implements OnInit, OnDestroy {
   albums: Album[] = [];
   destroy$ = new Subject<boolean>();
   hasNextPage$: Observable<boolean>;
+  loading$: Observable<boolean>;
 
   longPressed: Album;
   crateListType: ListType;
@@ -63,6 +65,7 @@ export class CrateComponent implements OnInit, OnDestroy {
     ).subscribe();
 
     this.hasNextPage$ = this.store.select(selectCrateAlbumsHasNextPage);
+    this.loading$ = this.store.select(selectCrateAlbumsLoading);
 
     this.store.select(selectCrateAlbumListType).pipe(
       tap(listType => this.crateListType = listType),

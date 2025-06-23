@@ -1,55 +1,20 @@
-/* Profile Settings - Modern Minimal Design */
+@import "../../../overrides";
 
-.profile-settings-container {
-    min-height: 100vh;
-    background: var(--bg-black);
+.profile-content {
     padding: 2rem 1rem;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-}
-
-.settings-content {
-    width: 100%;
     max-width: 600px;
+    margin: 0 auto;
     animation: fadeInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Header */
-.settings-header {
-    margin-bottom: 3rem;
-    text-align: center;
-}
-
-.settings-title {
-    color: var(--text-white);
-    font-weight: 700;
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.02em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.settings-title i {
-    color: var(--primary);
-}
-
-.settings-subtitle {
-    color: var(--text-muted);
-    font-size: 1rem;
-    font-weight: 500;
-    margin-bottom: 0;
+    
+    @media (max-width: 768px) {
+        padding: 1rem;
+    }
 }
 
 /* Form Styling */
 .settings-form {
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    padding: 2.5rem;
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--border-subtle);
+    background: transparent;
+    padding: 0;
 }
 
 .form-group {
@@ -57,7 +22,7 @@
 }
 
 .form-label {
-    color: var(--text-white);
+    color: var(--primary);
     font-weight: 600;
     font-size: 0.95rem;
     margin-bottom: 0.75rem;
@@ -102,7 +67,7 @@
 
 /* Form Actions */
 .form-actions {
-    margin-top: 3rem;
+    margin-top: 2rem;
     display: flex;
     gap: 1rem;
     justify-content: flex-start;
@@ -152,6 +117,17 @@
     }
 }
 
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Textarea Specific */
 textarea.form-control {
     resize: vertical;
@@ -165,39 +141,7 @@ textarea.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-    .profile-settings-container {
-        padding: 1rem;
-    }
-    
-    .settings-content {
-        max-width: 100%;
-    }
-    
-    .settings-form {
-        padding: 2rem 1.5rem;
-    }
-    
-    .settings-title {
-        font-size: 1.75rem;
-    }
-}
-
 @media (max-width: 576px) {
-    .settings-form {
-        padding: 1.5rem 1rem;
-    }
-    
-    .settings-title {
-        font-size: 1.5rem;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .settings-title i {
-        font-size: 2rem;
-    }
-    
     .form-help {
         flex-direction: column;
         align-items: flex-start;

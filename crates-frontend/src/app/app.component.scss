@@ -1,19 +1,106 @@
-:host {
-  display: block;
+@import "../overrides";
+
+/* CSS Grid Layout for Mobile-First Design */
+.app-container {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas: 
+    "user-header"
+    "main-content"
+    "mobile-footer";
+  height: 100vh;
   width: 100%;
-  height: 100%;
+  background: var(--bg-black);
+  overflow: hidden; /* Prevent any page-level scrolling */
 }
 
-.main-content-row {
+/* User Header Section - Fixed at top */
+.user-header-section {
+  grid-area: user-header;
+  position: sticky;
+  top: 0;
+  z-index: 1001;
+  background: var(--bg-black);
+}
+
+/* Main Content Section - Scrollable */
+.main-content-section {
+  grid-area: main-content;
   overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-black);
+  /* Ensure smooth scrolling on mobile */
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbar for clean look */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
 }
 
-@media (max-width: 576px) {
-  .main-content {
-    padding-bottom: 5em; /* Adjust this value as necessary */
+.main-content-section::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Mobile Footer Section - Fixed at bottom on mobile */
+.mobile-footer-section {
+  grid-area: mobile-footer;
+  position: sticky;
+  bottom: 0;
+  z-index: 1000;
+  background: var(--bg-black);
+}
+
+/* Welcome container for non-authenticated users */
+.welcome-container {
+  height: 100vh;
+  width: 100%;
+  background: var(--bg-black);
+}
+
+/* Desktop adjustments */
+@media (min-width: 768px) {
+  .app-container {
+    /* On desktop, hide mobile footer and adjust grid */
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 
+      "user-header"
+      "main-content";
+  }
+  
+  .mobile-footer-section {
+    display: none;
+  }
+  
+  /* Add some padding to main content on desktop */
+  .main-content-section {
+    padding: 0 1rem;
   }
 }
 
-.way-on-top {
-  z-index: 1051;
+/* Ensure proper sizing for the entire app */
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Global body adjustments for mobile layout */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-black);
+}
+
+/* Remove any margin/padding that might interfere */
+* {
+  box-sizing: border-box;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 767px) {
+  .main-content-section {
+    /* Add bottom padding to account for mobile footer */
+    padding-bottom: 80px;
+  }
 }

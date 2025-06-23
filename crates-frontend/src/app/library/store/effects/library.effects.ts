@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { LibraryService } from '../../shared/services/library.service';
-import { loadAlbums, loadAlbumsResult, reloadAlbums } from '../actions/load-albums.actions';
+import { loadAlbums, loadAlbumsResult, reloadAlbums, triggerInfiniteScroll } from '../actions/load-albums.actions';
 import { catchError, exhaustMap, filter, map, of, Subject, tap, withLatestFrom } from 'rxjs';
 import { ApiError } from '../../../shared/model/api-error.model';
 import { loadLibrary, loadLibraryResult, syncLibrary, syncLibraryResult } from '../actions/sync.actions';
@@ -124,6 +124,21 @@ export class LibraryEffects {
         )
       )));
 
+  triggerInfiniteScroll$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(triggerInfiniteScroll),
+      withLatestFrom(
+        this.store.select(selectAlbumPageable),
+        this.store.select(selectHideCrated)
+      ),
+      map(([_, pageable, hideCrated]) => {
+        console.log('Infinite scroll triggered via NgRx!');
+        return loadAlbums({
+          pageable: pageable.nextPageable(),
+          filters: hideCrated ? [LibraryAlbumFilter.ExcludeCrated] : []
+        });
+      })
+    ));
 
   constructor(private actions$: Actions,
               private libraryService: LibraryService,

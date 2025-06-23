@@ -20,3 +20,9 @@ export const selectLibraryLoading = createSelector(selectLibraryState, state => 
 
 export const selectHideCrated = createSelector(selectLibraryState, state => state.hideCrated);
 export const selectLibraryListType = createSelector(selectLibraryState, state => state.listType);
+
+export const selectSelectedAlbums = createSelector(selectAllAlbums, albums => 
+  albums.filter(album => album.selected)
+);
+export const selectSelectedAlbumCount = createSelector(selectSelectedAlbums, albums => albums.length);
+export const selectHasSelectedAlbums = createSelector(selectSelectedAlbumCount, count => count > 0);

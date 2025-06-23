@@ -23,3 +23,6 @@ export const reloadAlbums = createAction(
     search?: string,
     filters: LibraryAlbumFilter[]
   }>());
+
+export const triggerInfiniteScroll = createAction(
+  '[Library] Trigger Infinite Scroll');
