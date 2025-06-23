@@ -1,30 +1,34 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, Subject, combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { UserState } from '../store/reducers/user.reducer';
-import { selectUser } from '../store/selectors/user.selectors';
+import { selectUser, selectUserLoading, selectUserError } from '../store/selectors/user.selectors';
+import { updateUserProfile, updateUserProfileResult } from '../store/actions/load-user.actions';
 import { User } from '../shared/model/user.model';
-import { UserService } from '../shared/service/user.service';
 import { Router } from '@angular/router';
+import { ApiError } from '../../shared/model/api-error.model';
+import { Actions, ofType } from '@ngrx/effects';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile-settings',
   templateUrl: './profile-settings.component.html',
   styleUrls: ['./profile-settings.component.scss']
 })
-export class ProfileSettingsComponent implements OnInit {
+export class ProfileSettingsComponent implements OnInit, OnDestroy {
   profileForm: FormGroup;
   currentUser$: Observable<User | undefined>;
-  isLoading = false;
+  isLoading$: Observable<boolean>;
+  error$: Observable<ApiError | undefined>;
   successMessage = '';
-  errorMessage = '';
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     private store: Store<UserState>,
-    private userService: UserService,
-    private router: Router
+    private router: Router,
+    private actions$: Actions
   ) {
     this.profileForm = this.fb.group({
       handle: ['', [Validators.maxLength(64), Validators.pattern(/^[a-zA-Z0-9-]*$/)]],
@@ -34,39 +38,46 @@ export class ProfileSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser$ = this.store.select(selectUser);
+    this.isLoading$ = this.store.select(selectUserLoading);
+    this.error$ = this.store.select(selectUserError);
     
-    this.currentUser$.subscribe(user => {
+    this.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(user => {
       if (user) {
+        // Default username to Spotify ID if no custom handle is set
+        const defaultUsername = user.handle || user.spotifyId || '';
         this.profileForm.patchValue({
-          handle: user.handle || '',
+          handle: defaultUsername,
           bio: user.bio || ''
         });
       }
     });
+    
+    // Listen for successful profile updates
+    this.actions$.pipe(
+      ofType(updateUserProfileResult),
+      takeUntil(this.destroy$)
+    ).subscribe(action => {
+      if (action.response.success) {
+        this.successMessage = 'Profile updated successfully!';
+        setTimeout(() => this.successMessage = '', 3000);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onSubmit(): void {
     if (this.profileForm.valid) {
-      this.isLoading = true;
-      this.errorMessage = '';
       this.successMessage = '';
-
       const formValue = this.profileForm.value;
       
-      this.userService.updateProfile({
+      this.store.dispatch(updateUserProfile({
         handle: formValue.handle?.trim() || null,
         bio: formValue.bio?.trim() || null
-      }).subscribe({
-        next: (updatedUser) => {
-          this.isLoading = false;
-          this.successMessage = 'Profile updated successfully!';
-          setTimeout(() => this.successMessage = '', 3000);
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = error.error?.message || 'Failed to update profile. Please try again.';
-        }
-      });
+      }));
     }
   }
 
@@ -78,10 +89,10 @@ export class ProfileSettingsComponent implements OnInit {
     const control = this.profileForm.get('handle');
     if (control?.errors && control.touched) {
       if (control.errors['maxlength']) {
-        return 'Handle must be 64 characters or less';
+        return 'Username must be 64 characters or less';
       }
       if (control.errors['pattern']) {
-        return 'Handle can only contain letters, numbers, and hyphens';
+        return 'Username can only contain letters, numbers, and hyphens';
       }
     }
     return null;

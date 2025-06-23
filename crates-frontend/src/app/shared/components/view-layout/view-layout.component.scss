@@ -1,0 +1,23 @@
+@import "../../../../overrides";
+
+.view-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-black);
+}
+
+.view-layout-header {
+  flex-shrink: 0;
+  background: var(--bg-black);
+  z-index: 10;
+  position: sticky;
+  top: 0;
+}
+
+.view-layout-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}

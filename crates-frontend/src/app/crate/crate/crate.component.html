@@ -1,99 +1,81 @@
 <ng-container *ngIf="crate">
-  <div class="crate-container">
-    <!-- Header Section -->
-    <div class="crate-header">
-      <div class="row p-0 bg-black list-header">
-        <div class="container-fluid p-0">
-          <div class="row p-0">
-            <div class="col title-col d-flex align-items-center">
-              <h1 class="mb-0 me-3">{{ crate.name }}</h1>
-              <button class="btn btn-sm text-light" 
-                      (click)="openSettings()"
-                      title="Crate Settings">
-                <i class="bi-gear"></i>
-              </button>
-            </div>
-          </div>
-          <div class="row search-controls-row align-items-center">
-            <div class="col">
-              <crates-searchbar placeholder="Search albums..."
-                                (search)="handleSearch($event)"></crates-searchbar>
-            </div>
-            <div class="col-auto">
-              <crates-list-type-toggle [listType]="crateListType"
-                                       (toggle)="toggleCrateListType($event)"></crates-list-type-toggle>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="crate-layout">
     
-    <!-- Content Section -->
+    <!-- Fixed Crate Header -->
+    <div class="crate-header">
+      <crates-view-header
+        [title]="crate.name"
+        [showSearch]="true"
+        searchPlaceholder="Search albums..."
+        [showListToggle]="true"
+        [listType]="crateListType"
+        [showSettings]="true"
+        (search)="handleSearch($event)"
+        (listTypeToggle)="toggleCrateListType($event)"
+        (settingsClick)="openSettings()">
+      </crates-view-header>
+    </div>
+
+    <!-- Scrollable Crate Content -->
     <div class="crate-content">
-      <div class="row p-0"
-           infinite-scroll
-           [infiniteScrollDistance]="2"
-           [infiniteScrollThrottle]="1000"
-           (scrolled)="loadMore()">
-        <ng-container *ngIf="crateListType === ListType.Grid">
-          <div class="col-6 col-sm-6 col-md-4 col-xl-3 p-0" *ngFor="let album of albums; trackBy: trackByAlbumId">
-            <div class="album-card-container m-4">
-              <div class="card album-card disable-select">
-                <div class="album-image-container">
-                  <img class="album-image" [src]="album.images[0].url" alt="{{ album.name }} artwork"/>
-                  <div class="card-img-overlay d-flex align-items-end p-0"
-                       (click)="openAlbum(album)"
-                       longPress
-                       (mouseLongPress)="removeAlbum($event, album)">
-                    <div class="close-button"
-                         (click)="removeAlbum($event, album)">
-                      <i class="bi-x-lg"></i>
-                    </div>
-                    <div class="w-100 album-gradient p-3">
-                      <h6 class="card-title text-white mb-1 fw-bold album-title">{{ album.name }}</h6>
-                      <p class="card-text text-white-50 small mb-0">{{ getArtistNames(album) }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <crates-list-content
+        [items]="albums"
+        [listType]="crateListType"
+        [loading]="loading$ | async"
+        [hasNextPage]="hasNextPage$ | async"
+        [showLoadMore]="true"
+        [gridItemTemplate]="albumGridItem"
+        [listItemTemplate]="albumListItem"
+        (itemClick)="openAlbum($event)"
+        (itemLongPress)="removeAlbum($event, $event)"
+        (loadMore)="loadMore()">
+      </crates-list-content>
+    </div>
+
+  </div>
+</ng-container>
+
+<!-- Grid Item Template -->
+<ng-template #albumGridItem let-album>
+  <div class="album-card-container m-4">
+    <div class="card album-card disable-select">
+      <div class="album-image-container">
+        <img class="album-image" [src]="album.images[0].url" alt="{{ album.name }} artwork"/>
+        <div class="card-img-overlay d-flex align-items-end p-0"
+             (click)="openAlbum(album)"
+             longPress
+             (mouseLongPress)="removeAlbum($event, album)">
+          <div class="close-button"
+               (click)="removeAlbum($event, album)">
+            <i class="bi-x-lg"></i>
           </div>
-        </ng-container>
-        <ng-container *ngIf="crateListType === ListType.List">
-          <div class="col-12 p-md-0">
-            <div class="container-fluid p-0">
-              <div class="list-album-row"
-                   *ngFor="let album of albums; trackBy: trackByAlbumId"
-                   (click)="openAlbum(album)"
-                   longPress
-                   (mouseLongPress)="removeAlbum($event, album)">
-                <div class="flex-shrink-0">
-                  <img class="list-album-image"
-                       [src]="album.images[0].url"
-                       alt="{{ album.name }} artwork"/>
-                </div>
-                <div class="flex-grow-1">
-                  <h6 class="list-album-title">{{ album.name }}</h6>
-                  <p class="list-album-artist">{{ getArtistNames(album) }}</p>
-                </div>
-                <div class="flex-shrink-0">
-                  <i class="bi-music-note-beamed text-primary opacity-75"></i>
-                </div>
-              </div>
-            </div>
+          <div class="w-100 album-gradient p-3">
+            <h6 class="card-title text-white mb-1 fw-bold album-title">{{ album.name }}</h6>
+            <p class="card-text text-white-50 small mb-0">{{ getArtistNames(album) }}</p>
           </div>
-        </ng-container>
-      </div>
-      
-      <div class="row p-0"
-           *ngIf="hasNextPage$ | async">
-        <div class="col justify-content-center text-center align-content-center">
-          <button class="btn btn-light"
-                  (click)="loadMore()">
-            Load More
-          </button>
         </div>
       </div>
     </div>
   </div>
-</ng-container>
+</ng-template>
+
+<!-- List Item Template -->
+<ng-template #albumListItem let-album>
+  <div class="list-album-row"
+       (click)="openAlbum(album)"
+       longPress
+       (mouseLongPress)="removeAlbum($event, album)">
+    <div class="flex-shrink-0">
+      <img class="list-album-image"
+           [src]="album.images[0].url"
+           alt="{{ album.name }} artwork"/>
+    </div>
+    <div class="flex-grow-1">
+      <h6 class="list-album-title">{{ album.name }}</h6>
+      <p class="list-album-artist">{{ getArtistNames(album) }}</p>
+    </div>
+    <div class="flex-shrink-0">
+      <i class="bi-music-note-beamed text-primary opacity-75"></i>
+    </div>
+  </div>
+</ng-template>

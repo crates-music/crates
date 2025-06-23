@@ -1,161 +1,112 @@
 <!-- Welcome message - only show when no crates exist at all AND no search is active -->
 <ng-container *ngIf="!(cratesLoading$ | async) && (!(crates$ | async) || (crates$ | async)!.length === 0) && !(search$ | async)">
-  <div class="container-fluid p-0">
-    <div class="row p-0 justify-content-center">
-      <div class="col getting-started-container">
-        <div class="row py-2 g-0">
-          <h1 class="mb-4">Welcome to Crates!</h1>
-          <div class="text-center">
-            <img src="../../../assets/images/crates-icon.png"
-                 class="empty-crate-image"
-                 alt="Crates icon">
-          </div>
-          <h4 class="mb-4 text-primary">You don't have any Crates yet. Let's get you started!</h4>
-          <p><strong>Crates</strong> allows you to organize your albums into custom categories, making it easier to
-            rediscover and enjoy your music.</p>
-          <ol class="text-left d-inline-block mb-4 px-4">
-            <li><strong class="text-primary">Search Your Library:</strong> Select albums from your library to add
-              them
-              to crates.
-            </li>
-            <li><strong class="text-primary">Create Crates:</strong> Categorize your albums by genre, mood, era, or
-              any
-              other theme you like.
-            </li>
-            <li><strong class="text-primary">Enjoy Your Music:</strong> Come back to this tab to easily access and
-              listen to your curated Crates.
-            </li>
-          </ol>
-        </div>
-        <div class="row py-2 g-0 text-center">
-          <div class="col text-center">
-            <a class="btn btn-lg btn-light library-button big-ol-button"
-               [routerLink]="['/library']">Go to Library</a>
-          </div>
-        </div>
+  <div class="welcome-state">
+    <div class="getting-started-container">
+      <div class="text-center">
+        <h1 class="mb-4">Welcome to Crates!</h1>
+        <img src="../../../assets/images/crates-icon.png"
+             class="empty-crate-image"
+             alt="Crates icon">
+        <h4 class="mb-4 text-primary">You don't have any Crates yet. Let's get you started!</h4>
+        <p><strong>Crates</strong> allows you to organize your albums into custom categories, making it easier to
+          rediscover and enjoy your music.</p>
+        <ol class="text-left d-inline-block mb-4 px-4">
+          <li><strong class="text-primary">Search Your Library:</strong> Select albums from your library to add
+            them to crates.
+          </li>
+          <li><strong class="text-primary">Create Crates:</strong> Categorize your albums by genre, mood, era, or
+            any other theme you like.
+          </li>
+          <li><strong class="text-primary">Enjoy Your Music:</strong> Come back to this tab to easily access and
+            listen to your curated Crates.
+          </li>
+        </ol>
+        <a class="btn btn-lg btn-light library-button big-ol-button"
+           [routerLink]="['/library']">Go to Library</a>
       </div>
     </div>
   </div>
 </ng-container>
 
-<!-- Crates List with Sticky Header -->
-<div class="crates-container" 
+<!-- Crates List Layout -->
+<div class="crates-layout" 
      *ngIf="!!(crates$ | async) && (crates$ | async)!.length > 0 || (search$ | async)">
   
-  <!-- Header Section -->
+  <!-- Fixed Crates Header -->
   <div class="crates-header">
-    <div class="row p-0 bg-black list-header">
-      <div class="container-fluid p-0">
-        <div class="row p-0">
-          <div class="col-1 title-col">
-            <h1>CRATES</h1>
-          </div>
-        </div>
-        <div class="row search-controls-row align-items-center">
-          <div class="col-8 col-md-9 col-lg-10">
-            <crates-searchbar placeholder="What you feelin?"
-                              (search)="handleSearch($event)"></crates-searchbar>
-          </div>
-          <div class="col-4 col-md-3 col-lg-2">
-            <div class="d-flex align-items-center justify-content-end gap-1">
-              <crates-list-type-toggle [listType]="cratesListType"
-                                       (toggle)="toggleCratesListType($event)"></crates-list-type-toggle>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <crates-view-header
+      title="CRATES"
+      [showSearch]="true"
+      searchPlaceholder="What you feelin?"
+      [showListToggle]="true"
+      [listType]="cratesListType"
+      (search)="handleSearch($event)"
+      (listTypeToggle)="toggleCratesListType($event)">
+    </crates-view-header>
   </div>
 
-  <!-- Content Section -->
+  <!-- Scrollable Crates Content -->
   <div class="crates-content">
-    <div class="row p-0"
-     infinite-scroll
-     *ngIf="(crates$ | async) as crates"
-     [infiniteScrollDistance]="2"
-     [infiniteScrollThrottle]="1000"
-     (scrolled)="loadMore()">
-  
-  <!-- No search results message - show when search is active but yields no results -->
-  <ng-container *ngIf="!(cratesLoading$ | async) && (!crates || crates.length === 0) && (search$ | async)">
-    <div class="col-12 p-0">
-      <div class="container-fluid p-0">
-        <div class="row p-0 justify-content-center py-5">
-          <div class="col text-center">
-            <h4 class="mb-4 text-muted">No crates found matching "{{ search$ | async }}"</h4>
-            <p class="text-muted">Try adjusting your search terms or <button class="btn btn-link p-0 text-decoration-underline" (click)="handleSearch('')">clear the search</button> to see all crates.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </ng-container>
-
-  <!-- Grid view crates -->
-  <ng-container *ngIf="cratesListType === ListType.Grid && crates && crates.length > 0">
-    <div class="col-6 col-sm-6 col-md-4 col-xl-3 p-0" *ngFor="let crate of crates">
-      <div class="crate-card-container m-4">
-        <div class="card crate-card"
-             (click)="openCrate(crate)">
-          <div class="crate-image-container">
-            <img class="crate-image"
-                 *ngIf="!!crate.imageUri"
-                 [src]="crate.imageUri"
-                 alt="{{ crate.name }} artwork"/>
-            <img class="crate-image"
-                 *ngIf="!crate.imageUri"
-                 src="../../../assets/images/crate-placeholder.webp"
-                 alt="{{ crate.name }} artwork"/>
-            <div class="card-img-overlay d-flex align-items-end p-0">
-              <div class="w-100 album-gradient p-3">
-                <h6 class="card-title text-white mb-1 fw-bold crate-name">{{ crate.name }}</h6>
-                <p class="card-text text-white-50 small mb-0">Crate</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </ng-container>
-  
-  <!-- List view crates -->
-  <ng-container *ngIf="cratesListType === ListType.List && crates && crates.length > 0">
-    <div class="col-12 p-md-0">
-      <div class="container-fluid p-0">
-        <div class="list-crate-row"
-             *ngFor="let crate of crates; trackBy: trackByCrateId"
-             (click)="openCrate(crate)">
-          <div class="flex-shrink-0">
-            <img class="list-crate-image"
-                 *ngIf="!!crate.imageUri"
-                 [src]="crate.imageUri"
-                 alt="{{ crate.name }} artwork"/>
-            <img class="list-crate-image"
-                 *ngIf="!crate.imageUri"
-                 src="../../../assets/images/crate-placeholder.webp"
-                 alt="{{ crate.name }} artwork"/>
-          </div>
-          <div class="flex-grow-1">
-            <h6 class="list-crate-title">{{ crate.name }}</h6>
-            <p class="mb-0 text-white-50 small">Crate</p>
-          </div>
-          <div class="flex-shrink-0">
-            <i class="bi-chevron-right text-muted"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </ng-container>
-    </div>
-    
-    <div class="row p-0"
-         *ngIf="hasNextPage$ | async">
-      <div class="col justify-content-center text-center align-content-center">
-        <button class="btn btn-light"
-                (click)="loadMore()">
-          Load More
-        </button>
-      </div>
-    </div>
+    <crates-list-content
+      [items]="crates$ | async"
+      [listType]="cratesListType"
+      [hasNextPage]="hasNextPage$ | async"
+      [emptyStateTitle]="'No crates found matching ' + (search$ | async)"
+      [emptyStateMessage]="'Try adjusting your search terms or clear the search to see all crates.'"
+      [showEmptyState]="!!(search$ | async)"
+      [showLoadMore]="true"
+      [gridItemTemplate]="crateGridItem"
+      [listItemTemplate]="crateListItem"
+      (itemClick)="openCrate($event)"
+      (loadMore)="loadMore()">
+    </crates-list-content>
   </div>
+
 </div>
 
+<!-- Grid Item Template -->
+<ng-template #crateGridItem let-crate>
+  <div class="crate-card-container m-4">
+    <div class="card crate-card" (click)="openCrate(crate)">
+      <div class="crate-image-container">
+        <img class="crate-image"
+             *ngIf="!!crate.imageUri"
+             [src]="crate.imageUri"
+             alt="{{ crate.name }} artwork"/>
+        <img class="crate-image"
+             *ngIf="!crate.imageUri"
+             src="../../../assets/images/crate-placeholder.webp"
+             alt="{{ crate.name }} artwork"/>
+        <div class="card-img-overlay d-flex align-items-end p-0">
+          <div class="w-100 album-gradient p-3">
+            <h6 class="card-title text-white mb-1 fw-bold crate-name">{{ crate.name }}</h6>
+            <p class="card-text text-white-50 small mb-0">Crate</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- List Item Template -->
+<ng-template #crateListItem let-crate>
+  <div class="list-crate-row" (click)="openCrate(crate)">
+    <div class="flex-shrink-0">
+      <img class="list-crate-image"
+           *ngIf="!!crate.imageUri"
+           [src]="crate.imageUri"
+           alt="{{ crate.name }} artwork"/>
+      <img class="list-crate-image"
+           *ngIf="!crate.imageUri"
+           src="../../../assets/images/crate-placeholder.webp"
+           alt="{{ crate.name }} artwork"/>
+    </div>
+    <div class="flex-grow-1">
+      <h6 class="list-crate-title">{{ crate.name }}</h6>
+      <p class="mb-0 text-white-50 small">Crate</p>
+    </div>
+    <div class="flex-shrink-0">
+      <i class="bi-chevron-right text-muted"></i>
+    </div>
+  </div>
+</ng-template>

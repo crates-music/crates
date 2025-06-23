@@ -1,0 +1,33 @@
+<div class="user-header" *ngIf="user">
+  <div class="user-info">
+    <span class="user-name">{{ getDisplayName() }}</span>
+  </div>
+  
+  <div class="user-actions">
+    <!-- Desktop: Show settings and logout -->
+    <div class="d-none d-sm-flex align-items-center gap-2">
+      <button 
+        class="btn btn-sm btn-outline-secondary" 
+        (click)="navigateToSettings()"
+        title="Profile Settings">
+        <i class="bi-gear"></i>
+      </button>
+      <button 
+        class="btn btn-sm btn-outline-secondary" 
+        (click)="onLogout()"
+        title="Logout">
+        <i class="bi-power"></i>
+      </button>
+    </div>
+    
+    <!-- Mobile: Show just logout -->
+    <div class="d-sm-none">
+      <button 
+        class="btn btn-sm btn-outline-secondary" 
+        (click)="onLogout()"
+        title="Logout">
+        <i class="bi-power"></i>
+      </button>
+    </div>
+  </div>
+</div>

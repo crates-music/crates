@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { LibraryService } from './shared/services/library.service';
 import { Album } from './shared/model/album.model';
-import { Observable, Subject, takeUntil, tap } from 'rxjs';
+import { Observable, Subject, takeUntil, tap, withLatestFrom } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, Pageable } from '../shared/model/pageable.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CrateSelectionModal } from '../crate/shared/modal/crate-selection/crate-selection.modal';
@@ -12,11 +12,15 @@ import { LibraryAlbumFilter } from './shared/model/library-album-filter.enum';
 import {
   selectAlbumPageable,
   selectAlbumsHasNextPage,
+  selectAlbumsLoading,
   selectAllAlbums,
   selectHideCrated,
   selectLibrary, selectLibraryListType,
   selectLibraryLoaded,
-  selectLibraryLoading
+  selectLibraryLoading,
+  selectSelectedAlbums,
+  selectSelectedAlbumCount,
+  selectHasSelectedAlbums
 } from './store/selectors/library.selectors';
 import { clearAlbumSelection, toggleAlbumSelection } from './store/actions/album-selection.action';
 import { loadLibrary, syncLibrary } from './store/actions/sync.actions';
@@ -33,12 +37,14 @@ import { ListType } from '../shared/model/list-type.model';
 export class LibraryComponent implements OnInit, OnDestroy, AfterViewInit {
   page: Pageable;
   albums: Album[] = [];
-  albumsSelected = false;
   albums$: Observable<Album[]>;
-  selectedAlbumCount = 0;
+  selectedAlbums$: Observable<Album[]>;
+  selectedAlbumCount$: Observable<number>;
+  albumsSelected$: Observable<boolean>;
   hideCrated = true;
   destroy$ = new Subject<boolean>();
   hasNextPage$: Observable<boolean>;
+  albumsLoading$: Observable<boolean>;
   library$: Observable<Library>;
   libraryLoaded$: Observable<boolean>;
   libraryLoading$: Observable<boolean>;
@@ -60,10 +66,14 @@ export class LibraryComponent implements OnInit, OnDestroy, AfterViewInit {
               private crateService: CrateService,
               private store: Store) {
     this.hasNextPage$ = this.store.select(selectAlbumsHasNextPage);
+    this.albumsLoading$ = this.store.select(selectAlbumsLoading);
     this.library$ = this.store.select(selectLibrary);
     this.libraryLoaded$ = this.store.select(selectLibraryLoaded);
     this.libraryLoading$ = this.store.select(selectLibraryLoading);
     this.albums$ = this.store.select(selectAllAlbums);
+    this.selectedAlbums$ = this.store.select(selectSelectedAlbums);
+    this.selectedAlbumCount$ = this.store.select(selectSelectedAlbumCount);
+    this.albumsSelected$ = this.store.select(selectHasSelectedAlbums);
 
     this.store.select(selectHideCrated)
       .pipe(
@@ -143,20 +153,27 @@ export class LibraryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.page = this.page.nextPageable();
     this.store.dispatch(loadAlbums({
       pageable: this.page,
-      filters: [LibraryAlbumFilter.ExcludeCrated],
+      filters: this.hideCrated ? [LibraryAlbumFilter.ExcludeCrated] : [],
     }));
   }
 
   toggledSelected(album: Album) {
+    console.log('Toggling selection for:', album.name, 'current state:', album.selected);
     this.store.dispatch(toggleAlbumSelection({ album }));
-    this.selectedAlbumCount = this.albums.filter(album => album.selected).length;
-    this.albumsSelected = this.selectedAlbumCount > 0;
+    
+    // Debug: Check selection state after dispatch
+    setTimeout(() => {
+      this.selectedAlbums$.subscribe(selected => 
+        console.log('Selected albums:', selected.map(a => a.name))
+      ).unsubscribe();
+      this.albumsSelected$.subscribe(hasSelected => 
+        console.log('Has selected albums:', hasSelected)
+      ).unsubscribe();
+    }, 100);
   }
 
   clearSelection() {
     this.store.dispatch(clearAlbumSelection());
-    this.selectedAlbumCount = 0;
-    this.albumsSelected = false;
   }
 
   syncLibrary() {
@@ -168,8 +185,9 @@ export class LibraryComponent implements OnInit, OnDestroy, AfterViewInit {
       centered: true
     });
     modalRef.closed.pipe(
-      tap(crate => {
-        this.store.dispatch(addAlbumsToCrate({ crate, albums: this.albums.filter(album => album.selected) }));
+      withLatestFrom(this.selectedAlbums$),
+      tap(([crate, selectedAlbums]) => {
+        this.store.dispatch(addAlbumsToCrate({ crate, albums: selectedAlbums }));
         this.clearSelection();
       }),
     ).subscribe();
@@ -181,6 +199,11 @@ export class LibraryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   toggleLibraryListType(listType: ListType) {
     this.store.dispatch(toggleListType({ listType }));
+  }
+
+  onFilterChange(hideCrated: boolean) {
+    this.hideCrated = hideCrated;
+    this.reloadAlbums(this.search);
   }
 
   // Pull to refresh methods

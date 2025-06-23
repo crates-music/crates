@@ -1,7 +1,7 @@
 import { emptyLoadable, Loadable } from '../../../shared/model/loadable.model';
 import { User } from '../../shared/model/user.model';
 import { Action, createReducer, on } from '@ngrx/store';
-import { loadUser, loadUserResult } from '../actions/load-user.actions';
+import { loadUser, loadUserResult, updateUserProfile, updateUserProfileResult } from '../actions/load-user.actions';
 
 export interface UserState {
   user: Loadable<User>;
@@ -12,9 +12,10 @@ export const initialState: UserState = {
 }
 
 const userReducer = createReducer(initialState,
-  on(loadUser, (): UserState => {
+  on(loadUser, (state): UserState => {
     return {
       user: {
+        ...state.user,
         loaded: false,
         loading: true,
       }
@@ -26,6 +27,24 @@ const userReducer = createReducer(initialState,
         loading: false,
         loaded: !!action.response.success,
         value: action.response.data,
+        error: action.response.error,
+      }
+    };
+  }),
+  on(updateUserProfile, (state): UserState => {
+    return {
+      user: {
+        ...state.user,
+        loading: true,
+      }
+    };
+  }),
+  on(updateUserProfileResult, (state, action): UserState => {
+    return {
+      user: {
+        loading: false,
+        loaded: !!action.response.success,
+        value: action.response.success ? action.response.data : state.user.value,
         error: action.response.error,
       }
     };

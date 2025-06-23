@@ -1,0 +1,31 @@
+<div class="view-layout">
+  
+  <!-- Fixed Header -->
+  <div class="view-layout-header">
+    <crates-view-header
+      [title]="title"
+      [showSearch]="showSearch"
+      [searchPlaceholder]="searchPlaceholder"
+      [showListToggle]="showListToggle"
+      [listType]="listType"
+      [showSyncButton]="showSyncButton"
+      [syncDisabled]="syncDisabled"
+      [syncLoading]="syncLoading"
+      [showFilters]="showFilters"
+      [showSettings]="showSettings"
+      [hideCrated]="hideCrated"
+      [hideCratedLabel]="hideCratedLabel"
+      (search)="onSearch($event)"
+      (listTypeToggle)="onListTypeToggle($event)"
+      (sync)="onSync()"
+      (settingsClick)="onSettings()"
+      (filterChange)="onFilterChange($event)">
+    </crates-view-header>
+  </div>
+
+  <!-- Scrollable Content -->
+  <div class="view-layout-content">
+    <ng-content></ng-content>
+  </div>
+
+</div>
