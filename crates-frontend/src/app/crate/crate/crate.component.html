@@ -9,9 +9,11 @@
         searchPlaceholder="Search albums..."
         [showListToggle]="true"
         [listType]="crateListType"
+        [showShare]="shouldShowShareButton()"
         [showSettings]="true"
         (search)="handleSearch($event)"
         (listTypeToggle)="toggleCrateListType($event)"
+        (shareClick)="shareCrate()"
         (settingsClick)="openSettings()">
       </crates-view-header>
     </div>

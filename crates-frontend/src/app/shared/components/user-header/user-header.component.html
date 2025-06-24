@@ -24,8 +24,14 @@
       </div>
       
       <div class="user-actions">
-        <!-- Desktop: Show settings and logout -->
+        <!-- Desktop: Show public profile, settings and logout -->
         <div class="d-none d-sm-flex align-items-center gap-2">
+          <button 
+            class="btn btn-sm btn-outline-secondary" 
+            (click)="openPublicProfile()"
+            title="View Public Profile">
+            <i class="bi-box-arrow-up-right"></i>
+          </button>
           <button 
             class="btn btn-sm btn-outline-secondary" 
             (click)="navigateToSettings()"
@@ -40,8 +46,14 @@
           </button>
         </div>
         
-        <!-- Mobile: Show just logout -->
-        <div class="d-sm-none">
+        <!-- Mobile: Show public profile and logout -->
+        <div class="d-sm-none d-flex align-items-center gap-2">
+          <button 
+            class="btn btn-sm btn-outline-secondary" 
+            (click)="openPublicProfile()"
+            title="View Public Profile">
+            <i class="bi-box-arrow-up-right"></i>
+          </button>
           <button 
             class="btn btn-sm btn-outline-secondary" 
             (click)="onLogout()"

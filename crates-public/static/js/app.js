@@ -14,18 +14,55 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
     
-    // Share functionality using Web Share API if available
+    // Enhanced share functionality using Web Share API if available
     window.shareUrl = function(url, title, text) {
         if (navigator.share) {
+            // Mobile: Use native share dialog
             navigator.share({
                 title: title,
                 text: text,
                 url: url
             }).catch(console.error);
         } else {
-            // Fallback to copy to clipboard
+            // Desktop: Copy to clipboard with visual feedback
             copyToClipboard(url);
+            showShareToast('Link copied to clipboard!');
         }
+    };
+    
+    // Show toast notification for desktop share feedback
+    window.showShareToast = function(message) {
+        // Remove any existing toast
+        const existingToast = document.querySelector('.share-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        // Create new toast
+        const toast = document.createElement('div');
+        toast.className = 'share-toast position-fixed top-0 start-50 translate-middle-x mt-3 px-3 py-2 bg-success text-white rounded shadow-lg';
+        toast.style.zIndex = '9999';
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-20px)';
+        setTimeout(() => {
+            toast.style.transition = 'all 0.3s ease';
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+        }, 10);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(-20px)';
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 3000);
     };
     
     // Keyboard navigation

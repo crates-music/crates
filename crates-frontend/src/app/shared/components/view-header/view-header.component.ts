@@ -17,6 +17,7 @@ export class ViewHeaderComponent {
   @Input() syncLoading: boolean = false;
   @Input() showFilters: boolean = false;
   @Input() showSettings: boolean = false;
+  @Input() showShare: boolean = false;
   
   // Filter inputs
   @Input() hideCrated: boolean = false;
@@ -27,6 +28,7 @@ export class ViewHeaderComponent {
   @Output() listTypeToggle = new EventEmitter<ListType>();
   @Output() sync = new EventEmitter<void>();
   @Output() settingsClick = new EventEmitter<void>();
+  @Output() shareClick = new EventEmitter<void>();
   @Output() filterChange = new EventEmitter<boolean>();
 
   // Expose ListType enum to template
@@ -48,6 +50,10 @@ export class ViewHeaderComponent {
 
   onSettings(): void {
     this.settingsClick.emit();
+  }
+
+  onShare(): void {
+    this.shareClick.emit();
   }
 
   onFilterChange(event: Event): void {

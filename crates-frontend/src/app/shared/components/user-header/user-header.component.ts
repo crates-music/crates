@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { User } from '../../../user/shared/model/user.model';
+import { PublicLinkService } from '../../services/public-link.service';
 
 @Component({
   selector: 'crates-user-header',
@@ -11,7 +12,10 @@ export class UserHeaderComponent {
   @Input() user: User | null = null;
   @Output() logout = new EventEmitter<void>();
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private publicLinkService: PublicLinkService
+  ) {}
 
   getDisplayName(): string {
     if (!this.user) return '';
@@ -44,5 +48,12 @@ export class UserHeaderComponent {
 
   isCurrentRoute(route: string): boolean {
     return this.router.url.startsWith(route);
+  }
+
+  openPublicProfile(): void {
+    if (this.user) {
+      const url = this.publicLinkService.getProfileUrl(this.user);
+      this.publicLinkService.openInNewTab(url);
+    }
   }
 }

@@ -5,6 +5,14 @@
       <div class="title-section d-flex align-items-center">
         <h1 class="mb-0 me-3">{{ title }}</h1>
 
+        <!-- Share button (for public crates) -->
+        <button class="btn btn-sm text-light"
+                *ngIf="showShare"
+                (click)="onShare()"
+                title="Share Crate">
+          <i class="bi-box-arrow-up-right"></i>
+        </button>
+
         <!-- Settings button (for individual crates) -->
         <button class="btn btn-sm text-light"
                 *ngIf="showSettings"

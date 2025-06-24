@@ -78,11 +78,19 @@
                     <p class="lead mb-2">
                         by <a href="/{{.user.SpotifyID}}" class="text-white text-decoration-none fw-bold">{{.user.DisplayName}}</a>
                     </p>
-                    <p class="text-white-50">
-                        <span x-text="stats.totalAlbums"></span> albums
-                        <span class="mx-2">•</span>
-                        Created {{.crate.CreatedAt.Format "January 2, 2006"}}
-                    </p>
+                    <div class="d-flex align-items-center gap-2">
+                        <p class="text-white-50 mb-0">
+                            <span x-text="stats.totalAlbums"></span> albums
+                            <span class="mx-2">•</span>
+                            Created {{.crate.CreatedAt.Format "January 2, 2006"}}
+                        </p>
+                        <button type="button" 
+                                class="btn btn-outline-light btn-sm"
+                                @click="shareCrate()"
+                                title="Share Crate">
+                            <i class="bi-share"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -330,6 +338,16 @@ function crateApp() {
                 month: 'short',
                 day: 'numeric'
             });
+        },
+
+        shareCrate() {
+            const username = '{{if .user.Handle}}{{.user.Handle}}{{else}}{{.user.SpotifyID}}{{end}}';
+            const crateName = '{{.crate.Name}}';
+            const url = window.location.href;
+            const title = `${crateName} by @${username}`;
+            const text = `Check out this curated music collection on Crates`;
+            
+            shareUrl(url, title, text);
         }
     }
 }
@@ -337,6 +355,8 @@ function crateApp() {
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- App JS -->
+<script src="/static/js/app.js"></script>
 <!-- Alpine.js -->
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 

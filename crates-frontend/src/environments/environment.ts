@@ -4,8 +4,10 @@
 
 export const environment = {
   production: false,
-  baseUri: 'http://localhost:8980'
+  baseUri: 'http://localhost:8980',
   // baseUri: 'http://192.168.1.158:8980'
+  publicBaseUrl: 'http://localhost:8337'
+  // publicBaseUrl: 'http://192.168.1.158:8337'
 };
 
 /*

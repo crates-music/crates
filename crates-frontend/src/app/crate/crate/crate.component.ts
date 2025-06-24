@@ -17,6 +17,9 @@ import { loadCrateAlbums, reloadCrateAlbums, toggleCrateAlbumListType } from '..
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { RemoveAlbumModalComponent } from '../shared/modal/remove-album/remove-album-modal.component';
 import { ListType } from '../../shared/model/list-type.model';
+import { PublicLinkService } from '../../shared/services/public-link.service';
+import { selectUser } from '../../user/store/selectors/user.selectors';
+import { User } from '../../user/shared/model/user.model';
 
 @Component({
   selector: 'crates-crate',
@@ -31,6 +34,7 @@ export class CrateComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<boolean>();
   hasNextPage$: Observable<boolean>;
   loading$: Observable<boolean>;
+  user: User;
 
   longPressed: Album;
   crateListType: ListType;
@@ -40,7 +44,8 @@ export class CrateComponent implements OnInit, OnDestroy {
   constructor(private activatedRoute: ActivatedRoute,
               private store: Store,
               private modal: NgbModal,
-              private router: Router) {
+              private router: Router,
+              private publicLinkService: PublicLinkService) {
     this.loadCrate();
     this.page = Pageable.of(0, DEFAULT_PAGE_SIZE);
     this.store.select(selectCrate).pipe(
@@ -70,6 +75,11 @@ export class CrateComponent implements OnInit, OnDestroy {
     this.store.select(selectCrateAlbumListType).pipe(
       tap(listType => this.crateListType = listType),
       takeUntil(this.destroy$),
+    ).subscribe();
+
+    this.store.select(selectUser).pipe(
+      tap(user => this.user = user),
+      takeUntil(this.destroy$)
     ).subscribe();
   }
 
@@ -144,6 +154,17 @@ export class CrateComponent implements OnInit, OnDestroy {
 
   openSettings() {
     this.router.navigate(['/crate', this.crate.id, 'settings']);
+  }
+
+  shareCrate() {
+    if (this.user && this.crate) {
+      const url = this.publicLinkService.getCrateUrl(this.user, this.crate);
+      this.publicLinkService.openInNewTab(url);
+    }
+  }
+
+  shouldShowShareButton(): boolean {
+    return this.crate?.publicCrate === true;
   }
 
   protected readonly ListType = ListType;

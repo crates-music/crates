@@ -19,13 +19,21 @@
                     {{end}}
                 </div>
                 <div class="col">
-                    <h1 class="display-4 mb-2 text-primary">{{.user.DisplayName}}</h1>
+                    <h1 class="display-4 mb-2 text-primary">@{{if .user.Handle}}{{.user.Handle}}{{else}}{{.user.SpotifyID}}{{end}}</h1>
                     {{if .user.Bio}}
                         <p class="mb-2 text-light">{{.user.Bio}}</p>
                     {{end}}
-                    <p class="lead mb-0 text-light">
-                        <span x-text="stats.totalCrates"></span> public crates
-                    </p>
+                    <div class="d-flex align-items-center gap-2">
+                        <p class="lead mb-0 text-light">
+                            <span x-text="stats.totalCrates"></span> public crates
+                        </p>
+                        <button type="button" 
+                                class="btn btn-outline-light btn-sm"
+                                @click="shareProfile()"
+                                title="Share Profile">
+                            <i class="bi-share"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -248,6 +256,15 @@ function profileApp() {
                 month: 'short',
                 day: 'numeric'
             });
+        },
+
+        shareProfile() {
+            const username = '{{if .user.Handle}}{{.user.Handle}}{{else}}{{.user.SpotifyID}}{{end}}';
+            const url = window.location.href;
+            const title = `Check out @${username}'s music crates`;
+            const text = `Discover ${username}'s curated music collection on Crates`;
+            
+            shareUrl(url, title, text);
         }
     }
 }
