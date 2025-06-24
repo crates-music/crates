@@ -21,6 +21,7 @@ import {
   removeAlbumFromCrate,
   removeAlbumFromCrateResult, toggleCrateAlbumListType
 } from '../actions/crate-album.actions';
+import { updateCrate, updateCrateResult } from '../actions/update-crate.actions';
 import { CrateAlbum } from '../../shared/model/crate-album.model';
 import { ListType } from '../../../shared/model/list-type.model';
 
@@ -283,6 +284,39 @@ const crateReducer = createReducer(initialState,
     return {
       ...state,
       crateAlbumListType: action.listType,
+    };
+  }),
+  on(updateCrate, (state) => {
+    return {
+      ...state,
+      crate: {
+        ...state.crate,
+        loading: true,
+      }
+    };
+  }),
+  on(updateCrateResult, (state, action) => {
+    if (action.response.success) {
+      return {
+        ...state,
+        crate: {
+          value: action.response.data,
+          loading: false,
+          loaded: true,
+        },
+        crates: {
+          ...state.crates,
+          value: crateAdapter.upsertOne(action.response.data, state.crates.value)
+        }
+      };
+    }
+    return {
+      ...state,
+      crate: {
+        loading: false,
+        loaded: false,
+        error: action.response.error,
+      }
     };
   }),
   on(loadCrate, (state) => {
