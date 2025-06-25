@@ -175,7 +175,7 @@
                                     <div class="crate-image-container">
                                         <img :src="crate.imageUri || '/static/images/album-placeholder.svg'" 
                                              :alt="crate.name"
-                                             class="card-img-top crate-preview-image"
+                                             class="crate-image"
                                              onerror="this.src='/static/images/album-placeholder.svg'">
                                         <div class="card-img-overlay d-flex align-items-end p-0">
                                             <div class="w-100 bg-gradient-overlay p-3">
@@ -361,10 +361,6 @@
         box-shadow: var(--shadow-lg);
     }
 
-    .crate-preview-image {
-        height: 200px;
-        object-fit: cover;
-    }
 
     .bg-gradient-dark {
         background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
