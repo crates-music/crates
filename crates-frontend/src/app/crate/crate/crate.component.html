@@ -29,7 +29,6 @@
         [gridItemTemplate]="albumGridItem"
         [listItemTemplate]="albumListItem"
         (itemClick)="openAlbum($event)"
-        (itemLongPress)="removeAlbum($event, $event)"
         (loadMore)="loadMore()">
       </crates-list-content>
     </div>
@@ -39,14 +38,11 @@
 
 <!-- Grid Item Template -->
 <ng-template #albumGridItem let-album>
-  <div class="album-card-container m-4">
+  <div class="album-card-container m-4" (click)="openAlbum(album)">
     <div class="card album-card disable-select">
       <div class="album-image-container">
         <img class="album-image" [src]="album.images[0].url" alt="{{ album.name }} artwork"/>
-        <div class="card-img-overlay d-flex align-items-end p-0"
-             (click)="openAlbum(album)"
-             longPress
-             (mouseLongPress)="removeAlbum($event, album)">
+        <div class="card-img-overlay d-flex align-items-end p-0">
           <div class="close-button"
                (click)="removeAlbum($event, album)">
             <i class="bi-x-lg"></i>
@@ -64,9 +60,7 @@
 <!-- List Item Template -->
 <ng-template #albumListItem let-album>
   <div class="list-album-row"
-       (click)="openAlbum(album)"
-       longPress
-       (mouseLongPress)="removeAlbum($event, album)">
+       (click)="openAlbum(album)">
     <div class="flex-shrink-0">
       <img class="list-album-image"
            [src]="album.images[0].url"

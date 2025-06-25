@@ -115,6 +115,15 @@
   opacity: 1;
 }
 
+/* Always show close button on mobile */
+@media (max-width: 576px) {
+  .close-button {
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(0, 0, 0, 0.9);
+  }
+}
+
 /* List view styling */
 .list-album-row {
   padding: 6px 12px;
@@ -195,6 +204,24 @@
     height: 28px;
     right: 0.5rem;
     top: 0.5rem;
+  }
+  
+  /* Disable hover effects on mobile to prevent sticky states */
+  .album-card:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-sm) !important;
+    border-color: var(--border-subtle) !important;
+    background: var(--bg-card) !important;
+  }
+  
+  .album-card:hover .album-image {
+    transform: none !important;
+    filter: brightness(0.9) !important;
+  }
+  
+  .list-album-row:hover {
+    background: transparent !important;
+    transform: none !important;
   }
 }
 

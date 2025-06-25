@@ -10,6 +10,7 @@ import { StoreModule } from '@ngrx/store';
 import * as fromLibrary from './store/reducers/library.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { LibraryEffects } from './store/effects/library.effects';
+import { LibraryStorageEffects } from './store/effects/library-storage.effects';
 import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
 import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap';
@@ -25,7 +26,7 @@ import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/n
     InfiniteScrollModule,
     CrateModule,
     StoreModule.forFeature('library', fromLibrary.reducer),
-    EffectsModule.forFeature([LibraryEffects]),
+    EffectsModule.forFeature([LibraryEffects, LibraryStorageEffects]),
     FormsModule,
     NgOptimizedImage,
     SharedModule,

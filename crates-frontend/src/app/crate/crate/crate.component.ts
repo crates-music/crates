@@ -36,7 +36,6 @@ export class CrateComponent implements OnInit, OnDestroy {
   loading$: Observable<boolean>;
   user: User;
 
-  longPressed: Album;
   crateListType: ListType;
   search: string;
 
@@ -108,32 +107,18 @@ export class CrateComponent implements OnInit, OnDestroy {
 
   // https://open.spotify.com/album/2TklWyQdmNHg7d2Xmam8G8?si=660e00a203414f19
   openAlbum(album: Album) {
-    if (this.longPressed?.id === album.id) {
-      this.longPressed = undefined;
-      return;
-    }
     window.location.href = `https://open.spotify.com/album/${album.spotifyId}`;
   }
 
   removeAlbum($event: MouseEvent, album: Album) {
-    if (this.longPressed === album) {
-      return;
-    }
-    this.longPressed = album;
     if ($event) {
+      $event.preventDefault();
       $event.stopPropagation();
       $event.stopImmediatePropagation();
     }
     const modalRef = this.modal.open(RemoveAlbumModalComponent, { centered: true });
     modalRef.componentInstance.crate = this.crate;
     modalRef.componentInstance.album = album;
-
-    modalRef.dismissed.pipe(
-      tap(() => {
-        this.longPressed = undefined;
-      }),
-      takeUntil(this.destroy$)
-    ).subscribe();
   }
 
   handleSearch(search: string) {

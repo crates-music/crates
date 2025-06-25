@@ -44,7 +44,7 @@ export const initialState: LibraryState = {
   search: undefined,
   albumPageable: Pageable.of(0, DEFAULT_PAGE_SIZE),
   hideCrated: true, // TODO: load from localstorage
-  listType: ListType.List  // TODO: load from localstorage
+  listType: ListType.List // Will be loaded from localStorage via effects
 };
 
 const libraryReducer = createReducer(initialState,

@@ -24,12 +24,12 @@ check out the live version of this running at [app.crates.page](https://app.crat
 - [X] Library Sync - check for removed albums
 - [ ] tommy idea - [📦] Create playlists with box icon at the front for each crate.
 - [X] swap to root domain for share UI
-- [ ] links from app to share UI for profiles and crates
+- [X] links from app to share UI for profiles and crates
 - [X] handles for profiles
 - [X] no slashes allowed in handles (other special character handling too, consider URL-encoding)
 - [X] main landing page isn't centered anymore
 - [X] need max width on the view layout
-- [ ] fix double-tap issue on crate albums
+- [X] fix double-tap issue on crate albums
 - [ ] Profile - only show save if changes made
 - [ ] Profile - Cancel should go "back", not always to Crates 
 - [ ] following crates & users

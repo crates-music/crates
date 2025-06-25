@@ -11,6 +11,7 @@ import { StoreModule } from '@ngrx/store';
 import * as fromCrate from './store/reducers/crate.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { CrateEffects } from './store/effects/crate.effects';
+import { CrateStorageEffects } from './store/effects/crate-storage.effects';
 import { SharedModule } from '../shared/shared.module';
 import { RemoveAlbumModalComponent } from './shared/modal/remove-album/remove-album-modal.component';
 import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap';
@@ -32,7 +33,7 @@ import { CrateSettingsComponent } from './crate-settings/crate-settings.componen
     ReactiveFormsModule,
     InfiniteScrollModule,
     StoreModule.forFeature('crate', fromCrate.reducer),
-    EffectsModule.forFeature([CrateEffects]),
+    EffectsModule.forFeature([CrateEffects, CrateStorageEffects]),
     SharedModule,
     NgOptimizedImage,
     NgbDropdown,
