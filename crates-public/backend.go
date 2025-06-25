@@ -142,10 +142,13 @@ func (bc *BackendClient) GetUser(username string) (*User, error) {
 	return &user, nil
 }
 
-func (bc *BackendClient) GetUserCrates(username string, page, size int, search string) (*Page[Crate], error) {
+func (bc *BackendClient) GetUserCrates(username string, page, size int, search, sort string) (*Page[Crate], error) {
 	url := fmt.Sprintf("/v1/public/user/%s/crates?page=%d&size=%d", username, page, size)
 	if search != "" {
 		url += "&search=" + search
+	}
+	if sort != "" {
+		url += "&sort=" + sort
 	}
 
 	body, err := bc.makeRequest(url)
@@ -176,10 +179,13 @@ func (bc *BackendClient) GetCrate(username, handle string) (*Crate, error) {
 	return &crate, nil
 }
 
-func (bc *BackendClient) GetCrateAlbums(username, handle string, page, size int, search string) (*Page[CrateAlbum], error) {
+func (bc *BackendClient) GetCrateAlbums(username, handle string, page, size int, search, sort string) (*Page[CrateAlbum], error) {
 	url := fmt.Sprintf("/v1/public/user/%s/crate/%s/albums?page=%d&size=%d", username, handle, page, size)
 	if search != "" {
 		url += "&search=" + search
+	}
+	if sort != "" {
+		url += "&sort=" + sort
 	}
 
 	body, err := bc.makeRequest(url)

@@ -96,7 +96,7 @@ func handleProfilePage(c *gin.Context) {
 	}
 
 	// Fetch initial crates (first page)
-	crates, err := backendClient.GetUserCrates(username, 0, 12, "")
+	crates, err := backendClient.GetUserCrates(username, 0, 12, "", "updatedAt,desc")
 	if err != nil {
 		log.Printf("Error fetching crates for user %s: %v", username, err)
 		crates = &Page[Crate]{Content: []Crate{}}
@@ -140,7 +140,7 @@ func handleCratePage(c *gin.Context) {
 	}
 
 	// Fetch initial albums (first page)
-	albums, err := backendClient.GetCrateAlbums(username, handle, 0, 20, "")
+	albums, err := backendClient.GetCrateAlbums(username, handle, 0, 20, "", "createdAt,desc")
 	if err != nil {
 		log.Printf("Error fetching albums for crate %s: %v", handle, err)
 		albums = &Page[CrateAlbum]{Content: []CrateAlbum{}}
@@ -170,7 +170,7 @@ func handleUserCratesAPI(c *gin.Context) {
 	size := getSizeFromQuery(c.Query("size"))
 	search := c.Query("search")
 
-	crates, err := backendClient.GetUserCrates(username, page, size, search)
+	crates, err := backendClient.GetUserCrates(username, page, size, search, "updatedAt,desc")
 	if err != nil {
 		log.Printf("Error fetching crates for user %s: %v", username, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch crates"})
@@ -187,7 +187,7 @@ func handleCrateAlbumsAPI(c *gin.Context) {
 	size := getSizeFromQuery(c.Query("size"))
 	search := c.Query("search")
 
-	albums, err := backendClient.GetCrateAlbums(username, handle, page, size, search)
+	albums, err := backendClient.GetCrateAlbums(username, handle, page, size, search, "createdAt,desc")
 	if err != nil {
 		log.Printf("Error fetching albums for crate %s: %v", handle, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch albums"})
