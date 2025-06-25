@@ -39,4 +39,6 @@ public interface CrateService {
     Page<CrateAlbum> getPublicAlbums(Long crateId, Pageable pageable);
 
     Page<CrateAlbum> searchPublicAlbums(Long crateId, String search, Pageable pageable);
+
+    Page<Crate> findAllPublic(Pageable pageable);
 }

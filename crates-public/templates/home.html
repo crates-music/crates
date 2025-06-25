@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{.ogTitle}}">
+    <meta property="og:description" content="{{.ogDesc}}">
+    <meta property="og:url" content="{{.ogURL}}">
+    {{if .ogImage}}<meta property="og:image" content="{{.ogImage}}">{{end}}
+    <meta property="og:site_name" content="Crates">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{.ogTitle}}">
+    <meta name="twitter:description" content="{{.ogDesc}}">
+    {{if .ogImage}}<meta name="twitter:image" content="{{.ogImage}}">{{end}}
+    
+    <!-- General meta tags -->
+    <meta name="description" content="{{.ogDesc}}">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="/static/css/style.css" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+</head>
+<body class="bg-black text-white">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-white" href="/">
+                <img src="/static/images/logo.png" alt="Crates Logo" class="me-2" height="32">crates
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="https://app.crates.page" target="_blank">
+                    <i class="bi-box-arrow-up-right me-1"></i>Open App
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid p-0">
+        <div x-data="homeApp({{.featuredCrates | json}})" x-init="init()">
+            <!-- Hero Section -->
+            <section class="hero-section bg-gradient-dark py-5">
+                <div class="container">
+                    <div class="row align-items-center min-vh-75">
+                        <div class="col-lg-6">
+                            <div class="hero-content text-center text-lg-start">
+                                <img src="/static/images/logo.png" alt="Crates Logo" class="hero-logo mb-4 d-block d-lg-none mx-auto" width="80">
+                                <h1 class="display-2 fw-bold text-white mb-4">
+                                    Playlists are for songs,<br>
+                                    <span class="text-primary">Crates</span> are for <span class="text-primary">albums</span>.
+                                </h1>
+                                <p class="lead text-white-50 mb-5">
+                                    Organize your Spotify albums into custom categories, discover curated collections from other music lovers, and rediscover the joy of full albums curated just the way you like.
+                                </p>
+                                <div class="hero-actions d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+                                    <a href="https://app.crates.page" class="btn btn-primary btn-lg px-4 py-3">
+                                        <i class="bi-music-note-beamed me-2"></i>Start Organizing
+                                    </a>
+                                    <button @click="scrollToExplore()" class="btn btn-outline-light btn-lg px-4 py-3">
+                                        <i class="bi-search me-2"></i>Browse Public Crates
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="hero-visual text-center d-none d-lg-block">
+                                <img src="/static/images/logo.png" alt="Crates Logo" class="hero-logo-large" width="200">
+                                <div class="hero-illustration mt-4">
+                                    <div class="floating-crates">
+                                        <div class="crate-card-demo">
+                                            <div class="demo-album bg-primary"></div>
+                                            <div class="demo-info">
+                                                <div class="demo-title"></div>
+                                                <div class="demo-artist"></div>
+                                            </div>
+                                        </div>
+                                        <div class="crate-card-demo">
+                                            <div class="demo-album bg-success"></div>
+                                            <div class="demo-info">
+                                                <div class="demo-title"></div>
+                                                <div class="demo-artist"></div>
+                                            </div>
+                                        </div>
+                                        <div class="crate-card-demo">
+                                            <div class="demo-album bg-warning"></div>
+                                            <div class="demo-info">
+                                                <div class="demo-title"></div>
+                                                <div class="demo-artist"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-section py-5 bg-dark">
+                <div class="container">
+                    <div class="row text-center mb-5">
+                        <div class="col">
+                            <h2 class="display-5 fw-bold text-white mb-3">Why Choose Albums Over Singles?</h2>
+                            <p class="lead text-white-50">Experience music the way artists intended - as complete, cohesive works of art.</p>
+                        </div>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="feature-card text-center h-100 p-4">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi-collection display-4 text-primary"></i>
+                                </div>
+                                <h4 class="text-white mb-3">Organize Your Albums</h4>
+                                <p class="text-white-50">Create custom crates to organize your albums by genre, mood, era, or any way that makes sense to you.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-card text-center h-100 p-4">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi-share display-4 text-primary"></i>
+                                </div>
+                                <h4 class="text-white mb-3">Share Your Taste</h4>
+                                <p class="text-white-50">Make your crates public and share your curated music collections with friends and fellow music lovers.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-card text-center h-100 p-4">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi-lightning display-4 text-primary"></i>
+                                </div>
+                                <h4 class="text-white mb-3">Sync with Spotify</h4>
+                                <p class="text-white-50">Automatically sync your saved albums from Spotify and keep everything organized in one place.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Explore Section -->
+            <section id="explore" class="explore-section py-5 bg-darker">
+                <div class="container">
+                    <div class="row text-center mb-5">
+                        <div class="col">
+                            <h2 class="display-5 fw-bold text-white mb-3">Discover Public Crates</h2>
+                            <p class="lead text-white-50">Explore curated album collections from music enthusiasts around the world.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div x-show="loading" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+
+                    <!-- Featured Crates Grid -->
+                    <div x-show="!loading" class="row g-4">
+                        <template x-for="crate in featuredCrates" :key="crate.id">
+                            <div class="col-md-6 col-lg-4">
+                                <div class="crate-preview-card card bg-card border-secondary h-100 position-relative overflow-hidden">
+                                    <div class="crate-image-container">
+                                        <img :src="crate.imageUri || '/static/images/album-placeholder.svg'" 
+                                             :alt="crate.name"
+                                             class="card-img-top crate-preview-image"
+                                             onerror="this.src='/static/images/album-placeholder.svg'">
+                                        <div class="card-img-overlay d-flex align-items-end p-0">
+                                            <div class="w-100 bg-gradient-overlay p-3">
+                                                <h5 class="card-title text-white mb-1 fw-bold" x-text="crate.name"></h5>
+                                                <p class="card-text text-white-50 small mb-0">
+                                                    by <span x-text="crate.ownerName"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a :href="'/' + crate.ownerSpotifyId + '/' + crate.handle" class="stretched-link"></a>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div x-show="!loading && featuredCrates.length === 0" class="text-center py-5">
+                        <i class="bi-vinyl display-1 text-muted"></i>
+                        <h3 class="mt-3 text-muted">No public crates yet</h3>
+                        <p class="text-muted">Be the first to create and share your music collection!</p>
+                        <a href="https://app.crates.page" class="btn btn-primary mt-3">
+                            <i class="bi-plus-circle me-2"></i>Create Your First Crate
+                        </a>
+                    </div>
+
+                    <!-- Browse All -->
+                    <div x-show="!loading && featuredCrates.length > 0" class="text-center mt-5">
+                        <p class="text-white-50 mb-3">Want to see more curated collections?</p>
+                        <a href="https://app.crates.page" class="btn btn-outline-primary btn-lg">
+                            <i class="bi-arrow-right-circle me-2"></i>Start Your Own Collection
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="cta-section py-5 bg-gradient-primary">
+                <div class="container">
+                    <div class="row text-center">
+                        <div class="col-lg-8 mx-auto">
+                            <h2 class="display-5 fw-bold text-white mb-3">Ready to Organize Your Music?</h2>
+                            <p class="lead text-white mb-4">
+                                Join thousands of music lovers who have discovered the joy of album-based organization. 
+                                Connect your Spotify account and start curating your perfect music collection today.
+                            </p>
+                            <a href="https://app.crates.page" class="btn btn-light btn-lg px-5 py-3">
+                                <i class="bi-spotify me-2"></i>Get Started with Spotify
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black border-top border-secondary py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col text-center">
+                    <p class="text-white-50 mb-0">© 2025 Crates. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alpine.js -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="/static/js/app.js"></script>
+
+    <script>
+    function homeApp(featuredCrates) {
+        return {
+            featuredCrates: featuredCrates || [],
+            loading: false,
+
+            init() {
+                console.log('Home app initialized with', this.featuredCrates.length, 'featured crates');
+            },
+
+            scrollToExplore() {
+                document.getElementById('explore').scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+            }
+        }
+    }
+    </script>
+
+    <style>
+    .min-vh-75 {
+        min-height: 75vh;
+    }
+
+    .hero-logo {
+        filter: drop-shadow(0 4px 20px rgba(29, 185, 84, 0.3));
+    }
+
+    .hero-logo-large {
+        filter: drop-shadow(0 8px 40px rgba(29, 185, 84, 0.4));
+    }
+
+    .floating-crates {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .crate-card-demo {
+        background: var(--bg-card);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        width: 120px;
+        animation: float 3s ease-in-out infinite;
+        border: 1px solid var(--border-subtle);
+    }
+
+    .crate-card-demo:nth-child(2) {
+        animation-delay: -1s;
+    }
+
+    .crate-card-demo:nth-child(3) {
+        animation-delay: -2s;
+    }
+
+    .demo-album {
+        width: 100%;
+        height: 80px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 0.5rem;
+    }
+
+    .demo-info {
+        text-align: left;
+    }
+
+    .demo-title {
+        height: 12px;
+        background: var(--text-white);
+        border-radius: 2px;
+        margin-bottom: 0.25rem;
+        width: 80%;
+    }
+
+    .demo-artist {
+        height: 8px;
+        background: var(--text-muted);
+        border-radius: 2px;
+        width: 60%;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .feature-card {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        transition: var(--transition);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary);
+    }
+
+    .crate-preview-card {
+        transition: var(--transition);
+    }
+
+    .crate-preview-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .crate-preview-image {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .bg-gradient-dark {
+        background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    }
+
+    .bg-gradient-overlay {
+        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+    }
+
+    .bg-card {
+        background-color: var(--bg-card) !important;
+    }
+
+    .bg-darker {
+        background-color: var(--bg-darker) !important;
+    }
+    </style>
+</body>
+</html>

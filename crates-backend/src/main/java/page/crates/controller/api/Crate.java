@@ -21,4 +21,5 @@ public class Crate {
     private CrateState state;
     private String imageUri;
     private Boolean publicCrate;
+    private PublicUser user;
 }

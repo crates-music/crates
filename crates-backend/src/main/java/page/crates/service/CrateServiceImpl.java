@@ -207,4 +207,10 @@ public class CrateServiceImpl implements CrateService {
         // No access check for public albums - the caller should verify it's public
         return crateAlbumRepository.findActiveByCrateAndSearch(crate, search, pageable);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Crate> findAllPublic(Pageable pageable) {
+        return crateRepository.findAllPublicCrates(pageable);
+    }
 }

@@ -45,4 +45,9 @@ public interface CrateRepository extends JpaRepository<Crate, Long> {
            "  AND c.user = :user " +
            "  AND c.handle = :handle")
     Optional<Crate> findByUserAndHandle(SpotifyUser user, String handle);
+
+    @Query("SELECT c FROM Crate c " +
+           "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
+           "  AND c.publicCrate = true")
+    Page<Crate> findAllPublicCrates(Pageable pageable);
 }

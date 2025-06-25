@@ -52,18 +52,33 @@ func setupRoutes(r *gin.Engine) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
-	// Profile page - /{username}
-	r.GET("/:username", handleProfilePage)
+	// Home page - exact match first
+	r.GET("/", func(c *gin.Context) {
+		log.Printf("Home page route hit")
+		handleHomePage(c)
+	})
 
-	// Crate page - /{username}/{handle}
-	r.GET("/:username/:handle", handleCratePage)
-
-	// API routes for AJAX
+	// API routes for AJAX - must come before wildcard routes
 	api := r.Group("/api")
 	{
 		api.GET("/:username/crates", handleUserCratesAPI)
 		api.GET("/:username/:handle/albums", handleCrateAlbumsAPI)
 	}
+
+	// Profile page - /{username}
+	r.GET("/:username", func(c *gin.Context) {
+		username := c.Param("username")
+		log.Printf("Profile route hit for username: %s", username)
+		handleProfilePage(c)
+	})
+
+	// Crate page - /{username}/{handle}
+	r.GET("/:username/:handle", func(c *gin.Context) {
+		username := c.Param("username")
+		handle := c.Param("handle")
+		log.Printf("Crate route hit for: %s/%s", username, handle)
+		handleCratePage(c)
+	})
 }
 
 func handleProfilePage(c *gin.Context) {
@@ -180,6 +195,59 @@ func handleCrateAlbumsAPI(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, albums)
+}
+
+func handleHomePage(c *gin.Context) {
+	log.Printf("Rendering home page template")
+	
+	// Fetch latest public crates for the featured section
+	featuredCrates := []gin.H{}
+	cratesResponse, err := backendClient.GetAllPublicCrates(0, 3, "createdAt,desc")
+	if err != nil {
+		log.Printf("Error fetching public crates: %v", err)
+		// Continue with empty featured crates on error
+	} else {
+		// Transform crates with real user information
+		for _, crate := range cratesResponse.Content {
+			ownerName := "Unknown"
+			ownerSpotifyId := "unknown"
+			
+			if crate.User != nil {
+				ownerSpotifyId = crate.User.SpotifyID
+				
+				// Use custom handle if available, otherwise fall back to spotifyId
+				if crate.User.Handle != nil && *crate.User.Handle != "" {
+					ownerName = *crate.User.Handle
+				} else {
+					ownerName = crate.User.SpotifyID
+				}
+			}
+			
+			featuredCrate := gin.H{
+				"id":            crate.ID,
+				"name":          crate.Name,
+				"handle":        crate.Handle,
+				"ownerName":     ownerName,
+				"ownerSpotifyId": ownerSpotifyId,
+				"imageUri":      crate.ImageURI,
+				"createdAt":     crate.CreatedAt,
+			}
+			featuredCrates = append(featuredCrates, featuredCrate)
+		}
+	}
+	
+	data := gin.H{
+		"title":          "Crates - Organize Your Spotify Albums",
+		"ogTitle":        "Crates - Organize Your Spotify Albums",
+		"ogDesc":         "Organize your Spotify albums into custom categories, discover curated collections from other music lovers, and rediscover the joy of full albums.",
+		"ogImage":        "https://crates.page/static/images/crates-card.png",
+		"ogURL":          "https://crates.page",
+		"featuredCrates": featuredCrates,
+	}
+	
+	log.Printf("Template data with %d featured crates", len(featuredCrates))
+	c.HTML(http.StatusOK, "home.html", data)
+	log.Printf("Finished rendering home template")
 }
 
 func getFirstImage(images []Image) string {

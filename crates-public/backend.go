@@ -25,6 +25,14 @@ type User struct {
 	Images      []Image `json:"images"`
 }
 
+type PublicUser struct {
+	SpotifyID   string  `json:"spotifyId"`
+	DisplayName string  `json:"displayName"`
+	Handle      *string `json:"handle"`
+	Bio         *string `json:"bio"`
+	Images      []Image `json:"images"`
+}
+
 type Crate struct {
 	ID          int64     `json:"id"`
 	Name        string    `json:"name"`
@@ -34,6 +42,7 @@ type Crate struct {
 	State       string    `json:"state"`
 	ImageURI    string    `json:"imageUri"`
 	PublicCrate bool      `json:"publicCrate"`
+	User        *PublicUser `json:"user"`
 }
 
 type Album struct {
@@ -184,6 +193,25 @@ func (bc *BackendClient) GetCrateAlbums(username, handle string, page, size int,
 	}
 
 	return &albums, nil
+}
+
+func (bc *BackendClient) GetAllPublicCrates(page, size int, sort string) (*Page[Crate], error) {
+	url := fmt.Sprintf("/v1/public/crates?page=%d&size=%d", page, size)
+	if sort != "" {
+		url += "&sort=" + sort
+	}
+
+	body, err := bc.makeRequest(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var crates Page[Crate]
+	if err := json.Unmarshal(body, &crates); err != nil {
+		return nil, fmt.Errorf("failed to parse public crates response: %w", err)
+	}
+
+	return &crates, nil
 }
 
 func getPageFromQuery(query string) int {

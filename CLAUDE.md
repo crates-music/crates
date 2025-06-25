@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Crates is a music organization tool that allows users to organize their Spotify library albums into custom categories called "crates." The application consists of a Spring Boot backend, Angular frontend, and PostgreSQL database.
+Crates is a comprehensive music organization and sharing platform that allows users to organize their Spotify library albums into custom categories called "crates" and share them publicly. The application consists of a Spring Boot backend, Angular frontend, Go-based public sharing service, and PostgreSQL database.
 
-**Live Version:** https://app.crates.page
+**Live Version:** https://app.crates.page  
+**Public Sharing:** https://crates.page
 
 ## Architecture
 
@@ -17,12 +18,21 @@ Crates is a music organization tool that allows users to organize their Spotify 
 - Auth0 for authentication
 - MapStruct for object mapping
 - Docker containerization
+- Runs on port 8980
 
 **Frontend (crates-frontend/):**
-- Angular 15+ with TypeScript
+- Angular 15.0 with TypeScript
 - NgRx for state management
 - Bootstrap 5 with Bootstrap Icons
+- Mobile-first responsive design
 - Runs on port 4311
+
+**Public Sharing Service (crates-public/):**
+- Go 1.24 with Gin web framework
+- Server-side rendered templates
+- Alpine.js for progressive enhancement
+- Docker containerization
+- Runs on port 8080 (prod) / 8337 (dev)
 
 **Database (crates-database/):**
 - PostgreSQL in Docker container
@@ -35,13 +45,15 @@ Crates is a music organization tool that allows users to organize their Spotify 
 - Maven
 - Docker
 - Node.js/npm/yarn
+- Go 1.24+ (for public sharing service)
 
 ### Starting the Application
 
 1. **Start Database:**
    ```bash
    cd crates-database
-   ./mvnw clean install docker:start
+   ./start-database.sh
+   # Or: ./mvnw clean install docker:start
    ```
 
 2. **Configure Backend:**
@@ -56,14 +68,23 @@ Crates is a music organization tool that allows users to organize their Spotify 
    # Or manually: ./mvnw clean install -Pdocker -DskipTests && docker rm -f crates-backend && ./mvnw docker:start
    ```
 
-4. **Start Frontend:**
+4. **Start Public Sharing Service:**
+   ```bash
+   cd crates-public
+   ./start-public.sh
+   # Or manually: go build && BACKEND_URL=http://localhost:8980 ./crates-public
+   ```
+
+5. **Start Frontend:**
    ```bash
    cd crates-frontend
    yarn install  # or npm install
    yarn start    # or npm start
    ```
 
-5. **Access Application:** http://localhost:4311
+6. **Access Application:** 
+   - Main app: http://localhost:4311
+   - Public sharing: http://localhost:8337
 
 ## Common Commands
 
@@ -96,14 +117,30 @@ yarn test
 ng generate component component-name
 ```
 
+### Public Sharing Service
+```bash
+# Build and run
+go build
+BACKEND_URL=http://localhost:8980 ./crates-public
+
+# Run with auto-reload (if using air)
+air
+
+# Build for production
+go build -ldflags="-s -w"
+```
+
 ### Database
 ```bash
 # Start database container
 cd crates-database
-./mvnw clean install docker:start
+./start-database.sh
 
 # Stop container
-./mvnw docker:stop
+./stop-database.sh
+
+# Restart container
+./restart-database.sh
 ```
 
 ## Key Integrations
@@ -122,19 +159,27 @@ cd crates-database
 ## Project Structure
 
 **Backend Services:**
-- `controller/` - REST API endpoints
-- `service/` - Business logic layer
+- `controller/` - REST API endpoints including new PublicController
+- `service/` - Business logic layer with user profile and sharing services
 - `repository/` - Data access layer
-- `entity/` - JPA entities
+- `entity/` - JPA entities with public sharing fields
 - `spotify/client/` - Spotify API integration
 - `security/` - Authentication and authorization
 
 **Frontend Modules:**
 - `auth/` - Authentication components and services
 - `library/` - Spotify library management
-- `crate/` - Crates (categories) management
-- `shared/` - Reusable components and services
+- `crate/` - Crates management with privacy controls
+- `user/` - User profile management and settings
+- `shared/` - Reusable components including mobile navigation
+- `layout/` - Layout components including mobile footer
 - `store/` - NgRx state management
+
+**Public Sharing Service:**
+- `main.go` - Go application entry point
+- `backend.go` - Backend API client integration
+- `templates/` - Server-side rendered HTML templates
+- `static/` - CSS, JS, and image assets
 
 ## Environment Configuration
 
@@ -144,12 +189,17 @@ cd crates-database
 - `SPOTIFY_REDIRECT_URI` - OAuth redirect URI
 - `CRATES_AUTH_CALLBACK_URI` - Frontend callback URI
 - `CRATES_ENCRYPTION_KEY` - Token encryption key
+- `BACKEND_URL` - Backend API URL for public sharing service
 
 **Database Configuration:**
 - Host: `crates-database:5432` (Docker network)
 - Database: `crates`
 - Username: `crates`
 - Password: `cratesforfun`
+
+**Public Sharing URLs:**
+- Development: http://localhost:8337
+- Production: https://crates.page
 
 ## Development Patterns
 
@@ -166,6 +216,13 @@ cd crates-database
 - NgRx store for state management
 - Feature modules with lazy loading
 - Bootstrap utilities for responsive design
+- Mobile-first responsive design patterns
+
+**Public Sharing Service:**
+- Server-side rendering for SEO and social sharing
+- RESTful API design patterns
+- Progressive enhancement with Alpine.js
+- Containerized deployment with Docker
 
 ## Testing
 
@@ -178,9 +235,28 @@ cd crates-database
 - Jasmine and Karma for unit tests
 - Angular Testing Utilities
 
+## Features
+
+### Core Features
+- **Music Organization**: Organize Spotify albums into custom "crates" (categories)
+- **Library Synchronization**: Automatic sync with Spotify library
+- **Album Management**: Add/remove albums, search, and filter functionality
+
+### Public Sharing Features
+- **Public Profiles**: Users can set custom usernames and bio
+- **Public Crates**: Share individual crates publicly with unique URLs
+- **SEO Optimized**: Server-side rendered pages for social media sharing
+- **Mobile Responsive**: Mobile-first design with dedicated mobile navigation
+
+### User Profile Management
+- **Custom Handles**: Unique usernames (64 chars, alphanumeric + hyphens)
+- **Bio**: Personal bio field (280 character limit)
+- **Privacy Controls**: Toggle individual crates between public/private
+
 ## Docker Network
 
 All services run on the `crates-network` Docker network:
 - `crates-database` - PostgreSQL (port 5432)
 - `crates-backend` - Spring Boot API (port 8980)
+- `crates-public` - Go sharing service (port 8080/8337)
 - Frontend runs locally on port 4311
