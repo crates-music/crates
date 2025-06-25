@@ -162,6 +162,7 @@ public class CrateServiceImpl implements CrateService {
         
         if (crateUpdate.getName() != null) {
             crate.setName(crateUpdate.getName());
+            crate.setHandle(handleService.handelize(crateUpdate.getName()));
         }
         if (crateUpdate.getPublicCrate() != null) {
             crate.setPublicCrate(crateUpdate.getPublicCrate());
