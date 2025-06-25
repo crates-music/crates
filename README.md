@@ -30,8 +30,8 @@ check out the live version of this running at [app.crates.page](https://app.crat
 - [X] main landing page isn't centered anymore
 - [X] need max width on the view layout
 - [X] fix double-tap issue on crate albums
-- [ ] Profile - only show save if changes made
-- [ ] Profile - Cancel should go "back", not always to Crates 
+- [X] Profile - only show save if changes made
+- [X] Profile - Cancel should go "back", not always to Crates 
 - [ ] following crates & users
 - [ ] share landing page
 - [ ] discover section in app

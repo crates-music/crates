@@ -69,7 +69,7 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="form-actions">
+      <div *ngIf="profileForm.dirty" class="form-actions">
         <button
           type="submit"
           class="btn btn-primary"

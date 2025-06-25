@@ -7,6 +7,7 @@ import { selectUser, selectUserLoading, selectUserError } from '../store/selecto
 import { updateUserProfile, updateUserProfileResult } from '../store/actions/load-user.actions';
 import { User } from '../shared/model/user.model';
 import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { ApiError } from '../../shared/model/api-error.model';
 import { Actions, ofType } from '@ngrx/effects';
 import { takeUntil } from 'rxjs/operators';
@@ -28,6 +29,7 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private store: Store<UserState>,
     private router: Router,
+    private location: Location,
     private actions$: Actions
   ) {
     this.profileForm = this.fb.group({
@@ -82,7 +84,7 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   }
 
   onCancel(): void {
-    this.router.navigate(['/crates']);
+    this.location.back();
   }
 
   get handleErrors() {
