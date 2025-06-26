@@ -50,4 +50,6 @@ public class Crate {
     private CrateState state;
     @Column(name = "public", nullable = false)
     private Boolean publicCrate;
+    @Column(name = "description", length = 300)
+    private String description;
 }

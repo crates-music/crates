@@ -7,4 +7,5 @@ export class Crate {
   state: string;
   imageUri: string;
   publicCrate: boolean;
+  description: string;
 }

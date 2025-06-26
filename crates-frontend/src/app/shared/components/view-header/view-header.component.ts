@@ -8,6 +8,7 @@ import { ListType } from '../../model/list-type.model';
 })
 export class ViewHeaderComponent {
   @Input() title: string = '';
+  @Input() description: string = '';
   @Input() showSearch: boolean = true;
   @Input() searchPlaceholder: string = 'Search...';
   @Input() showListToggle: boolean = true;

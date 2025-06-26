@@ -1,74 +1,110 @@
-<div class="container-fluid p-4">
-  <div class="row">
-    <div class="col-12">
-      <div class="d-flex align-items-center mb-4">
-        <button class="btn btn-outline-light me-3" (click)="onCancel()">
-          <i class="bi-arrow-left"></i>
-        </button>
-        <h2 class="mb-0">Crate Settings</h2>
-      </div>
+<crates-view-layout 
+  title="CRATE SETTINGS"
+  [showSearch]="false"
+  [showListToggle]="false">
+  <div class="crate-settings-content">
+    
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="alert alert-success" role="alert">
+      <i class="bi-check-circle me-2"></i>
+      {{ successMessage }}
     </div>
-  </div>
 
-  <div class="row justify-content-center">
-    <div class="col-12 col-md-8 col-lg-6">
-      <div class="card bg-dark text-white">
-        <div class="card-body">
-          <form [formGroup]="settingsForm" (ngSubmit)="onSave()">
-            <!-- Crate Name -->
-            <div class="mb-4">
-              <label for="crateName" class="form-label">Crate Name</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                id="crateName"
-                formControlName="name"
-                [class.is-invalid]="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched">
-              <div class="invalid-feedback" *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched">
-                <div *ngIf="settingsForm.get('name')?.errors?.['required']">
-                  Crate name is required
-                </div>
-                <div *ngIf="settingsForm.get('name')?.errors?.['maxlength']">
-                  Crate name cannot exceed 255 characters
-                </div>
-              </div>
-            </div>
+    <!-- Error Message -->
+    <div *ngIf="error$ | async as error" class="alert alert-danger" role="alert">
+      <i class="bi-exclamation-triangle me-2"></i>
+      {{ error.message || 'Failed to update crate. Please try again.' }}
+    </div>
 
-            <!-- Public Crate Toggle -->
-            <div class="mb-4">
-              <div class="form-check form-switch">
-                <input 
-                  class="form-check-input" 
-                  type="checkbox" 
-                  id="publicCrate"
-                  formControlName="publicCrate">
-                <label class="form-check-label" for="publicCrate">
-                  Make this crate public
-                </label>
-              </div>
-              <small class="form-text text-muted">
-                Public crates can be viewed by other users
-              </small>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="d-flex gap-2">
-              <button 
-                type="submit" 
-                class="btn btn-primary"
-                [disabled]="settingsForm.invalid">
-                Save Changes
-              </button>
-              <button 
-                type="button" 
-                class="btn btn-outline-secondary"
-                (click)="onCancel()">
-                Cancel
-              </button>
-            </div>
-          </form>
+    <!-- Form -->
+    <form [formGroup]="settingsForm" (ngSubmit)="onSave()" class="settings-form">
+      
+      <!-- Crate Name Field -->
+      <div class="form-group">
+        <label for="crateName" class="form-label">
+          Crate Name
+        </label>
+        <input
+          type="text"
+          id="crateName"
+          class="form-control"
+          [class.is-invalid]="nameErrors"
+          formControlName="name"
+          placeholder="Enter crate name"
+          maxlength="255">
+        <div class="form-help">
+          Choose a name that describes your music collection.
+        </div>
+        <div *ngIf="nameErrors" class="form-error">
+          {{ nameErrors }}
         </div>
       </div>
-    </div>
+
+      <!-- Description Field -->
+      <div class="form-group">
+        <label for="crateDescription" class="form-label">
+          Description
+          <span class="form-label-optional">(Optional)</span>
+        </label>
+        <textarea
+          id="crateDescription"
+          class="form-control"
+          [class.is-invalid]="descriptionErrors"
+          formControlName="description"
+          rows="3"
+          placeholder="Describe your crate..."
+          maxlength="300"></textarea>
+        <div class="form-help">
+          <span>A short description that appears on your crate.</span>
+          <span class="character-count" [class.text-warning]="descriptionCharacterCount > 280">
+            {{ descriptionCharacterCount }}/300
+          </span>
+        </div>
+        <div *ngIf="descriptionErrors" class="form-error">
+          {{ descriptionErrors }}
+        </div>
+      </div>
+
+      <!-- Public Crate Toggle -->
+      <div class="form-group">
+        <label class="form-label">
+          Privacy
+        </label>
+        <div class="form-check form-switch">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="publicCrate"
+            formControlName="publicCrate">
+          <label class="form-check-label" for="publicCrate">
+            Make this crate public
+          </label>
+        </div>
+        <div class="form-help">
+          Public crates can be viewed and shared with other users.
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div *ngIf="settingsForm.dirty" class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="!settingsForm.valid || (isLoading$ | async)">
+          <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          <i *ngIf="!(isLoading$ | async)" class="bi-check-lg me-2"></i>
+          {{ (isLoading$ | async) ? 'Saving...' : 'Save Changes' }}
+        </button>
+        
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="onCancel()"
+          [disabled]="isLoading$ | async">
+          <i class="bi-x-lg me-2"></i>
+          Cancel
+        </button>
+      </div>
+    </form>
   </div>
-</div>
+</crates-view-layout>

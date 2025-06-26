@@ -34,6 +34,11 @@
       </div>
     </div>
 
+    <!-- Description Row -->
+    <div class="description-row" *ngIf="description">
+      <p class="mb-0 text-muted">{{ description }}</p>
+    </div>
+
     <!-- Search and Controls Row -->
     <div class="search-controls-row align-items-center" *ngIf="showSearch || showListToggle">
       <div class="search-section" *ngIf="showSearch">

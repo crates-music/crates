@@ -42,6 +42,7 @@ type Crate struct {
 	State       string    `json:"state"`
 	ImageURI    string    `json:"imageUri"`
 	PublicCrate bool      `json:"publicCrate"`
+	Description *string   `json:"description"`
 	User        *PublicUser `json:"user"`
 }
 

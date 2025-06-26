@@ -75,6 +75,9 @@
                 </div>
                 <div class="col">
                     <h1 class="display-4 mb-2 text-primary">{{.crate.Name}}</h1>
+                    {{if .crate.Description}}
+                        <p class="text-white-50 mb-3">{{.crate.Description}}</p>
+                    {{end}}
                     <p class="lead mb-2">
                         by <a href="/{{.user.SpotifyID}}" class="text-white text-decoration-none fw-bold">{{.user.DisplayName}}</a>
                     </p>

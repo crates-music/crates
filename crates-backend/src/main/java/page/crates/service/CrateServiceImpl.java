@@ -156,6 +156,9 @@ public class CrateServiceImpl implements CrateService {
     @Override
     @Transactional
     public Crate updateCrate(Long crateId, Crate crateUpdate) {
+        log.info("Updating crate {} with data: name={}, description={}, publicCrate={}", 
+                crateId, crateUpdate.getName(), crateUpdate.getDescription(), crateUpdate.getPublicCrate());
+        
         final Crate crate = crateRepository.findById(crateId)
                 .orElseThrow(() -> new CrateNotFoundException(crateId));
         accessService.assertAccess(crate);
@@ -167,9 +170,12 @@ public class CrateServiceImpl implements CrateService {
         if (crateUpdate.getPublicCrate() != null) {
             crate.setPublicCrate(crateUpdate.getPublicCrate());
         }
+        crate.setDescription(crateUpdate.getDescription());
         
         crate.setUpdatedAt(systemTimeFacade.now());
-        return crateRepository.save(crate);
+        final Crate saved = crateRepository.save(crate);
+        log.info("Saved crate with description: {}", saved.getDescription());
+        return saved;
     }
 
     @Override

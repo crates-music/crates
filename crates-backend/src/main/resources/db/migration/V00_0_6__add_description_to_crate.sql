@@ -1,0 +1,1 @@
+ALTER TABLE crate ADD COLUMN description VARCHAR(300) NULL;
