@@ -19,6 +19,23 @@ const routes: Routes = [
     loadChildren: () => import('./user/user.module').then(m => m.UserModule)
   },
   {
+    path: 'discover',
+    loadChildren: () => import('./discover/discover.module').then(m => m.DiscoverModule)
+  },
+  {
+    path: 'search',
+    loadChildren: () => import('./search/search.module').then(m => m.SearchModule)
+  },
+  {
+    path: ':handle',
+    loadChildren: () => import('./user/user.module').then(m => m.UserModule)
+  },
+  {
+    path: '',
+    redirectTo: 'crate/list',
+    pathMatch: 'full'
+  },
+  {
     path: '**',
     redirectTo: 'crate/list'
   }

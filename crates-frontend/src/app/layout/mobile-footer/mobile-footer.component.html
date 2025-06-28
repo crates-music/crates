@@ -11,6 +11,11 @@
       <i class="bi-disc fs-5"></i>
       <span class="d-block">Library</span>
     </a>
+    <a class="nav-link tab d-flex flex-column align-items-center" routerLink="/discover"
+       [ngClass]="{ 'active-tab': currentTab === Tab.Discover }">
+      <i class="bi-compass fs-5"></i>
+      <span class="d-block">Discover</span>
+    </a>
     <a class="nav-link tab d-flex flex-column align-items-center" routerLink="/user/profile/settings"
        [ngClass]="{ 'active-tab': currentTab === Tab.Profile }">
       <i class="bi-person fs-5"></i>

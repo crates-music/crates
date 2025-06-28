@@ -62,7 +62,9 @@ func setupRoutes(r *gin.Engine) {
 	api := r.Group("/api")
 	{
 		api.GET("/:username/crates", handleUserCratesAPI)
+		api.GET("/:username/collection", handleUserCollectionAPI)
 		api.GET("/:username/:handle/albums", handleCrateAlbumsAPI)
+		api.GET("/:username/collection/:handle/albums", handleCollectionCrateAlbumsAPI)
 	}
 
 	// Profile page - /{username}
@@ -70,6 +72,14 @@ func setupRoutes(r *gin.Engine) {
 		username := c.Param("username")
 		log.Printf("Profile route hit for username: %s", username)
 		handleProfilePage(c)
+	})
+
+	// Collection crate page - /{username}/collection/{handle}
+	r.GET("/:username/collection/:handle", func(c *gin.Context) {
+		username := c.Param("username")
+		handle := c.Param("handle")
+		log.Printf("Collection crate route hit for: %s/collection/%s", username, handle)
+		handleCollectionCratePage(c)
 	})
 
 	// Crate page - /{username}/{handle}
@@ -95,22 +105,31 @@ func handleProfilePage(c *gin.Context) {
 		return
 	}
 
-	// Fetch initial crates (first page)
+	// Fetch initial authored crates (first page)
 	crates, err := backendClient.GetUserCrates(username, 0, 12, "", "updatedAt,desc")
 	if err != nil {
 		log.Printf("Error fetching crates for user %s: %v", username, err)
 		crates = &Page[Crate]{Content: []Crate{}}
 	}
 
+	// Fetch initial collection (first page)
+	collection, err := backendClient.GetUserCollection(username, 0, 12, "", "createdAt,desc")
+	if err != nil {
+		log.Printf("Error fetching collection for user %s: %v", username, err)
+		collection = &Page[Crate]{Content: []Crate{}}
+	}
+
 	c.HTML(http.StatusOK, "profile.html", gin.H{
-		"title":      user.DisplayName + " - Crates",
-		"user":       user,
-		"crates":     crates.Content,
-		"hasMore":    !crates.Last,
-		"ogTitle":    user.DisplayName + " - Crates",
-		"ogDesc":     "Check out " + user.DisplayName + "'s music crates",
-		"ogImage":    getFirstImage(user.Images),
-		"ogURL":      c.Request.URL.String(),
+		"title":         user.DisplayName + " - Crates",
+		"user":          user,
+		"crates":        crates.Content,
+		"hasMoreCrates": !crates.Last,
+		"collection":    collection.Content,
+		"hasMoreCollection": !collection.Last,
+		"ogTitle":       user.DisplayName + " - Crates",
+		"ogDesc":        "Check out " + user.DisplayName + "'s music crates and collection",
+		"ogImage":       getFirstImage(user.Images),
+		"ogURL":         c.Request.URL.String(),
 	})
 }
 
@@ -248,6 +267,90 @@ func handleHomePage(c *gin.Context) {
 	log.Printf("Template data with %d featured crates", len(featuredCrates))
 	c.HTML(http.StatusOK, "home.html", data)
 	log.Printf("Finished rendering home template")
+}
+
+func handleCollectionCratePage(c *gin.Context) {
+	username := c.Param("username")
+	handle := c.Param("handle")
+
+	// Fetch user and collection crate data from backend
+	user, err := backendClient.GetUser(username)
+	if err != nil {
+		log.Printf("Error fetching user %s: %v", username, err)
+		c.HTML(http.StatusNotFound, "error.html", gin.H{
+			"title":   "User Not Found",
+			"message": "User not found",
+		})
+		return
+	}
+
+	crate, err := backendClient.GetCollectionCrate(username, handle)
+	if err != nil {
+		log.Printf("Error fetching collection crate %s for user %s: %v", handle, username, err)
+		c.HTML(http.StatusNotFound, "error.html", gin.H{
+			"title":   "Crate Not Found",
+			"message": "Crate not found in collection or is private",
+		})
+		return
+	}
+
+	// Fetch initial albums (first page)
+	albums, err := backendClient.GetCollectionCrateAlbums(username, handle, 0, 20, "", "createdAt,desc")
+	if err != nil {
+		log.Printf("Error fetching albums for collection crate %s: %v", handle, err)
+		albums = &Page[CrateAlbum]{Content: []CrateAlbum{}}
+	}
+
+	firstAlbumImage := ""
+	if len(albums.Content) > 0 && len(albums.Content[0].Album.Images) > 0 {
+		firstAlbumImage = albums.Content[0].Album.Images[0].URL
+	}
+
+	c.HTML(http.StatusOK, "crate.html", gin.H{
+		"title":      crate.Name + " (collected by " + user.DisplayName + ")",
+		"user":       user,
+		"crate":      crate,
+		"albums":     albums.Content,
+		"hasMore":    !albums.Last,
+		"isCollection": true,
+		"ogTitle":    crate.Name + " (collected by " + user.DisplayName + ")",
+		"ogDesc":     "A music crate with " + strconv.Itoa(albums.TotalElements) + " albums, collected by " + user.DisplayName,
+		"ogImage":    firstAlbumImage,
+		"ogURL":      c.Request.URL.String(),
+	})
+}
+
+func handleUserCollectionAPI(c *gin.Context) {
+	username := c.Param("username")
+	page := getPageFromQuery(c.Query("page"))
+	size := getSizeFromQuery(c.Query("size"))
+	search := c.Query("search")
+
+	collection, err := backendClient.GetUserCollection(username, page, size, search, "createdAt,desc")
+	if err != nil {
+		log.Printf("Error fetching collection for user %s: %v", username, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch collection"})
+		return
+	}
+
+	c.JSON(http.StatusOK, collection)
+}
+
+func handleCollectionCrateAlbumsAPI(c *gin.Context) {
+	username := c.Param("username")
+	handle := c.Param("handle")
+	page := getPageFromQuery(c.Query("page"))
+	size := getSizeFromQuery(c.Query("size"))
+	search := c.Query("search")
+
+	albums, err := backendClient.GetCollectionCrateAlbums(username, handle, page, size, search, "createdAt,desc")
+	if err != nil {
+		log.Printf("Error fetching albums for collection crate %s: %v", handle, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch albums"})
+		return
+	}
+
+	c.JSON(http.StatusOK, albums)
 }
 
 func getFirstImage(images []Image) string {

@@ -19,6 +19,8 @@ export class ViewHeaderComponent {
   @Input() showFilters: boolean = false;
   @Input() showSettings: boolean = false;
   @Input() showShare: boolean = false;
+  @Input() showCollection: boolean = false;
+  @Input() crateId?: number;
   
   // Filter inputs
   @Input() hideCrated: boolean = false;

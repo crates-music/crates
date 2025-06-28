@@ -1,3 +1,5 @@
+import { User } from '../../../user/shared/model/user.model';
+
 export class Crate {
   id: number;
   name: string;
@@ -8,4 +10,8 @@ export class Crate {
   imageUri: string;
   publicCrate: boolean;
   description: string;
+  followerCount: number;
+  user: User; // The author/owner of the crate
+  albumCount?: number;
+  isInUserCollection?: boolean;
 }

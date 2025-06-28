@@ -36,9 +36,15 @@ public interface CrateService {
 
     Crate findByUserAndHandle(SpotifyUser user, String handle);
 
+    Crate findByHandle(String handle);
+
     Page<CrateAlbum> getPublicAlbums(Long crateId, Pageable pageable);
 
     Page<CrateAlbum> searchPublicAlbums(Long crateId, String search, Pageable pageable);
 
     Page<Crate> findAllPublic(Pageable pageable);
+    
+    Page<Crate> searchAllPublic(String search, Pageable pageable);
+    
+    Page<Crate> getUserPublicCrates(SpotifyUser user, String search, Pageable pageable);
 }

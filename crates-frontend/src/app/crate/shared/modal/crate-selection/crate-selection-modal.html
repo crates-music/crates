@@ -3,7 +3,7 @@
     <h4 class="text-center py-2 mb-0">Add to crate</h4>
   </div>
   
-  <div class="modal-search" *ngIf="!creating">
+  <div class="modal-search" *ngIf="!creating && allCrates.length > 0">
     <div class="input-group mb-3">
       <input type="text" 
              class="form-control search-input" 
@@ -27,26 +27,36 @@
   </div>
   <ng-container *ngIf="creating">
     <div class="create-crate-form">
-      <div class="d-flex flex-column align-items-center">
-        <label for="crateName" class="form-label mb-3">Give your crate a name</label>
-        <div class="input-group mb-3 w-75">
+      <div class="create-crate-header">
+        <i class="bi bi-plus-circle-fill create-icon"></i>
+        <h5 class="create-title mb-0">Create New Crate</h5>
+      </div>
+      
+      <div class="create-crate-body">
+        <div class="form-group">
+          <label for="crateName" class="form-label">Crate Name</label>
           <input [(ngModel)]="crateName"
                  type="text"
                  name="crateName"
                  id="crateName"
-                 class="form-control"
-                 placeholder="Enter crate name..."
-                 (keyup.enter)="createCrate(crateName)"/>
+                 class="form-control create-input"
+                 placeholder="Enter a name for your crate..."
+                 (keyup.enter)="createCrate(crateName)"
+                 maxlength="100"/>
+          <div class="input-hint" *ngIf="crateName?.length">
+            {{ crateName.length }}/100 characters
+          </div>
         </div>
-        <div class="d-flex gap-2">
-          <button class="btn btn-primary"
+        
+        <div class="create-actions">
+          <button class="btn btn-primary create-btn"
                   (click)="createCrate(crateName)"
                   [disabled]="!crateName?.trim()">
-            <i class="bi bi-check-lg me-2"></i>Create
+            <i class="bi bi-check-circle me-2"></i>Create Crate
           </button>
-          <button class="btn btn-secondary"
+          <button class="btn btn-outline-secondary cancel-btn"
                   (click)="creating = false">
-            <i class="bi bi-x-lg me-2"></i>Cancel
+            <i class="bi bi-x-circle me-2"></i>Cancel
           </button>
         </div>
       </div>

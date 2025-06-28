@@ -3,6 +3,8 @@ package page.crates.service;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import page.crates.entity.SpotifyUser;
 import page.crates.entity.Token;
@@ -35,6 +37,8 @@ public class UserServiceImpl implements UserService {
     private SpotifyUserMapper spotifyUserMapper;
     @Resource
     private SystemTimeFacade systemTimeFacade;
+    @Resource
+    private HandleService handleService;
 
     private SpotifyUserCreation createOrUpdateUser(Token token) {
         final Context context = Context.forToken(token.getAccessToken());
@@ -54,6 +58,10 @@ public class UserServiceImpl implements UserService {
         user.setToken(token);
         user.setCreatedAt(systemTimeFacade.now());
         user.setUpdatedAt(systemTimeFacade.now());
+        // Auto-generate handle from spotifyId for new users
+        if (user.getHandle() == null) {
+            user.setHandle(handleService.handelize(user.getSpotifyId()));
+        }
         log.info("Creating new user for {} [ {} ]", user.getEmail(), user.getSpotifyId());
         return new SpotifyUserCreation(spotifyUserRepository.save(user), true);
     }
@@ -109,5 +117,17 @@ public class UserServiceImpl implements UserService {
         
         user.setUpdatedAt(systemTimeFacade.now());
         return spotifyUserRepository.save(user);
+    }
+
+    @Override
+    public SpotifyUser getUser(Long userId) {
+        return spotifyUserRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+    }
+
+    @Override
+    public Page<SpotifyUser> searchUsers(String search, Pageable pageable) {
+        log.info("Searching users with term: {}", search);
+        return spotifyUserRepository.searchUsers(search, pageable);
     }
 }

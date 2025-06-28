@@ -38,6 +38,10 @@ export class UserHeaderComponent {
     this.router.navigate(['/library']);
   }
 
+  navigateToDiscover(): void {
+    this.router.navigate(['/discover']);
+  }
+
   navigateToSettings(): void {
     this.router.navigate(['/user/profile/settings']);
   }

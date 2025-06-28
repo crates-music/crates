@@ -47,6 +47,7 @@ export class CrateService {
       )
   }
 
+
   createCrate(name: string): Observable<Crate> {
     return this.http.post(
       `${environment.baseUri}/v1/crate`, {
@@ -102,6 +103,7 @@ export class CrateService {
         })
       )
   }
+
 
   updateCrate(id: number, crateUpdate: Partial<Crate>): Observable<Crate> {
     return this.http.put(`${environment.baseUri}/v1/crate/${id}`, crateUpdate)

@@ -30,6 +30,17 @@ export class PublicLinkService {
   }
 
   /**
+   * Get the public collection crate URL for a crate in a user's collection
+   * @param collectorUser The user who has the crate in their collection
+   * @param crate The crate object
+   * @returns The public collection crate URL
+   */
+  getCollectionCrateUrl(collectorUser: User, crate: Crate): string {
+    const username = collectorUser.handle || collectorUser.spotifyId;
+    return `${environment.publicBaseUrl}/${username}/collection/${crate.handle}`;
+  }
+
+  /**
    * Open a URL in a new tab/window
    * @param url The URL to open
    */

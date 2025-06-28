@@ -98,6 +98,24 @@ export class CrateSelectionModal {
 
   crateCrateClicked() {
     this.creating = true;
+    setTimeout(() => {
+      const input = document.getElementById('crateName') as HTMLInputElement;
+      if (input) {
+        // Try multiple approaches to trigger mobile keyboard
+        input.focus();
+        input.click();
+        
+        // For iOS Safari specifically
+        const touchEvent = new TouchEvent('touchstart', {
+          bubbles: true,
+          cancelable: true,
+        });
+        input.dispatchEvent(touchEvent);
+        
+        // Set cursor position to end of input
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
+    }, 200);
   }
 
   selectCrate(crate: Crate) {

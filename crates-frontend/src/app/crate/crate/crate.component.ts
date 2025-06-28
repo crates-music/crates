@@ -38,6 +38,7 @@ export class CrateComponent implements OnInit, OnDestroy {
 
   crateListType: ListType;
   search: string;
+  
 
 
   constructor(private activatedRoute: ActivatedRoute,
@@ -143,13 +144,30 @@ export class CrateComponent implements OnInit, OnDestroy {
 
   shareCrate() {
     if (this.user && this.crate) {
-      const url = this.publicLinkService.getCrateUrl(this.user, this.crate);
+      let url: string;
+      
+      if (this.isCurrentUserCrate()) {
+        // User owns this crate - use authored URL
+        url = this.publicLinkService.getCrateUrl(this.user, this.crate);
+      } else {
+        // User is viewing someone else's crate (it's in their collection) - use collection URL
+        url = this.publicLinkService.getCollectionCrateUrl(this.user, this.crate);
+      }
+      
       this.publicLinkService.openInNewTab(url);
     }
   }
 
   shouldShowShareButton(): boolean {
     return this.crate?.publicCrate === true;
+  }
+
+  isCurrentUserCrate(): boolean {
+    return this.user && this.crate && this.user.id === this.crate.user.id;
+  }
+
+  shouldShowCollectionButton(): boolean {
+    return !this.isCurrentUserCrate() && this.crate?.publicCrate === true;
   }
 
   protected readonly ListType = ListType;

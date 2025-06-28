@@ -221,6 +221,65 @@ func (bc *BackendClient) GetAllPublicCrates(page, size int, sort string) (*Page[
 	return &crates, nil
 }
 
+func (bc *BackendClient) GetUserCollection(username string, page, size int, search, sort string) (*Page[Crate], error) {
+	url := fmt.Sprintf("/v1/public/user/%s/collection?page=%d&size=%d", username, page, size)
+	if search != "" {
+		url += "&search=" + search
+	}
+	if sort != "" {
+		url += "&sort=" + sort
+	}
+
+	body, err := bc.makeRequest(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var crates Page[Crate]
+	if err := json.Unmarshal(body, &crates); err != nil {
+		return nil, fmt.Errorf("failed to parse collection response: %w", err)
+	}
+
+	return &crates, nil
+}
+
+func (bc *BackendClient) GetCollectionCrate(username, handle string) (*Crate, error) {
+	url := fmt.Sprintf("/v1/public/user/%s/collection/%s", username, handle)
+	body, err := bc.makeRequest(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var crate Crate
+	if err := json.Unmarshal(body, &crate); err != nil {
+		return nil, fmt.Errorf("failed to parse collection crate response: %w", err)
+	}
+
+	return &crate, nil
+}
+
+func (bc *BackendClient) GetCollectionCrateAlbums(username, handle string, page, size int, search, sort string) (*Page[CrateAlbum], error) {
+	url := fmt.Sprintf("/v1/public/user/%s/collection/%s/albums?page=%d&size=%d", username, handle, page, size)
+	if search != "" {
+		url += "&search=" + search
+	}
+	if sort != "" {
+		url += "&sort=" + sort
+	}
+
+	body, err := bc.makeRequest(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var albums Page[CrateAlbum]
+	if err := json.Unmarshal(body, &albums); err != nil {
+		return nil, fmt.Errorf("failed to parse collection albums response: %w", err)
+	}
+
+	return &albums, nil
+}
+
 func getPageFromQuery(query string) int {
 	if query == "" {
 		return 0

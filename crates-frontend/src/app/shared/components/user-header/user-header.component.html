@@ -21,6 +21,13 @@
           <i class="bi-disc"></i>
           <span>Library</span>
         </button>
+        <button 
+          class="nav-tab" 
+          [class.active]="isCurrentRoute('/discover')"
+          (click)="navigateToDiscover()">
+          <i class="bi-compass"></i>
+          <span>Discover</span>
+        </button>
       </div>
       
       <div class="user-actions">

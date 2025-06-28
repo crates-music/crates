@@ -1,5 +1,5 @@
-<!-- Welcome message - only show when no crates exist at all AND no search is active -->
-<ng-container *ngIf="!(cratesLoading$ | async) && (!(crates$ | async) || (crates$ | async)!.length === 0) && !(search$ | async)">
+<!-- Welcome message - only show for owned tab when no crates exist AND no search is active -->
+<ng-container *ngIf="activeTab === 'owned' && !(getCurrentLoading$() | async) && (!(getCurrentCrates$() | async) || (getCurrentCrates$() | async)!.length === 0) && !(search$ | async)">
   <div class="welcome-state">
     <div class="getting-started-container">
       <div class="text-center">
@@ -30,7 +30,7 @@
 
 <!-- Crates List Layout -->
 <div class="crates-layout" 
-     *ngIf="!!(crates$ | async) && (crates$ | async)!.length > 0 || (search$ | async)">
+     *ngIf="activeTab === 'collection' || (!!(getCurrentCrates$() | async) && (getCurrentCrates$() | async)!.length > 0) || (search$ | async)">
   
   <!-- Fixed Crates Header -->
   <div class="crates-header">
@@ -43,14 +43,45 @@
       (search)="handleSearch($event)"
       (listTypeToggle)="toggleCratesListType($event)">
     </crates-view-header>
+    
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <nav class="nav nav-pills nav-justified">
+        <button 
+          class="nav-link" 
+          [class.active]="activeTab === 'owned'"
+          (click)="setActiveTab('owned')" 
+          type="button">
+          <i class="bi-box-seam me-2"></i>
+          My Crates
+        </button>
+        <button 
+          class="nav-link" 
+          [class.active]="activeTab === 'collection'"
+          (click)="setActiveTab('collection')" 
+          type="button">
+          <i class="bi-bookmark me-2"></i>
+          Collection
+        </button>
+      </nav>
+    </div>
   </div>
 
   <!-- Scrollable Crates Content -->
   <div class="crates-content">
+    <!-- Empty collection message -->
+    <div *ngIf="activeTab === 'collection' && !(getCurrentLoading$() | async) && (!(getCurrentCrates$() | async) || (getCurrentCrates$() | async)!.length === 0) && !(search$ | async)"
+         class="text-center p-5">
+      <p class="mb-3">No crates in your collection</p>
+      <a class="btn btn-primary" [routerLink]="['/discover']">Search Everything</a>
+    </div>
+    
+    <!-- Crates list -->
     <crates-list-content
-      [items]="crates$ | async"
+      *ngIf="!!(getCurrentCrates$() | async) && (getCurrentCrates$() | async)!.length > 0 || (search$ | async)"
+      [items]="getCurrentCrates$() | async"
       [listType]="cratesListType"
-      [hasNextPage]="hasNextPage$ | async"
+      [hasNextPage]="getCurrentHasNextPage$() | async"
       [emptyStateTitle]="'No crates found matching ' + (search$ | async)"
       [emptyStateMessage]="'Try adjusting your search terms or clear the search to see all crates.'"
       [showEmptyState]="!!(search$ | async)"
@@ -58,7 +89,7 @@
       [gridItemTemplate]="crateGridItem"
       [listItemTemplate]="crateListItem"
       (itemClick)="openCrate($event)"
-      (loadMore)="loadMore()">
+      (loadMore)="activeTab === 'owned' ? loadMore() : loadMoreCollection()">
     </crates-list-content>
   </div>
 
@@ -80,7 +111,12 @@
         <div class="card-img-overlay d-flex align-items-end p-0">
           <div class="w-100 album-gradient p-3">
             <h6 class="card-title text-white mb-1 fw-bold crate-name">{{ crate.name }}</h6>
-            <p class="card-text text-white-50 small mb-0">Crate</p>
+            <p class="card-text text-white-50 small mb-0" *ngIf="isOwnedCrate(crate)">
+              My Crate
+            </p>
+            <p class="card-text text-white-50 small mb-0" *ngIf="!isOwnedCrate(crate) && crate.user">
+              by {{ crate.user.displayName }}
+            </p>
           </div>
         </div>
       </div>
@@ -103,7 +139,12 @@
     </div>
     <div class="flex-grow-1">
       <h6 class="list-crate-title">{{ crate.name }}</h6>
-      <p class="mb-0 text-white-50 small">Crate</p>
+      <p class="mb-0 text-white-50 small" *ngIf="isOwnedCrate(crate)">
+        My Crate
+      </p>
+      <p class="mb-0 text-white-50 small" *ngIf="!isOwnedCrate(crate) && crate.user">
+        by {{ crate.user.displayName }}
+      </p>
     </div>
     <div class="flex-shrink-0">
       <i class="bi-chevron-right text-muted"></i>

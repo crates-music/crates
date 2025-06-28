@@ -1,0 +1,27 @@
+<button 
+  [class]="buttonClass"
+  [disabled]="loading"
+  (click)="toggleFollow()"
+  type="button">
+  
+  <!-- Loading Spinner -->
+  <span 
+    *ngIf="loading" 
+    class="spinner-border spinner-border-sm me-2" 
+    role="status" 
+    aria-hidden="true">
+  </span>
+  
+  <!-- Follow/Unfollow Icon -->
+  <i 
+    *ngIf="!loading" 
+    [class]="isFollowing ? 'bi-person-dash me-1' : 'bi-person-plus me-1'">
+  </i>
+  
+  {{ buttonText }}
+</button>
+
+<!-- Error Message -->
+<div class="text-danger small mt-1" *ngIf="error">
+  {{ error }}
+</div>

@@ -5,6 +5,7 @@ import { filter, Subject, takeUntil, tap } from 'rxjs';
 export enum Tab {
   Crates = 'CRATES',
   Library = 'LIBRARY',
+  Discover = 'DISCOVER',
   Profile = 'PROFILE'
 }
 
@@ -40,6 +41,8 @@ export class MobileFooterComponent implements OnDestroy {
       this.currentTab = Tab.Crates;
     } else if (segments.includes('library')) {
       this.currentTab = Tab.Library;
+    } else if (segments.includes('discover')) {
+      this.currentTab = Tab.Discover;
     } else if (segments.includes('user')) {
       this.currentTab = Tab.Profile;
     } else if (segments.includes('auth')) {

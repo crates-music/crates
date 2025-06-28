@@ -18,6 +18,9 @@ import page.crates.repository.CrateAlbumRepository;
 import page.crates.repository.CrateRepository;
 import page.crates.util.SystemTimeFacade;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 public class CrateServiceImpl implements CrateService {
@@ -39,6 +42,8 @@ public class CrateServiceImpl implements CrateService {
     private HandleService handleService;
     @Resource
     private LibraryAlbumService libraryAlbumService;
+    @Resource
+    private CrateEventService crateEventService;
 
 
     @Override
@@ -58,7 +63,14 @@ public class CrateServiceImpl implements CrateService {
 
         log.info("added album {} to crate: {} -- {}", album.getId(), crate.getId(), crateAlbum);
         crate.setUpdatedAt(systemTimeFacade.now());
-        return crateRepository.save(crate);
+        Crate savedCrate = crateRepository.save(crate);
+        
+        // Fire event if crate is public
+        if (crate.isPublicCrate()) {
+            crateEventService.recordAlbumsAdded(crate.getUser(), crate, List.of(album.getId()));
+        }
+        
+        return savedCrate;
     }
 
     @Override
@@ -67,7 +79,8 @@ public class CrateServiceImpl implements CrateService {
         final Crate crate = crateRepository.findById(crateId)
                 .orElseThrow(() -> new CrateNotFoundException(crateId));
         accessService.assertAccess(crate);
-        albumList.albums().forEach(incomingAlbum -> {
+        
+        List<Long> addedAlbumIds = albumList.albums().stream().map(incomingAlbum -> {
             final Album album = albumService.findOrCreate(albumMapper.map(incomingAlbum));
             final CrateAlbum crateAlbum = crateAlbumRepository.save(
                     CrateAlbum.builder()
@@ -77,9 +90,18 @@ public class CrateServiceImpl implements CrateService {
                             .build());
             log.info("added album {} to crate: {} -- {}", album.getId(), crate.getId(), crateAlbum);
             libraryAlbumService.markCrated(album, crate.getUser());
-        });
+            return album.getId();
+        }).collect(Collectors.toList());
+        
         crate.setUpdatedAt(systemTimeFacade.now());
-        return crateRepository.save(crate);
+        Crate savedCrate = crateRepository.save(crate);
+        
+        // Fire event if crate is public and albums were added
+        if (crate.isPublicCrate() && !addedAlbumIds.isEmpty()) {
+            crateEventService.recordAlbumsAdded(crate.getUser(), crate, addedAlbumIds);
+        }
+        
+        return savedCrate;
     }
 
     @Override
@@ -101,6 +123,8 @@ public class CrateServiceImpl implements CrateService {
         crate.setUpdatedAt(systemTimeFacade.now());
         crate.setHandle(handleService.handelize(crate.getName()));
         crate.setState(CrateState.ACTIVE);
+        crate.setPublicCrate(true);
+        crate.setFollowerCount(0);
         return crateRepository.save(crate);
     }
 
@@ -157,23 +181,30 @@ public class CrateServiceImpl implements CrateService {
     @Transactional
     public Crate updateCrate(Long crateId, Crate crateUpdate) {
         log.info("Updating crate {} with data: name={}, description={}, publicCrate={}", 
-                crateId, crateUpdate.getName(), crateUpdate.getDescription(), crateUpdate.getPublicCrate());
+                crateId, crateUpdate.getName(), crateUpdate.getDescription(), crateUpdate.isPublicCrate());
         
         final Crate crate = crateRepository.findById(crateId)
                 .orElseThrow(() -> new CrateNotFoundException(crateId));
         accessService.assertAccess(crate);
         
+        // Track if crate is becoming public
+        boolean wasPrivate = !crate.isPublicCrate();
+        
         if (crateUpdate.getName() != null) {
             crate.setName(crateUpdate.getName());
             crate.setHandle(handleService.handelize(crateUpdate.getName()));
         }
-        if (crateUpdate.getPublicCrate() != null) {
-            crate.setPublicCrate(crateUpdate.getPublicCrate());
-        }
+        crate.setPublicCrate(crateUpdate.isPublicCrate());
         crate.setDescription(crateUpdate.getDescription());
         
         crate.setUpdatedAt(systemTimeFacade.now());
         final Crate saved = crateRepository.save(crate);
+        
+        // Fire event if crate is becoming public
+        if (wasPrivate && crateUpdate.isPublicCrate()) {
+            crateEventService.recordCrateReleased(crate.getUser(), saved);
+        }
+        
         log.info("Saved crate with description: {}", saved.getDescription());
         return saved;
     }
@@ -199,6 +230,13 @@ public class CrateServiceImpl implements CrateService {
 
     @Override
     @Transactional(readOnly = true)
+    public Crate findByHandle(String handle) {
+        return crateRepository.findByHandle(handle)
+                .orElseThrow(() -> new CrateNotFoundException(handle));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<CrateAlbum> getPublicAlbums(Long crateId, Pageable pageable) {
         final Crate crate = crateRepository.findById(crateId)
                 .orElseThrow(() -> new CrateNotFoundException(crateId));
@@ -219,5 +257,20 @@ public class CrateServiceImpl implements CrateService {
     @Transactional(readOnly = true)
     public Page<Crate> findAllPublic(Pageable pageable) {
         return crateRepository.findAllPublicCrates(pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Crate> searchAllPublic(String search, Pageable pageable) {
+        return crateRepository.findAllPublicCratesWithSearch(search, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Crate> getUserPublicCrates(SpotifyUser user, String search, Pageable pageable) {
+        if (search != null && !search.trim().isEmpty()) {
+            return crateRepository.findPublicByUserAndNameLike(user, search, pageable);
+        }
+        return crateRepository.findPublicByUser(user, pageable);
     }
 }

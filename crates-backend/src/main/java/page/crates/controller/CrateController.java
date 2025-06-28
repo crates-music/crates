@@ -21,8 +21,10 @@ import page.crates.controller.api.CrateAlbum;
 import page.crates.controller.api.mapper.CrateAlbumMapper;
 import page.crates.controller.api.mapper.CrateMapper;
 import page.crates.security.SpotifyAuthorization;
+import page.crates.service.CrateCollectionService;
 import page.crates.service.CrateDecorator;
 import page.crates.service.CrateService;
+import page.crates.service.CurrentUserService;
 
 @RestController
 @RequestMapping("/v1/crate")
@@ -36,6 +38,10 @@ public class CrateController implements CrateApi {
     private CrateAlbumMapper crateAlbumMapper;
     @Resource
     private CrateDecorator crateDecorator;
+    @Resource
+    private CrateCollectionService crateCollectionService;
+    @Resource
+    private CurrentUserService currentUserService;
 
     @Override
     @PostMapping("/{crateId}/album")
@@ -125,4 +131,59 @@ public class CrateController implements CrateApi {
         return crateMapper.map(
                 crateService.updateCrate(id, crateMapper.map(crate)));
     }
+
+    // Collection Management Endpoints
+
+    @PostMapping("/{crateId}/collection")
+    @SpotifyAuthorization
+    public CollectionResponse addCrateToCollection(@PathVariable Long crateId) {
+        log.info("Request to add crate {} to current user's collection", crateId);
+        
+        page.crates.entity.SpotifyUser currentUser = currentUserService.getCurrentUser();
+        page.crates.entity.Crate crate = crateService.getCrate(crateId);
+        
+        crateCollectionService.addCrateToCollection(currentUser, crate);
+        return new CollectionResponse(true, "Crate added to collection");
+    }
+
+    @DeleteMapping("/{crateId}/collection")
+    @SpotifyAuthorization
+    public CollectionResponse removeCrateFromCollection(@PathVariable Long crateId) {
+        log.info("Request to remove crate {} from current user's collection", crateId);
+        
+        page.crates.entity.SpotifyUser currentUser = currentUserService.getCurrentUser();
+        page.crates.entity.Crate crate = crateService.getCrate(crateId);
+        
+        crateCollectionService.removeCrateFromCollection(currentUser, crate);
+        return new CollectionResponse(false, "Crate removed from collection");
+    }
+
+    @GetMapping("/{crateId}/collection/status")
+    @SpotifyAuthorization
+    public CollectionStatusResponse getCollectionStatus(@PathVariable Long crateId) {
+        page.crates.entity.SpotifyUser currentUser = currentUserService.getCurrentUser();
+        page.crates.entity.Crate crate = crateService.getCrate(crateId);
+        
+        boolean inCollection = crateCollectionService.isInCollection(currentUser, crate);
+        return new CollectionStatusResponse(inCollection);
+    }
+
+    @GetMapping("/collection")
+    @SpotifyAuthorization
+    public Page<Crate> getMyCollection(@RequestParam(value = "search", required = false) String search,
+                                       Pageable pageable) {
+        page.crates.entity.SpotifyUser currentUser = currentUserService.getCurrentUser();
+        
+        if (StringUtils.isNotBlank(search)) {
+            return crateCollectionService.searchUserCollection(currentUser, search, pageable)
+                    .map(collection -> crateDecorator.decorate(crateMapper.map(collection.getCrate())));
+        }
+        
+        return crateCollectionService.getUserCollection(currentUser, pageable)
+                .map(collection -> crateDecorator.decorate(crateMapper.map(collection.getCrate())));
+    }
+
+    // DTO classes
+    public record CollectionResponse(boolean inCollection, String message) {}
+    public record CollectionStatusResponse(boolean inCollection) {}
 }

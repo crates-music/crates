@@ -1,0 +1,22 @@
+// Component-specific styles
+:host {
+  display: inline-block;
+}
+
+.btn {
+  // Ensure consistent button styling
+  white-space: nowrap;
+  
+  // Smooth transitions for state changes
+  transition: all 0.2s ease;
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  // Icon alignment
+  i {
+    vertical-align: text-top;
+  }
+}

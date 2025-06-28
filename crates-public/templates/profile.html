@@ -39,17 +39,35 @@
         </div>
     </div>
 
+    <!-- Tab Navigation -->
+    <div class="container pb-3">
+        <div class="profile-tabs d-flex w-100">
+            <button class="profile-tab flex-fill" 
+                    :class="{'active': activeTab === 'authored'}"
+                    @click="setActiveTab('authored')">
+                <i class="bi-collection me-2"></i>Crates
+                <span class="tab-badge" x-text="authoredCrates.length"></span>
+            </button>
+            <button class="profile-tab flex-fill" 
+                    :class="{'active': activeTab === 'collection'}"
+                    @click="setActiveTab('collection')">
+                <i class="bi-bookmark-star me-2"></i>Collection
+                <span class="tab-badge" x-text="collectionCrates.length"></span>
+            </button>
+        </div>
+    </div>
+
     <!-- Search and Filter Controls -->
     <div class="container pb-4">
-        <div class="row">
-            <div class="col-md-8">
+        <div class="d-flex align-items-center gap-3">
+            <div class="flex-grow-1">
                 <div class="input-group">
                     <span class="input-group-text bg-dark border-secondary">
                         <i class="bi-search"></i>
                     </span>
                     <input type="text" 
                            class="form-control bg-dark border-secondary text-white mb-1"
-                           placeholder="Search crates..."
+                           :placeholder="activeTab === 'authored' ? 'Search crates...' : 'Search collection...'"
                            x-model="searchTerm"
                            @input.debounce.500ms="searchCrates()"
                            @keyup.escape="clearSearch()">
@@ -61,18 +79,20 @@
                     </button>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="btn-group w-100" role="group">
+            <div class="view-toggle-compact">
+                <div class="btn-group" role="group">
                     <button type="button" 
-                            class="btn btn-outline-primary" 
+                            class="btn btn-outline-primary btn-sm" 
                             :class="{'active': viewMode === 'grid'}"
-                            @click="setViewMode('grid')">
+                            @click="setViewMode('grid')"
+                            title="Grid View">
                         <i class="bi-grid-3x3-gap"></i>
                     </button>
                     <button type="button" 
-                            class="btn btn-outline-primary"
+                            class="btn btn-outline-primary btn-sm"
                             :class="{'active': viewMode === 'list'}"
-                            @click="setViewMode('list')">
+                            @click="setViewMode('list')"
+                            title="List View">
                         <i class="bi-list"></i>
                     </button>
                 </div>
@@ -83,26 +103,38 @@
     <!-- Crates Grid -->
     <div class="container pb-5">
         <!-- Loading State -->
-        <div x-show="loading && crates.length === 0" class="text-center py-5">
+        <div x-show="loading && currentCrates.length === 0" class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
 
         <!-- No Results -->
-        <div x-show="!loading && crates.length === 0" class="text-center py-5">
+        <div x-show="!loading && currentCrates.length === 0" class="text-center py-5">
             <i class="bi-vinyl display-1 text-muted"></i>
-            <h3 class="mt-3 text-muted">No crates found</h3>
+            <h3 class="mt-3 text-muted">
+                <span x-show="activeTab === 'authored'">No crates found</span>
+                <span x-show="activeTab === 'collection'">No collected crates found</span>
+            </h3>
             <p class="text-muted">
                 <span x-show="searchTerm">Try adjusting your search terms.</span>
-                <span x-show="!searchTerm">This user hasn't created any public crates yet.</span>
+                <span x-show="!searchTerm && activeTab === 'authored'">This user hasn't created any public crates yet.</span>
+                <span x-show="!searchTerm && activeTab === 'collection'">This user hasn't collected any public crates yet.</span>
             </p>
         </div>
 
         <!-- Grid View -->
-        <div x-show="viewMode === 'grid'" class="row g-4">
-            <template x-for="crate in crates" :key="crate.id">
-                <div class="col-6 col-md-4 col-lg-3">
+        <div x-show="viewMode === 'grid'" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             class="row g-4">
+            <template x-for="(crate, index) in currentCrates" :key="crate.id + '-' + activeTab">
+                <div class="col-6 col-md-4 col-lg-3" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 transform translate-y-4"
+                     x-transition:enter-end="opacity-100 transform translate-y-0"
+                     :style="`transition-delay: ${index * 50}ms`">
                     <div class="crate-card card bg-dark border-secondary h-100 position-relative overflow-hidden">
                         <div class="crate-image-container">
                             <img :src="crate.imageUri || '/static/images/album-placeholder.svg'" 
@@ -114,11 +146,14 @@
                                     <h5 class="card-title text-white mb-1 fw-bold" x-text="crate.name"></h5>
                                     <p class="card-text text-white-50 small mb-0">
                                         <span x-text="formatDate(crate.createdAt)"></span>
+                                        <span x-show="activeTab === 'collection' && crate.user" 
+                                              class="d-block" 
+                                              x-text="'by ' + (crate.user.handle || crate.user.spotifyId)"></span>
                                     </p>
                                 </div>
                             </div>
                         </div>
-                        <a :href="'/' + '{{.user.SpotifyID}}' + '/' + crate.handle" 
+                        <a :href="getCrateUrl(crate)" 
                            class="stretched-link"></a>
                     </div>
                 </div>
@@ -127,8 +162,8 @@
 
         <!-- List View -->
         <div x-show="viewMode === 'list'" class="list-group list-group-flush">
-            <template x-for="crate in crates" :key="crate.id">
-                <a :href="'/' + '{{.user.SpotifyID}}' + '/' + crate.handle" 
+            <template x-for="crate in currentCrates" :key="crate.id">
+                <a :href="getCrateUrl(crate)" 
                    class="list-group-item list-group-item-action bg-dark border-secondary text-white d-flex align-items-center p-3">
                     <div class="flex-shrink-0 me-3">
                         <img :src="crate.imageUri || '/static/images/album-placeholder.svg'" 
@@ -140,6 +175,8 @@
                         <h6 class="mb-1 text-primary fw-bold" x-text="crate.name"></h6>
                         <p class="mb-0 text-white-50 small">
                             <span x-text="formatDate(crate.createdAt)"></span>
+                            <span x-show="activeTab === 'collection' && crate.user" 
+                                  x-text="' • by ' + (crate.user.handle || crate.user.spotifyId)"></span>
                         </p>
                     </div>
                     <div class="flex-shrink-0">
@@ -150,14 +187,14 @@
         </div>
 
         <!-- Load More -->
-        <div class="text-center mt-4" x-show="hasMore && !loading">
+        <div class="text-center mt-4" x-show="currentHasMore && !loading">
             <button class="btn btn-outline-primary" @click="loadMore()">
                 <i class="bi-arrow-clockwise me-2"></i>Load More
             </button>
         </div>
 
         <!-- Loading More -->
-        <div class="text-center mt-4" x-show="loading && crates.length > 0">
+        <div class="text-center mt-4" x-show="loading && currentCrates.length > 0">
             <div class="spinner-border spinner-border-sm text-primary" role="status">
                 <span class="visually-hidden">Loading more...</span>
             </div>
@@ -165,37 +202,54 @@
     </div>
 
     <!-- Intersection Observer Target -->
-    <div x-ref="loadMoreTrigger" x-show="hasMore" class="load-more-trigger"></div>
+    <div x-ref="loadMoreTrigger" x-show="currentHasMore" class="load-more-trigger"></div>
 </div>
 
 <script>
 function profileApp() {
     return {
-        crates: {{.crates | json}},
-        hasMore: {{.hasMore}},
+        // Data from backend
+        authoredCrates: {{.crates | json}},
+        collectionCrates: {{.collection | json}},
+        hasMoreCrates: {{.hasMoreCrates}},
+        hasMoreCollection: {{.hasMoreCollection}},
+        
+        // UI state
+        activeTab: 'authored',
         loading: false,
         searchTerm: '',
         viewMode: localStorage.getItem('viewMode') || 'grid',
-        currentPage: 0,
+        currentPageCrates: 0,
+        currentPageCollection: 0,
         stats: {
             totalCrates: 0,
             totalAlbums: 0
         },
 
+        // Computed properties
+        get currentCrates() {
+            return this.activeTab === 'authored' ? this.authoredCrates : this.collectionCrates;
+        },
+
+        get currentHasMore() {
+            return this.activeTab === 'authored' ? this.hasMoreCrates : this.hasMoreCollection;
+        },
+
         init() {
-            console.log('Profile app initializing with crates:', this.crates);
+            console.log('Profile app initializing');
+            console.log('Authored crates:', this.authoredCrates);
+            console.log('Collection crates:', this.collectionCrates);
             this.updateStats();
             this.setupIntersectionObserver();
         },
 
         updateStats() {
-            this.stats.totalCrates = this.crates.length;
-            // Calculate total albums from crates (you'd need this data from backend)
+            this.stats.totalCrates = this.authoredCrates.length + this.collectionCrates.length;
         },
 
         setupIntersectionObserver() {
             const observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && this.hasMore && !this.loading) {
+                if (entries[0].isIntersecting && this.currentHasMore && !this.loading) {
                     this.loadMore();
                 }
             }, { threshold: 0.1 });
@@ -205,22 +259,47 @@ function profileApp() {
             }
         },
 
+        setActiveTab(tab) {
+            this.activeTab = tab;
+            this.searchTerm = '';
+            // Reset pagination when switching tabs
+            this.currentPageCrates = 0;
+            this.currentPageCollection = 0;
+        },
+
         setViewMode(mode) {
             this.viewMode = mode;
             localStorage.setItem('viewMode', mode);
         },
 
+        getCrateUrl(crate) {
+            const userIdentifier = '{{if .user.Handle}}{{.user.Handle}}{{else}}{{.user.SpotifyID}}{{end}}';
+            if (this.activeTab === 'authored') {
+                return `/${userIdentifier}/${crate.handle}`;
+            } else {
+                return `/${userIdentifier}/collection/${crate.handle}`;
+            }
+        },
+
         async searchCrates() {
             this.loading = true;
-            this.currentPage = 0;
+            const endpoint = this.activeTab === 'authored' ? 'crates' : 'collection';
             
             try {
-                const response = await fetch(`/api/{{.user.SpotifyID}}/crates?search=${encodeURIComponent(this.searchTerm)}&page=0&size=12`);
+                const response = await fetch(`/api/{{.user.SpotifyID}}/${endpoint}?search=${encodeURIComponent(this.searchTerm)}&page=0&size=12`);
                 const data = await response.json();
-                this.crates = data.content || [];
-                this.hasMore = !data.last;
+                
+                if (this.activeTab === 'authored') {
+                    this.authoredCrates = data.content || [];
+                    this.hasMoreCrates = !data.last;
+                    this.currentPageCrates = 0;
+                } else {
+                    this.collectionCrates = data.content || [];
+                    this.hasMoreCollection = !data.last;
+                    this.currentPageCollection = 0;
+                }
             } catch (error) {
-                console.error('Error searching crates:', error);
+                console.error('Error searching:', error);
             } finally {
                 this.loading = false;
             }
@@ -232,19 +311,31 @@ function profileApp() {
         },
 
         async loadMore() {
-            if (this.loading || !this.hasMore) return;
+            if (this.loading || !this.currentHasMore) return;
             
             this.loading = true;
-            this.currentPage++;
+            const endpoint = this.activeTab === 'authored' ? 'crates' : 'collection';
+            const currentPage = this.activeTab === 'authored' ? ++this.currentPageCrates : ++this.currentPageCollection;
             
             try {
-                const response = await fetch(`/api/{{.user.SpotifyID}}/crates?search=${encodeURIComponent(this.searchTerm)}&page=${this.currentPage}&size=12`);
+                const response = await fetch(`/api/{{.user.SpotifyID}}/${endpoint}?search=${encodeURIComponent(this.searchTerm)}&page=${currentPage}&size=12`);
                 const data = await response.json();
-                this.crates = [...this.crates, ...(data.content || [])];
-                this.hasMore = !data.last;
+                
+                if (this.activeTab === 'authored') {
+                    this.authoredCrates = [...this.authoredCrates, ...(data.content || [])];
+                    this.hasMoreCrates = !data.last;
+                } else {
+                    this.collectionCrates = [...this.collectionCrates, ...(data.content || [])];
+                    this.hasMoreCollection = !data.last;
+                }
             } catch (error) {
-                console.error('Error loading more crates:', error);
-                this.currentPage--; // Revert page increment on error
+                console.error('Error loading more:', error);
+                // Revert page increment on error
+                if (this.activeTab === 'authored') {
+                    this.currentPageCrates--;
+                } else {
+                    this.currentPageCollection--;
+                }
             } finally {
                 this.loading = false;
             }

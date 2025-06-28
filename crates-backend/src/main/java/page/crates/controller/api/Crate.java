@@ -20,7 +20,8 @@ public class Crate {
     private Instant updatedAt;
     private CrateState state;
     private String imageUri;
-    private Boolean publicCrate;
+    private boolean publicCrate;
     private String description;
     private PublicUser user;
+    private int followerCount;
 }

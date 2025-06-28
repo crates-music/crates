@@ -1,5 +1,7 @@
 package page.crates.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import page.crates.entity.SpotifyUser;
 
 public interface UserService {
@@ -10,4 +12,8 @@ public interface UserService {
     SpotifyUser findByHandleOrSpotifyId(String identifier);
     
     SpotifyUser updateProfile(Long userId, String handle, String bio);
+    
+    SpotifyUser getUser(Long userId);
+    
+    Page<SpotifyUser> searchUsers(String search, Pageable pageable);
 }

@@ -4,17 +4,29 @@ import { logger } from './logger.reducer';
 import * as fromUser from '../../user/store/reducers/user.reducer';
 import * as fromLibrary from '../../library/store/reducers/library.reducer';
 import * as fromCrate from '../../crate/store/reducers/crate.reducer';
+import * as fromSocial from '../../shared/store/reducers/social.reducer';
+import * as fromCollection from '../../shared/store/reducers/collection.reducer';
+import * as fromDiscover from '../../shared/store/reducers/discover.reducer';
+import * as fromSearch from '../../shared/store/reducers/search.reducer';
 
 export interface State {
   user: fromUser.UserState,
-  library: fromLibrary.LibraryState
-  crate: fromCrate.CrateState
+  library: fromLibrary.LibraryState,
+  crate: fromCrate.CrateState,
+  social: fromSocial.SocialState,
+  collection: fromCollection.CollectionState,
+  discover: fromDiscover.DiscoverState,
+  search: fromSearch.SearchState
 }
 
 export const reducers: ActionReducerMap<State> = {
   user: fromUser.reducer,
   library: fromLibrary.reducer,
   crate: fromCrate.reducer,
+  social: fromSocial.socialReducer,
+  collection: fromCollection.collectionReducer,
+  discover: fromDiscover.discoverReducer,
+  search: fromSearch.searchReducer,
 };
 
 // export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {

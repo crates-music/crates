@@ -11,7 +11,9 @@
         [showListToggle]="true"
         [listType]="crateListType"
         [showShare]="shouldShowShareButton()"
-        [showSettings]="true"
+        [showSettings]="isCurrentUserCrate()"
+        [showCollection]="shouldShowCollectionButton()"
+        [crateId]="crate.id"
         (search)="handleSearch($event)"
         (listTypeToggle)="toggleCrateListType($event)"
         (shareClick)="shareCrate()"
@@ -45,6 +47,7 @@
         <img class="album-image" [src]="album.images[0].url" alt="{{ album.name }} artwork"/>
         <div class="card-img-overlay d-flex align-items-end p-0">
           <div class="close-button"
+               *ngIf="isCurrentUserCrate()"
                (click)="removeAlbum($event, album)">
             <i class="bi-x-lg"></i>
           </div>

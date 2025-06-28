@@ -9,9 +9,12 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { metaReducers, reducers } from './store/reducers';
-import { UserModule } from './user/user.module';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { UserEffects } from './user/store/effects/user.effects';
+import { SocialEffects } from './shared/store/effects/social.effects';
+import { CollectionEffects } from './shared/store/effects/collection.effects';
+import { DiscoverEffects } from './shared/store/effects/discover.effects';
+import { SearchEffects } from './shared/store/effects/search.effects';
 import { MobileFooterComponent } from './layout/mobile-footer/mobile-footer.component';
 import { SharedModule } from './shared/shared.module';
 
@@ -26,12 +29,15 @@ import { SharedModule } from './shared/shared.module';
     NgbModule,
     HttpClientModule,
     SharedModule,
-    UserModule,
     StoreModule.forRoot(reducers, {
       metaReducers
     }),
     EffectsModule.forRoot([
-      UserEffects
+      UserEffects,
+      SocialEffects,
+      CollectionEffects,
+      DiscoverEffects,
+      SearchEffects
     ]),
     StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: !isDevMode() }),
   ],

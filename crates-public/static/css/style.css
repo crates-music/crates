@@ -576,6 +576,88 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: center;
 }
 
+/* Profile Tabs */
+.profile-tabs {
+    background: transparent;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+}
+
+.profile-tab {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 12px 16px;
+    transition: var(--transition);
+    border-right: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.profile-tab:last-child {
+    border-right: none;
+}
+
+.profile-tab:hover {
+    background: rgba(29, 185, 84, 0.1);
+    color: var(--primary-hover);
+}
+
+.profile-tab.active {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+}
+
+.profile-tab.active:hover {
+    background: var(--primary-hover);
+    color: white;
+}
+
+.tab-badge {
+    background: rgba(255, 255, 255, 0.15);
+    color: inherit;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+}
+
+.profile-tab.active .tab-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Compact View Toggle */
+.view-toggle-compact {
+    flex-shrink: 0;
+}
+
+.view-toggle-compact .btn-group .btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 6px;
+    border-radius: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-toggle-compact .btn-group .btn:first-child {
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+
+.view-toggle-compact .btn-group .btn:last-child {
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+}
+
 /* Utility Classes */
 .disable-select {
     user-select: none;

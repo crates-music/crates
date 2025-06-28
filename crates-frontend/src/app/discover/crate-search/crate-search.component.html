@@ -1,0 +1,75 @@
+<!-- Search Input -->
+<div class="search-container mb-4">
+  <crates-searchbar
+    placeholder="Search public crates..."
+    [value]="searchTerm"
+    (searchChange)="onSearchChange($event)">
+  </crates-searchbar>
+</div>
+
+<!-- Loading State -->
+<div class="text-center" *ngIf="loading && crates.length === 0">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <p class="mt-2">Loading crates...</p>
+</div>
+
+<!-- No Results -->
+<div class="text-center text-muted" *ngIf="!loading && crates.length === 0">
+  <i class="bi-box fs-1 d-block mb-2"></i>
+  <p *ngIf="searchTerm">No crates found for "<strong>{{ searchTerm }}</strong>"</p>
+  <p *ngIf="!searchTerm">No public crates found</p>
+  <small>Try a different search term or check back later</small>
+</div>
+
+<!-- Crate Results -->
+<div class="crate-results" *ngIf="crates.length > 0">
+  <div class="crate-card" *ngFor="let crate of crates; trackBy: trackByCrateId">
+    <!-- Crate Info -->
+    <div class="crate-info">
+      <!-- Crate Image -->
+      <div class="crate-image">
+        <img 
+          *ngIf="crate.imageUri; else defaultImage"
+          [src]="crate.imageUri" 
+          [alt]="crate.name"
+          class="crate-img">
+        <ng-template #defaultImage>
+          <div class="default-image">
+            <i class="bi-box-seam"></i>
+          </div>
+        </ng-template>
+      </div>
+      
+      <!-- Crate Details -->
+      <div class="crate-details">
+        <h6 class="crate-name mb-1">{{ crate.name }}</h6>
+        <p class="crate-author text-muted mb-1" *ngIf="crate.user">
+          by {{ crate.user.displayName }}
+          <span *ngIf="crate.user.handle" class="text-muted">(@{{ crate.user.handle }})</span>
+        </p>
+        <p class="crate-description text-muted mb-1" *ngIf="crate.description">{{ crate.description }}</p>
+        <small class="crate-stats text-muted">
+          <i class="bi-people me-1"></i>{{ crate.followerCount || 0 }} follower{{ (crate.followerCount || 0) !== 1 ? 's' : '' }}
+        </small>
+      </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="crate-actions">
+      <app-collection-button [crateId]="crate.id"></app-collection-button>
+    </div>
+  </div>
+  
+  <!-- Load More Button -->
+  <div class="text-center mt-4" *ngIf="hasNextPage">
+    <button 
+      class="btn btn-outline-primary"
+      [disabled]="loading"
+      (click)="loadMore()">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+      Load More Crates
+    </button>
+  </div>
+</div>

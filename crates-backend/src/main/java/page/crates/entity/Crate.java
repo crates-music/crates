@@ -49,7 +49,9 @@ public class Crate {
     @Enumerated(EnumType.STRING)
     private CrateState state;
     @Column(name = "public", nullable = false)
-    private Boolean publicCrate;
+    private boolean publicCrate;
     @Column(name = "description", length = 300)
     private String description;
+    @Column(name = "follower_count", nullable = false)
+    private long followerCount;
 }

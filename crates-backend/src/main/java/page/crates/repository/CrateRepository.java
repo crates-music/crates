@@ -48,6 +48,34 @@ public interface CrateRepository extends JpaRepository<Crate, Long> {
 
     @Query("SELECT c FROM Crate c " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
-           "  AND c.publicCrate = true")
+           "  AND c.handle = :handle")
+    Optional<Crate> findByHandle(String handle);
+
+    @Query("SELECT c FROM Crate c " +
+           "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
+           "  AND c.publicCrate = true " +
+           "ORDER BY c.updatedAt DESC")
     Page<Crate> findAllPublicCrates(Pageable pageable);
+    
+    @Query("SELECT c FROM Crate c " +
+           "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
+           "  AND c.publicCrate = true " +
+           "  AND c.name ILIKE CONCAT('%', :search, '%') " +
+           "ORDER BY c.updatedAt DESC")
+    Page<Crate> findAllPublicCratesWithSearch(String search, Pageable pageable);
+    
+    @Query("SELECT DISTINCT c FROM Crate c " +
+           "LEFT JOIN CrateAlbum ca ON ca.crate = c " +
+           "LEFT JOIN ca.album a " +
+           "LEFT JOIN a.artists ar " +
+           "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
+           "  AND c.publicCrate = true " +
+           "  AND (" +
+           "    c.name ILIKE CONCAT('%', :search, '%') OR " +
+           "    c.description ILIKE CONCAT('%', :search, '%') OR " +
+           "    a.name ILIKE CONCAT('%', :search, '%') OR " +
+           "    ar.name ILIKE CONCAT('%', :search, '%')" +
+           "  ) " +
+           "ORDER BY c.updatedAt DESC")
+    Page<Crate> findAllPublicCratesWithUnifiedSearch(String search, Pageable pageable);
 }

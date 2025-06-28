@@ -1,0 +1,115 @@
+<div class="search-container">
+  <!-- Search Header -->
+  <div class="search-header p-3">
+    <div class="d-flex align-items-center mb-3">
+      <button class="btn btn-link text-white me-3 p-0" (click)="goBack()">
+        <i class="bi-arrow-left fs-4"></i>
+      </button>
+      <h2 class="mb-0">Search</h2>
+    </div>
+    
+    <!-- Search Input -->
+    <div class="position-relative">
+      <input
+        type="text"
+        class="form-control form-control-lg"
+        placeholder="Search for users, crates, albums, or artists..."
+        [formControl]="searchControl"
+        autofocus>
+      <div class="position-absolute end-0 top-50 translate-middle-y me-3" *ngIf="loading$ | async">
+        <div class="spinner-border spinner-border-sm text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Results -->
+  <div class="search-results p-3" *ngIf="query$ | async as query">
+    <!-- Empty State -->
+    <div *ngIf="!(loading$ | async) && !(results$ | async)" class="text-center py-5">
+      <i class="bi-search fs-1 text-muted mb-3"></i>
+      <p class="text-muted">No results found for "{{ query }}"</p>
+      <p class="text-muted small">Try searching for something else</p>
+    </div>
+
+    <!-- Results -->
+    <div *ngIf="results$ | async as results">
+      <!-- Users Section -->
+      <div *ngIf="(users$ | async)?.length > 0" class="mb-4">
+        <h5 class="mb-3">
+          <i class="bi-people me-2"></i>
+          Users
+        </h5>
+        <div class="user-results">
+          <div 
+            *ngFor="let user of users$ | async; trackBy: trackByUserId"
+            class="user-result-item d-flex align-items-center p-3 mb-2 rounded cursor-pointer"
+            (click)="openUser(user)">
+            <div class="flex-shrink-0 me-3">
+              <img 
+                [src]="user.imageUrl || 'assets/images/default-avatar.png'" 
+                class="rounded-circle"
+                width="48" 
+                height="48"
+                [alt]="user.displayName">
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-1">{{ user.displayName }}</h6>
+              <p class="mb-0 text-muted small" *ngIf="user.handle">@{{ user.handle }}</p>
+            </div>
+            <div class="flex-shrink-0">
+              <i class="bi-chevron-right text-muted"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crates Section -->
+      <div *ngIf="(crates$ | async)?.length > 0">
+        <h5 class="mb-3">
+          <i class="bi-box-seam me-2"></i>
+          Crates
+        </h5>
+        <div class="crate-results">
+          <div 
+            *ngFor="let crate of crates$ | async; trackBy: trackByCrateId"
+            class="crate-result-item d-flex align-items-center p-3 mb-2 rounded cursor-pointer"
+            (click)="openCrate(crate)">
+            <div class="flex-shrink-0 me-3">
+              <img 
+                [src]="crate.imageUri || 'assets/images/crate-placeholder.webp'" 
+                class="rounded"
+                width="56" 
+                height="56"
+                [alt]="crate.name">
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-1">{{ crate.name }}</h6>
+              <p class="mb-1 text-muted small" *ngIf="crate.description">{{ crate.description }}</p>
+              <p class="mb-0 text-muted small" *ngIf="crate.user">by {{ crate.user.displayName }}</p>
+            </div>
+            <div class="flex-shrink-0">
+              <i class="bi-chevron-right text-muted"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Results in Categories -->
+      <div *ngIf="(users$ | async)?.length === 0 && (crates$ | async)?.length === 0 && !(loading$ | async)" 
+           class="text-center py-5">
+        <i class="bi-search fs-1 text-muted mb-3"></i>
+        <p class="text-muted">No results found for "{{ query }}"</p>
+        <p class="text-muted small">Try searching for something else</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Initial State -->
+  <div *ngIf="!(query$ | async)" class="initial-state text-center py-5">
+    <i class="bi-search fs-1 text-muted mb-3"></i>
+    <h4 class="text-muted mb-3">Search Everything</h4>
+    <p class="text-muted">Find users, crates, albums, and artists all in one place</p>
+  </div>
+</div>

@@ -5,22 +5,30 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import page.crates.controller.api.ProfileUpdateRequest;
 import page.crates.controller.api.SpotifyUser;
 import page.crates.controller.api.mapper.UserMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import page.crates.exception.ExpiredTokenException;
 import page.crates.security.SpotifyAuthorization;
 import page.crates.service.CurrentUserService;
 import page.crates.service.UserService;
+import page.crates.service.CrateService;
+import page.crates.controller.api.mapper.CrateMapper;
 import page.crates.spotify.client.Context;
 import page.crates.spotify.client.Spotify;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/v1/user")
+@Slf4j
 public class UserController {
     @Resource
     private CurrentUserService currentUserService;
@@ -28,6 +36,10 @@ public class UserController {
     private UserMapper userMapper;
     @Resource
     private UserService userService;
+    @Resource
+    private CrateService crateService;
+    @Resource
+    private CrateMapper crateMapper;
     @Resource
     private Spotify spotify;
 
@@ -55,5 +67,41 @@ public class UserController {
                 request.getBio()
         );
         return userMapper.map(updatedUser);
+    }
+
+    @GetMapping(value = "/search")
+    @SpotifyAuthorization
+    public Page<SpotifyUser> searchUsers(@RequestParam String search, Pageable pageable) {
+        log.info("Searching users with term: {}", search);
+        return userService.searchUsers(search, pageable)
+                .map(userMapper::map);
+    }
+
+    @GetMapping(value = "/profile/{identifier}")
+    @SpotifyAuthorization  
+    public SpotifyUser getUserProfile(@PathVariable String identifier) {
+        log.info("Getting user profile for identifier: {}", identifier);
+        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(identifier);
+        return userMapper.map(user);
+    }
+
+    @GetMapping(value = "/handle/{handle}")
+    @SpotifyAuthorization  
+    public SpotifyUser getUserByHandle(@PathVariable String handle) {
+        log.info("Getting user by handle: {}", handle);
+        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(handle);
+        return userMapper.map(user);
+    }
+
+    @GetMapping(value = "/{userId}/crates")
+    @SpotifyAuthorization
+    public Page<page.crates.controller.api.Crate> getUserPublicCrates(
+            @PathVariable Long userId, 
+            @RequestParam(value = "search", required = false) String search,
+            Pageable pageable) {
+        log.info("Getting public crates for user: {}", userId);
+        page.crates.entity.SpotifyUser user = userService.getUser(userId);
+        return crateService.getUserPublicCrates(user, search, pageable)
+                .map(crateMapper::map);
     }
 }

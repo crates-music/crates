@@ -14,8 +14,12 @@ public class AccessServiceImpl implements AccessService {
     @Override
     public void assertAccess(Crate crate) {
         final Long userId = currentUserService.getCurrentUser().getId();
-        if (!crate.getUser().getId().equals(userId)) {
-            throw new UnauthorizedAccessException();
+        
+        // Allow access if user owns the crate OR if the crate is public
+        if (crate.getUser().getId().equals(userId) || crate.isPublicCrate()) {
+            return;
         }
+        
+        throw new UnauthorizedAccessException();
     }
 }

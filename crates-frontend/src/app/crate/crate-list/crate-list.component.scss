@@ -13,6 +13,41 @@
   z-index: 10;
 }
 
+.tab-navigation {
+  padding: 0 1rem 1rem;
+  
+  .nav-pills {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+    
+    .nav-link {
+      background-color: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      border-radius: 0.375rem;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+      font-weight: 500;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.9);
+      }
+      
+      &.active {
+        background-color: var(--bs-primary);
+        color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      
+      i {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
 .crates-content {
   flex: 1;
   overflow-y: auto;

@@ -4,7 +4,7 @@ import { Observable, Subject, combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { UserState } from '../store/reducers/user.reducer';
 import { selectUser, selectUserLoading, selectUserError } from '../store/selectors/user.selectors';
-import { updateUserProfile, updateUserProfileResult } from '../store/actions/load-user.actions';
+import { loadUser, updateUserProfile, updateUserProfileResult } from '../store/actions/load-user.actions';
 import { User } from '../shared/model/user.model';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
@@ -39,6 +39,9 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Dispatch action to load current user
+    this.store.dispatch(loadUser());
+    
     this.currentUser$ = this.store.select(selectUser);
     this.isLoading$ = this.store.select(selectUserLoading);
     this.error$ = this.store.select(selectUserError);

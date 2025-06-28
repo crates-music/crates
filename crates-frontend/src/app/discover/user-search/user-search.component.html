@@ -1,0 +1,75 @@
+<!-- Search Input -->
+<div class="search-container mb-4">
+  <crates-searchbar
+    placeholder="Search users by name or handle..."
+    [value]="searchTerm"
+    (searchChange)="onSearchChange($event)">
+  </crates-searchbar>
+</div>
+
+<!-- Search Instructions -->
+<div class="text-center text-muted mb-4" *ngIf="!searchTerm || searchTerm.length < 2">
+  <i class="bi-search fs-1 d-block mb-2"></i>
+  <p>Search for users by their display name or handle</p>
+  <small>Enter at least 2 characters to start searching</small>
+</div>
+
+<!-- Loading State -->
+<div class="text-center" *ngIf="loading && users.length === 0">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <p class="mt-2">Searching users...</p>
+</div>
+
+<!-- No Results -->
+<div class="text-center text-muted" *ngIf="!loading && users.length === 0 && searchTerm.length >= 2">
+  <i class="bi-person-x fs-1 d-block mb-2"></i>
+  <p>No users found for "<strong>{{ searchTerm }}</strong>"</p>
+  <small>Try a different search term</small>
+</div>
+
+<!-- User Results -->
+<div class="user-results" *ngIf="users.length > 0">
+  <div class="user-card" *ngFor="let user of users; trackBy: trackByUserId">
+    <!-- User Info -->
+    <div class="user-info">
+      <!-- User Avatar -->
+      <div class="user-avatar">
+        <img 
+          *ngIf="user.images && user.images.length > 0; else defaultAvatar"
+          [src]="user.images[0].url" 
+          [alt]="user.displayName"
+          class="avatar-img">
+        <ng-template #defaultAvatar>
+          <div class="default-avatar">
+            <i class="bi-person-circle"></i>
+          </div>
+        </ng-template>
+      </div>
+      
+      <!-- User Details -->
+      <div class="user-details">
+        <h6 class="user-name mb-1">{{ user.displayName }}</h6>
+        <p class="user-handle text-muted mb-1">@{{ user.handle || user.spotifyId }}</p>
+        <p class="user-bio text-muted mb-0" *ngIf="user.bio">{{ user.bio }}</p>
+      </div>
+    </div>
+    
+    <!-- Follow Button -->
+    <div class="user-actions">
+      <app-follow-button [userId]="user.id"></app-follow-button>
+    </div>
+  </div>
+  
+  <!-- Load More Button -->
+  <div class="text-center mt-4" *ngIf="hasNextPage">
+    <button 
+      class="btn btn-outline-primary"
+      [disabled]="loading"
+      (click)="loadMore()">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+      Load More Users
+    </button>
+  </div>
+</div>

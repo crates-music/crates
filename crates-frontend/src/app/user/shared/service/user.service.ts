@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { User } from '../model/user.model';
+import { Page } from '../../../shared/model/page.model';
+import { Crate } from '../../../crate/shared/model/crate.model';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
@@ -24,5 +26,25 @@ export class UserService {
       .pipe(
         map(response => Object.assign(new User(), response) as User)
       );
+  }
+
+  getCurrentUser(): Observable<User | null> {
+    return this.getUser();
+  }
+
+  getUserByHandle(handle: string): Observable<User> {
+    return this.http.get(`${environment.baseUri}/v1/user/handle/${handle}`)
+      .pipe(
+        map(response => Object.assign(new User(), response) as User)
+      );
+  }
+
+  getUserPublicCrates(userId: number, search?: string): Observable<Page<Crate>> {
+    let params = new HttpParams();
+    if (search && search.trim()) {
+      params = params.set('search', search.trim());
+    }
+    
+    return this.http.get<Page<Crate>>(`${environment.baseUri}/v1/user/${userId}/crates`, { params });
   }
 }

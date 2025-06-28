@@ -1,0 +1,116 @@
+<div class="container-fluid py-3" *ngIf="!loading && !error">
+  <div class="row" *ngIf="user$ | async as user">
+    <!-- User Profile Header -->
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-auto">
+              <img [src]="user.imageUrl || '/assets/default-avatar.png'" 
+                   [alt]="user.displayName" 
+                   class="rounded-circle"
+                   style="width: 80px; height: 80px; object-fit: cover;">
+            </div>
+            <div class="col">
+              <h2 class="card-title mb-1">{{ user.displayName }}</h2>
+              <p class="text-muted mb-1">@{{ user.handle }}</p>
+              <p class="card-text" *ngIf="user.bio">{{ user.bio }}</p>
+              
+              <div class="d-flex gap-3 mt-2">
+                <span class="text-muted">
+                  <strong>{{ user.followerCount || 0 }}</strong> followers
+                </span>
+                <span class="text-muted">
+                  <strong>{{ user.followingCount || 0 }}</strong> following
+                </span>
+              </div>
+            </div>
+            <div class="col-auto" *ngIf="(currentUserId$ | async) !== user.id">
+              <app-follow-button 
+                [userId]="user.id"
+                [isFollowing]="isFollowing$ | async"
+                (followChange)="onFollowChange(user.id)">
+              </app-follow-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Public Crates -->
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Public Crates</h4>
+      </div>
+
+      <div class="row" *ngIf="publicCrates$ | async as crates">
+        <div class="col-12" *ngIf="crates.length === 0">
+          <div class="card">
+            <div class="card-body text-center py-5">
+              <i class="bi-music-note-list fs-1 text-muted"></i>
+              <h5 class="mt-3">No public crates yet</h5>
+              <p class="text-muted">This user hasn't shared any crates publicly.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3" *ngFor="let crate of crates">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="card-title mb-0">
+                  <a [routerLink]="['/', user.handle, crate.handle]" 
+                     class="text-decoration-none">
+                    {{ crate.name }}
+                  </a>
+                </h6>
+                <app-collection-button 
+                  [crateId]="crate.id"
+                  size="sm">
+                </app-collection-button>
+              </div>
+              
+              <p class="card-text text-muted small" *ngIf="crate.description">
+                {{ crate.description }}
+              </p>
+              
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <small class="text-muted">
+                  {{ crate.albumCount || 0 }} albums
+                </small>
+                <small class="text-muted">
+                  {{ crate.followerCount || 0 }} followers
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="container-fluid py-5" *ngIf="loading">
+  <div class="row justify-content-center">
+    <div class="col-auto">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Error State -->
+<div class="container-fluid py-5" *ngIf="error">
+  <div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+      <i class="bi-person-x fs-1 text-muted"></i>
+      <h4 class="mt-3">User Not Found</h4>
+      <p class="text-muted">The user you're looking for doesn't exist or has been removed.</p>
+      <a routerLink="/discover" class="btn btn-primary">
+        <i class="bi-compass me-2"></i>Discover Users
+      </a>
+    </div>
+  </div>
+</div>
