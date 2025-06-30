@@ -220,6 +220,7 @@ cd crates-database
 - Feature modules with lazy loading
 - Bootstrap utilities for responsive design
 - Mobile-first responsive design patterns
+- **Dual Tab System**: Separate tab implementations for desktop and mobile viewports that both need updating when adding new tabs
 
 **Public Sharing Service:**
 - Server-side rendering for SEO and social sharing
@@ -266,6 +267,14 @@ cd crates-database
 - When displaying usernames, use fallback: `user.handle || user.spotifyId`
 - Public sharing URLs use: `user.handle || user.spotifyId` for the username segment
 - Internal app navigation should use: `/user/{user.id}` for reliability
+
+### Dual Tab System
+**IMPORTANT:** The frontend uses separate tab implementations for desktop and mobile viewports:
+
+- **Desktop tabs**: Standard Bootstrap nav tabs, visible on larger screens
+- **Mobile tabs**: Custom mobile navigation, visible on smaller screens
+- **BOTH systems must be updated simultaneously** when adding new tabs or navigation items
+- Use responsive display classes (`d-md-block`, `d-md-none`) to show/hide appropriate tab system
 
 ### Common Patterns
 ```typescript

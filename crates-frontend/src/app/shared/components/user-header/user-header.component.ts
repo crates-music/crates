@@ -42,6 +42,10 @@ export class UserHeaderComponent {
     this.router.navigate(['/discover']);
   }
 
+  navigateToActivity(): void {
+    this.router.navigate(['/activity']);
+  }
+
   navigateToSettings(): void {
     this.router.navigate(['/user/profile/settings']);
   }

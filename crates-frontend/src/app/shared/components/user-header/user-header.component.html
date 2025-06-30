@@ -28,6 +28,13 @@
           <i class="bi-compass"></i>
           <span>Discover</span>
         </button>
+        <button 
+          class="nav-tab" 
+          [class.active]="isCurrentRoute('/activity')"
+          (click)="navigateToActivity()">
+          <i class="bi-activity"></i>
+          <span>Activity</span>
+        </button>
       </div>
       
       <div class="user-actions">
