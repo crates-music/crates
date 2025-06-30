@@ -11,7 +11,13 @@
       <i class="bi-disc fs-5"></i>
       <span class="d-block">Library</span>
     </a>
-    <a class="nav-link tab d-flex flex-column align-items-center" routerLink="/discover"
+    <a class="nav-link tab d-flex flex-column align-items-center" routerLink="/activity"
+       [ngClass]="{ 'active-tab': currentTab === Tab.Activity }">
+      <i class="bi-activity fs-5"></i>
+      <span class="d-block">Activity</span>
+    </a>
+    <a class="nav-link tab d-flex flex-column align-items-center" 
+       (click)="onDiscoverTabClick()"
        [ngClass]="{ 'active-tab': currentTab === Tab.Discover }">
       <i class="bi-compass fs-5"></i>
       <span class="d-block">Discover</span>

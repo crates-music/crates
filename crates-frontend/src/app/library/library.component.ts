@@ -28,6 +28,7 @@ import { addAlbumsToCrate } from '../crate/store/actions/crate-album.actions';
 import { Library, LibraryState } from './shared/model/library.model';
 import { hideCratedAlbums, showCratedAlbums, toggleListType } from './store/actions/library-option.actions';
 import { ListType } from '../shared/model/list-type.model';
+import * as NavigationActions from '../shared/store/actions/navigation.actions';
 
 @Component({
   selector: 'crate-library',
@@ -95,6 +96,9 @@ export class LibraryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit(): void {
+    // Set navigation context to 'library' since this is the user's Spotify library
+    this.store.dispatch(NavigationActions.setNavigationContext({ context: 'library' }));
+    
     this.loadAlbums();
   }
 

@@ -19,6 +19,110 @@
   border: 2px solid rgba(0, 0, 0, 0.1);
 }
 
+// Fix for tab navigation text
+.nav-tabs .nav-link {
+  color: var(--bs-body-color) !important;
+  opacity: 1 !important;
+  
+  &.active {
+    color: var(--bs-primary) !important;
+  }
+}
+
+// Crate-specific styling for templates (copied from crate-list component)
+.crate-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-lg) !important;
+  transition: var(--transition);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.crate-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-primary);
+  border-color: rgba(29, 185, 84, 0.3) !important;
+  background: var(--bg-card-hover) !important;
+}
+
+.crate-image-container {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.crate-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition-slow);
+  filter: brightness(0.9);
+}
+
+.crate-card:hover .crate-image {
+  transform: scale(1.08);
+  filter: brightness(1);
+}
+
+.album-gradient {
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+}
+
+.crate-card-container {
+  cursor: pointer;
+}
+
+.crate-name {
+  color: var(--primary) !important;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+}
+
+// List view styling
+.list-crate-row {
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  transition: var(--transition);
+  border-radius: var(--radius-md);
+  margin: 0 0 4px 0;
+  cursor: pointer;
+}
+
+.list-crate-row:hover {
+  background: var(--bg-card);
+  transform: translateX(4px);
+}
+
+.list-crate-image {
+  width: 48px;
+  height: 48px;
+  margin-right: 12px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.list-crate-image:hover {
+  transform: scale(1.05);
+}
+
+.list-crate-title {
+  font-weight: 600;
+  margin-bottom: 1px;
+  color: var(--primary) !important;
+  letter-spacing: -0.01em;
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
 @media (max-width: 768px) {
   .card-body {
     padding: 1rem;
@@ -27,5 +131,69 @@
   .rounded-circle {
     width: 60px !important;
     height: 60px !important;
+  }
+  
+  .list-crate-image {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+  }
+  
+  .crate-card-container {
+    margin: 0.75rem !important;
+  }
+}
+
+// Collection button styling (mirroring close-button from crate.component.scss)
+.collection-plus-btn {
+  visibility: hidden;
+  opacity: 0;
+  color: var(--primary);
+  background: rgba(0, 0, 0, 0.8);
+  border: none;
+  border-radius: 50%;
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  z-index: 100;
+  transition: var(--transition);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  padding: 0;
+  
+  &:hover {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.1);
+  }
+  
+  i {
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1;
+  }
+}
+
+// Show collection button on hover (like close button)
+.crate-card:hover .collection-plus-btn {
+  visibility: visible;
+  opacity: 1;
+}
+
+// Always show collection button on mobile
+@media (max-width: 576px) {
+  .collection-plus-btn {
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(0, 0, 0, 0.9);
+    width: 28px;
+    height: 28px;
+    right: 0.5rem;
+    top: 0.5rem;
   }
 }

@@ -14,6 +14,7 @@ import page.crates.controller.api.mapper.CrateEventMapper;
 import page.crates.entity.SpotifyUser;
 import page.crates.security.SpotifyAuthorization;
 import page.crates.service.CurrentUserService;
+import page.crates.service.CrateDecorator;
 import page.crates.service.FeedService;
 
 import java.time.Instant;
@@ -31,6 +32,9 @@ public class FeedController {
     
     @Resource
     private CrateEventMapper crateEventMapper;
+    
+    @Resource
+    private CrateDecorator crateDecorator;
 
     @GetMapping
     @SpotifyAuthorization
@@ -39,7 +43,7 @@ public class FeedController {
         
         SpotifyUser currentUser = currentUserService.getCurrentUser();
         return feedService.getUserFeed(currentUser, pageable)
-                .map(crateEventMapper::map);
+                .map(this::mapAndDecorateCrateEvent);
     }
 
     @GetMapping("/since")
@@ -51,7 +55,7 @@ public class FeedController {
         
         SpotifyUser currentUser = currentUserService.getCurrentUser();
         return feedService.getUserFeedAfter(currentUser, since, pageable)
-                .map(crateEventMapper::map);
+                .map(this::mapAndDecorateCrateEvent);
     }
 
     @GetMapping("/before")
@@ -63,7 +67,7 @@ public class FeedController {
         
         SpotifyUser currentUser = currentUserService.getCurrentUser();
         return feedService.getUserFeedBefore(currentUser, before, pageable)
-                .map(crateEventMapper::map);
+                .map(this::mapAndDecorateCrateEvent);
     }
 
     @GetMapping("/has-new")
@@ -76,6 +80,18 @@ public class FeedController {
         boolean hasNew = feedService.hasNewFeedEvents(currentUser, since);
         
         return new HasNewEventsResponse(hasNew);
+    }
+
+    // Helper method to map and decorate CrateEvent
+    private CrateEvent mapAndDecorateCrateEvent(page.crates.entity.CrateEvent entityEvent) {
+        CrateEvent apiEvent = crateEventMapper.map(entityEvent);
+        
+        // Decorate the crate if present
+        if (apiEvent.getCrate() != null) {
+            apiEvent.setCrate(crateDecorator.decorate(apiEvent.getCrate()));
+        }
+        
+        return apiEvent;
     }
 
     // DTO class

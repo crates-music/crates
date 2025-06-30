@@ -11,6 +11,7 @@ import page.crates.entity.CrateEvent;
 import page.crates.entity.SpotifyUser;
 import page.crates.entity.enums.CrateEventType;
 import page.crates.repository.CrateEventRepository;
+import page.crates.security.StructuredLogEntry;
 
 import java.time.Instant;
 import java.util.List;
@@ -61,7 +62,13 @@ public class CrateEventServiceImpl implements CrateEventService {
 
     @Override
     public CrateEvent recordCrateAddedToCollection(SpotifyUser user, Crate crate) {
-        log.info("Recording crate added to collection event for user {} and crate {}", user.getId(), crate.getId());
+        log.info("Recording crate added to collection event", 
+            new StructuredLogEntry()
+                .withUserId(user.getId())
+                .withCrateId(crate.getId())
+                .withAction("record_crate_event")
+                .with("eventType", "CRATE_ADDED_TO_COLLECTION")
+        );
         
         CrateEvent event = CrateEvent.builder()
                 .user(user)
@@ -71,7 +78,14 @@ public class CrateEventServiceImpl implements CrateEventService {
                 .build();
         
         CrateEvent saved = crateEventRepository.save(event);
-        log.debug("Recorded crate added to collection event with ID {}", saved.getId());
+        log.debug("Recorded crate event successfully", 
+            new StructuredLogEntry()
+                .withUserId(user.getId())
+                .withCrateId(crate.getId())
+                .withAction("record_crate_event")
+                .with("eventType", "CRATE_ADDED_TO_COLLECTION")
+                .with("eventId", saved.getId())
+        );
         return saved;
     }
 

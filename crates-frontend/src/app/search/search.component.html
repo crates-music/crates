@@ -56,7 +56,8 @@
             </div>
             <div class="flex-grow-1">
               <h6 class="mb-1">{{ user.displayName }}</h6>
-              <p class="mb-0 text-muted small" *ngIf="user.handle">@{{ user.handle }}</p>
+              <p class="mb-0 text-muted small" *ngIf="user.handle && user.handle.trim().length > 0">@{{ user.handle }}</p>
+              <p class="mb-0 text-muted small" *ngIf="!user.handle || !user.handle.trim().length">{{ user.spotifyId }}</p>
             </div>
             <div class="flex-shrink-0">
               <i class="bi-chevron-right text-muted"></i>

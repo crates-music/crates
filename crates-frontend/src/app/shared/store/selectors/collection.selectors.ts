@@ -31,9 +31,29 @@ export const selectMyCollection = createSelector(
   fromCollection.getMyCollection
 );
 
+export const selectMyCollectionData = createSelector(
+  selectMyCollection,
+  (myCollection) => myCollection.value
+);
+
 export const selectMyCollectionLoading = createSelector(
-  selectCollectionState,
-  fromCollection.getMyCollectionLoading
+  selectMyCollection,
+  (myCollection) => myCollection.loading
+);
+
+export const selectMyCollectionLoaded = createSelector(
+  selectMyCollection,
+  (myCollection) => myCollection.loaded
+);
+
+export const selectMyCollectionCrates = createSelector(
+  selectMyCollectionData,
+  (collectionData) => collectionData?.content || []
+);
+
+export const selectMyCollectionHasNextPage = createSelector(
+  selectMyCollectionData,
+  (collectionData) => !collectionData?.last
 );
 
 // Error Selectors

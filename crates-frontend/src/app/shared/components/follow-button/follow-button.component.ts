@@ -1,6 +1,9 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
-import { Subject, takeUntil, catchError, of } from 'rxjs';
-import { SocialService } from '../../services/social.service';
+import { Subject, takeUntil, Observable, take } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import * as SocialActions from '../../store/actions/social.actions';
+import { selectUserFollowStatus, selectUserFollowLoading } from '../../store/selectors/social.selectors';
 
 @Component({
   selector: 'app-follow-button',
@@ -11,16 +14,14 @@ export class FollowButtonComponent implements OnInit, OnDestroy {
   @Input() userId!: number;
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() variant: 'primary' | 'outline' = 'outline';
-  @Input() isFollowing: boolean | null = null;
   @Output() followChange = new EventEmitter<boolean>();
 
-  _isFollowing = false;
-  loading = false;
-  error: string | null = null;
+  isFollowing$: Observable<boolean>;
+  loading$: Observable<boolean>;
 
   private destroy$ = new Subject<boolean>();
 
-  constructor(private socialService: SocialService) {}
+  constructor(private store: Store) {}
 
   ngOnInit() {
     if (!this.userId) {
@@ -28,11 +29,14 @@ export class FollowButtonComponent implements OnInit, OnDestroy {
       return;
     }
     
-    if (this.isFollowing !== null) {
-      this._isFollowing = this.isFollowing;
-    } else {
-      this.loadFollowStatus();
-    }
+    // Set up observables
+    this.isFollowing$ = this.store.select(selectUserFollowStatus(this.userId)).pipe(
+      map(status => status.isFollowing)
+    );
+    this.loading$ = this.store.select(selectUserFollowLoading(this.userId));
+    
+    // Load follow status
+    this.store.dispatch(SocialActions.loadFollowStatus({ userId: this.userId }));
   }
 
   ngOnDestroy() {
@@ -40,58 +44,18 @@ export class FollowButtonComponent implements OnInit, OnDestroy {
     this.destroy$.unsubscribe();
   }
 
-  private loadFollowStatus() {
-    this.socialService.getFollowStatus(this.userId).pipe(
-      takeUntil(this.destroy$),
-      catchError(error => {
-        console.error('Error loading follow status:', error);
-        this.error = 'Failed to load follow status';
-        return of({ isFollowing: false });
-      })
-    ).subscribe(status => {
-      this._isFollowing = status.isFollowing;
-    });
-  }
-
   toggleFollow() {
-    if (this.loading) return;
-    
-    this.loading = true;
-    this.error = null;
-    
-    if (this._isFollowing) {
-      // Unfollow action
-      this.socialService.unfollowUser(this.userId).pipe(
-        takeUntil(this.destroy$),
-        catchError(error => {
-          console.error('Error unfollowing user:', error);
-          this.error = 'Failed to unfollow';
-          this.loading = false;
-          return of(null);
-        })
-      ).subscribe(() => {
-        this._isFollowing = false;
-        this.followChange.emit(false);
-        this.loading = false;
-      });
-    } else {
-      // Follow action
-      this.socialService.followUser(this.userId).pipe(
-        takeUntil(this.destroy$),
-        catchError(error => {
-          console.error('Error following user:', error);
-          this.error = 'Failed to follow';
-          this.loading = false;
-          return of(null);
-        })
-      ).subscribe(result => {
-        if (result !== null) {
-          this._isFollowing = true;
-          this.followChange.emit(true);
-        }
-        this.loading = false;
-      });
-    }
+    // Use take(1) to get the current value only once and prevent subscription loops
+    this.isFollowing$.pipe(
+      take(1)
+    ).subscribe(isFollowing => {
+      if (isFollowing) {
+        this.store.dispatch(SocialActions.unfollowUser({ userId: this.userId }));
+      } else {
+        this.store.dispatch(SocialActions.followUser({ userId: this.userId }));
+      }
+      this.followChange.emit(!isFollowing);
+    });
   }
 
   get buttonClass(): string {
@@ -100,10 +64,10 @@ export class FollowButtonComponent implements OnInit, OnDestroy {
     return `btn ${variantClass} ${sizeClass}`.trim();
   }
 
-  get buttonText(): string {
-    if (this.loading) {
-      return this._isFollowing ? 'Unfollowing...' : 'Following...';
+  getButtonText(isFollowing: boolean, loading: boolean): string {
+    if (loading) {
+      return isFollowing ? 'Unfollowing...' : 'Following...';
     }
-    return this._isFollowing ? 'Unfollow' : 'Follow';
+    return isFollowing ? 'Unfollow' : 'Follow';
   }
 }

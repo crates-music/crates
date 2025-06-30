@@ -12,6 +12,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class PublicUser {
+    private Long id;
     private String spotifyId;
     private String displayName;
     private String handle;

@@ -1,28 +1,25 @@
-<button 
-  #collectionButton
-  [class]="buttonClass"
-  [disabled]="loading"
-  (click)="toggleCollection()"
-  type="button">
-  
-  <!-- Loading Spinner -->
-  <span 
-    *ngIf="loading" 
-    class="spinner-border spinner-border-sm me-2" 
-    role="status" 
-    aria-hidden="true">
-  </span>
-  
-  <!-- Collection Icon -->
-  <i 
-    *ngIf="!loading" 
-    [class]="buttonIcon + ' me-1'">
-  </i>
-  
-  {{ buttonText }}
-</button>
-
-<!-- Error Message -->
-<div class="text-danger small mt-1" *ngIf="error">
-  {{ error }}
+<div *ngIf="{ inCollection: inCollection$ | async, loading: loading$ | async } as vm">
+  <button 
+    #collectionButton
+    [class]="buttonClass"
+    [disabled]="vm.loading"
+    (click)="toggleCollection()"
+    type="button">
+    
+    <!-- Loading Spinner -->
+    <span 
+      *ngIf="vm.loading" 
+      class="spinner-border spinner-border-sm me-2" 
+      role="status" 
+      aria-hidden="true">
+    </span>
+    
+    <!-- Collection Icon -->
+    <i 
+      *ngIf="!vm.loading" 
+      [class]="getButtonIcon(vm.inCollection || false) + ' me-1'">
+    </i>
+    
+    {{ getButtonText(vm.inCollection || false, vm.loading || false) }}
+  </button>
 </div>

@@ -69,16 +69,16 @@
 
   <!-- Scrollable Crates Content -->
   <div class="crates-content">
-    <!-- Empty collection message -->
-    <div *ngIf="activeTab === 'collection' && !(getCurrentLoading$() | async) && (!(getCurrentCrates$() | async) || (getCurrentCrates$() | async)!.length === 0) && !(search$ | async)"
+    <!-- Empty collection message - only show when loaded and empty -->
+    <div *ngIf="activeTab === 'collection' && (collectionLoaded$ | async) && !(getCurrentLoading$() | async) && (!(getCurrentCrates$() | async) || (getCurrentCrates$() | async)!.length === 0) && !(search$ | async)"
          class="text-center p-5">
       <p class="mb-3">No crates in your collection</p>
       <a class="btn btn-primary" [routerLink]="['/discover']">Search Everything</a>
     </div>
     
-    <!-- Crates list -->
+    <!-- Crates list - only show when data is loaded or loading -->
     <crates-list-content
-      *ngIf="!!(getCurrentCrates$() | async) && (getCurrentCrates$() | async)!.length > 0 || (search$ | async)"
+      *ngIf="activeTab === 'owned' ? (!!(getCurrentCrates$() | async) && (getCurrentCrates$() | async)!.length > 0 || (search$ | async)) : ((collectionLoaded$ | async) || (getCurrentLoading$() | async)) && (!!(getCurrentCrates$() | async) && (getCurrentCrates$() | async)!.length > 0 || (search$ | async))"
       [items]="getCurrentCrates$() | async"
       [listType]="cratesListType"
       [hasNextPage]="getCurrentHasNextPage$() | async"

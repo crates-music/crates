@@ -8,6 +8,8 @@ import * as fromSocial from '../../shared/store/reducers/social.reducer';
 import * as fromCollection from '../../shared/store/reducers/collection.reducer';
 import * as fromDiscover from '../../shared/store/reducers/discover.reducer';
 import * as fromSearch from '../../shared/store/reducers/search.reducer';
+import * as fromNavigation from '../../shared/store/reducers/navigation.reducer';
+import * as fromActivity from '../../shared/store/reducers/activity.reducer';
 
 export interface State {
   user: fromUser.UserState,
@@ -16,7 +18,9 @@ export interface State {
   social: fromSocial.SocialState,
   collection: fromCollection.CollectionState,
   discover: fromDiscover.DiscoverState,
-  search: fromSearch.SearchState
+  search: fromSearch.SearchState,
+  navigation: fromNavigation.NavigationState,
+  activity: fromActivity.ActivityState
 }
 
 export const reducers: ActionReducerMap<State> = {
@@ -27,6 +31,8 @@ export const reducers: ActionReducerMap<State> = {
   collection: fromCollection.collectionReducer,
   discover: fromDiscover.discoverReducer,
   search: fromSearch.searchReducer,
+  navigation: fromNavigation.navigationReducer,
+  activity: fromActivity.activityReducer,
 };
 
 // export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {

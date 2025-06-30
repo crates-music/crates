@@ -1,0 +1,129 @@
+.activity-item {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-lg) !important;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation-fill-mode: both;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(29, 185, 84, 0.2) !important;
+    background: var(--bg-card-hover) !important;
+  }
+}
+
+.user-avatar {
+  transition: var(--transition);
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+  
+  img, div {
+    border: 2px solid transparent;
+    transition: var(--transition);
+  }
+  
+  &:hover img,
+  &:hover div {
+    border-color: var(--primary);
+  }
+}
+
+.activity-description {
+  line-height: 1.4;
+  color: var(--text-white);
+  
+  .cursor-pointer {
+    color: var(--text-white);
+    transition: var(--transition);
+    font-weight: 600;
+    
+    &:hover {
+      color: var(--primary);
+      text-decoration: none;
+    }
+  }
+}
+
+.crate-preview {
+  transition: var(--transition);
+  
+  &:hover {
+    transform: translateY(-1px);
+    
+    .border {
+      border-color: var(--primary) !important;
+      background-color: var(--bg-card-hover) !important;
+    }
+  }
+  
+  .border {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    transition: var(--transition);
+  }
+  
+  img {
+    object-fit: cover;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+  }
+  
+  .fw-semibold {
+    color: var(--primary) !important;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  
+  .text-muted {
+    color: var(--text-muted) !important;
+    
+    &.small {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.activity-footer {
+  .text-muted {
+    color: var(--text-dim) !important;
+    
+    &.small {
+      font-size: 0.75rem;
+    }
+  }
+  
+  .badge {
+    font-size: 0.7rem;
+    background-color: var(--primary) !important;
+    color: white;
+    border-radius: var(--radius-sm);
+  }
+}
+
+// Cursor pointer utility
+.cursor-pointer {
+  cursor: pointer;
+}
+
+// Icon styling
+i {
+  transition: var(--transition);
+}
+
+// Animation keyframes
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

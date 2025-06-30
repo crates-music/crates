@@ -13,10 +13,16 @@
   background: var(--bs-gray-900);
   border: 1px solid var(--bs-gray-800);
   transition: all 0.2s ease;
+  min-height: 44px; // iOS minimum touch target
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   
-  &:hover {
+  &:hover,
+  &:active,
+  &:focus {
     background: var(--bs-gray-800);
     border-color: var(--bs-primary);
+    outline: none;
   }
 }
 

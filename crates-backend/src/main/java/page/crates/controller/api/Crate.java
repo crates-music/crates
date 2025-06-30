@@ -24,4 +24,6 @@ public class Crate {
     private String description;
     private PublicUser user;
     private int followerCount;
+    private boolean collected;
+    private int albumCount;
 }

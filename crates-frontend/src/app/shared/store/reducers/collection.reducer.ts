@@ -2,6 +2,7 @@ import { createReducer, on } from '@ngrx/store';
 import { CollectionStatus } from '../../model/social-stats.model';
 import { Crate } from '../../../crate/shared/model/crate.model';
 import { Page } from '../../model/page.model';
+import { Loadable, emptyLoadable } from '../../model/loadable.model';
 import * as CollectionActions from '../actions/collection.actions';
 
 export interface CollectionState {
@@ -10,8 +11,7 @@ export interface CollectionState {
   collectionLoading: { [crateId: number]: boolean };
   
   // User's collection
-  myCollection: Page<Crate> | null;
-  myCollectionLoading: boolean;
+  myCollection: Loadable<Page<Crate>>;
   
   // Error states
   error: any;
@@ -20,8 +20,7 @@ export interface CollectionState {
 export const initialState: CollectionState = {
   collectionStatus: {},
   collectionLoading: {},
-  myCollection: null,
-  myCollectionLoading: false,
+  myCollection: emptyLoadable(),
   error: null
 };
 
@@ -62,15 +61,11 @@ export const collectionReducer = createReducer(
     error: response.success ? null : response.error
   })),
   
-  // Load Collection Status
-  on(CollectionActions.loadCollectionStatus, (state, { crateId }) => ({
-    ...state,
-    collectionLoading: { ...state.collectionLoading, [crateId]: true }
-  })),
+  // Load Collection Status - don't show loading for initial status checks
+  on(CollectionActions.loadCollectionStatus, (state, { crateId }) => state),
   
   on(CollectionActions.loadCollectionStatusResult, (state, { crateId, response }) => ({
     ...state,
-    collectionLoading: { ...state.collectionLoading, [crateId]: false },
     collectionStatus: response.success ? { 
       ...state.collectionStatus, 
       [crateId]: response.data! 
@@ -81,14 +76,18 @@ export const collectionReducer = createReducer(
   // Load My Collection
   on(CollectionActions.loadMyCollection, (state) => ({
     ...state,
-    myCollectionLoading: true,
+    myCollection: { ...state.myCollection, loading: true },
     error: null
   })),
   
   on(CollectionActions.loadMyCollectionResult, (state, { response }) => ({
     ...state,
-    myCollectionLoading: false,
-    myCollection: response.success ? response.data! : null,
+    myCollection: {
+      loading: false,
+      loaded: true,
+      value: response.success ? response.data! : state.myCollection.value,
+      error: response.success ? null : response.error
+    },
     error: response.success ? null : response.error
   })),
   
@@ -103,5 +102,4 @@ export const collectionReducer = createReducer(
 export const getCollectionStatus = (state: CollectionState) => state.collectionStatus;
 export const getCollectionLoading = (state: CollectionState) => state.collectionLoading;
 export const getMyCollection = (state: CollectionState) => state.myCollection;
-export const getMyCollectionLoading = (state: CollectionState) => state.myCollectionLoading;
 export const getCollectionError = (state: CollectionState) => state.error;

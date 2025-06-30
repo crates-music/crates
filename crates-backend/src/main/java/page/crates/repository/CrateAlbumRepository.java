@@ -32,4 +32,9 @@ public interface CrateAlbumRepository extends JpaRepository<CrateAlbum, Long> {
            "FROM CrateAlbum a " +
            "WHERE a.crate.id = :crateId")
     Page<CrateAlbum> findActiveByCrateId(Long crateId, Pageable pageable);
+
+    @Query("SELECT COUNT(a) " +
+           "FROM CrateAlbum a " +
+           "WHERE a.crate.id = :crateId")
+    long countActiveByCrateId(Long crateId);
 }

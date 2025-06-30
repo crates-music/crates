@@ -1,0 +1,84 @@
+<!-- Activity Header -->
+<div class="activity-header p-3 d-flex justify-content-between align-items-center">
+  <h2 class="mb-0">
+    <i class="bi-activity me-2"></i>
+    Activity
+  </h2>
+  
+  <!-- Refresh Button -->
+  <button 
+    class="btn btn-outline-primary btn-sm"
+    (click)="onRefresh()"
+    [disabled]="refreshing$ | async">
+    <div *ngIf="refreshing$ | async" class="spinner-border spinner-border-sm me-1" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <i *ngIf="!(refreshing$ | async)" class="bi-arrow-clockwise me-1"></i>
+    Refresh
+  </button>
+</div>
+
+<!-- New Activity Banner -->
+<div *ngIf="hasNewActivity$ | async" class="alert alert-info mx-3 mb-0" role="alert">
+  <i class="bi-exclamation-circle me-2"></i>
+  New activity available! 
+  <button class="btn btn-link p-0 ms-1" (click)="onRefresh()">Refresh to see</button>
+</div>
+
+<!-- Activity Feed -->
+<div 
+  #scrollContainer
+  class="activity-feed flex-grow-1 overflow-auto"
+  style="height: calc(100vh - 180px);">
+  
+  <!-- Loading Initial Feed -->
+  <div *ngIf="loading$ | async" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading activity feed...</span>
+    </div>
+    <p class="text-muted mt-2 mb-0">Loading your activity feed...</p>
+  </div>
+
+  <!-- Feed Items -->
+  <div *ngIf="!(loading$ | async)" class="p-3">
+    <!-- Activity Items -->
+    <div *ngFor="let activity of feed$ | async; trackBy: trackByActivityId" class="mb-3">
+      <app-activity-item [activity]="activity"></app-activity-item>
+    </div>
+
+    <!-- Load More Indicator -->
+    <div *ngIf="loadingMore$ | async" class="text-center py-3">
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Loading more...</span>
+      </div>
+      <p class="text-muted small mt-2 mb-0">Loading more activity...</p>
+    </div>
+
+    <!-- End of Feed -->
+    <div *ngIf="!(canLoadMore$ | async) && (feed$ | async)?.length > 0" class="text-center py-3">
+      <p class="text-muted small mb-0">
+        <i class="bi-check-circle me-1"></i>
+        You're all caught up!
+      </p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="(feed$ | async)?.length === 0 && !(loading$ | async)" class="text-center py-5">
+      <i class="bi-activity fs-1 text-muted mb-3"></i>
+      <h4 class="text-muted mb-3">No Activity Yet</h4>
+      <p class="text-muted">Follow other users to see their activity here</p>
+      <p class="text-muted small">When people you follow create crates, add albums, or make their crates public, you'll see it here!</p>
+      <button class="btn btn-primary" routerLink="/discover">
+        <i class="bi-search me-1"></i>
+        Discover Users
+      </button>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error$ | async" class="alert alert-danger mx-3" role="alert">
+      <i class="bi-exclamation-triangle me-2"></i>
+      <strong>Oops!</strong> There was an error loading your activity feed.
+      <button class="btn btn-link p-0 ms-2" (click)="onRefresh()">Try again</button>
+    </div>
+  </div>
+</div>

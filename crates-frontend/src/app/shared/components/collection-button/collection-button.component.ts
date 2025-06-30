@@ -1,6 +1,9 @@
 import { Component, Input, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
-import { Subject, takeUntil, catchError, of } from 'rxjs';
-import { CollectionService } from '../../services/collection.service';
+import { Subject, takeUntil, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import * as CollectionActions from '../../store/actions/collection.actions';
+import { selectCrateCollectionStatus, selectCrateCollectionLoading } from '../../store/selectors/collection.selectors';
 
 @Component({
   selector: 'app-collection-button',
@@ -14,13 +17,13 @@ export class CollectionButtonComponent implements OnInit, OnDestroy {
 
   @ViewChild('collectionButton') collectionButton!: ElementRef<HTMLButtonElement>;
 
-  inCollection = false;
-  loading = false;
-  error: string | null = null;
+  inCollection$: Observable<boolean>;
+  loading$: Observable<boolean>;
+  private currentInCollectionState: boolean = false;
 
   private destroy$ = new Subject<boolean>();
 
-  constructor(private collectionService: CollectionService) {}
+  constructor(private store: Store) {}
 
   ngOnInit() {
     if (!this.crateId) {
@@ -28,7 +31,21 @@ export class CollectionButtonComponent implements OnInit, OnDestroy {
       return;
     }
     
-    this.loadCollectionStatus();
+    // Set up observables
+    this.inCollection$ = this.store.select(selectCrateCollectionStatus(this.crateId)).pipe(
+      map(status => status.inCollection)
+    );
+    this.loading$ = this.store.select(selectCrateCollectionLoading(this.crateId));
+    
+    // Track current state to avoid subscription loops
+    this.inCollection$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(inCollection => {
+      this.currentInCollectionState = inCollection;
+    });
+    
+    // Load collection status
+    this.store.dispatch(CollectionActions.loadCollectionStatus({ crateId: this.crateId }));
   }
 
   ngOnDestroy() {
@@ -36,52 +53,18 @@ export class CollectionButtonComponent implements OnInit, OnDestroy {
     this.destroy$.unsubscribe();
   }
 
-  private loadCollectionStatus() {
-    this.collectionService.getCollectionStatus(this.crateId).pipe(
-      takeUntil(this.destroy$),
-      catchError(error => {
-        console.error('Error loading collection status:', error);
-        this.error = 'Failed to load status';
-        return of({ inCollection: false });
-      })
-    ).subscribe(status => {
-      this.inCollection = status.inCollection;
-    });
-  }
-
   toggleCollection() {
-    if (this.loading) return;
+    // Use the tracked state instead of subscribing to observable
+    if (this.currentInCollectionState) {
+      this.store.dispatch(CollectionActions.removeCrateFromCollection({ crateId: this.crateId }));
+    } else {
+      this.store.dispatch(CollectionActions.addCrateToCollection({ crateId: this.crateId }));
+    }
     
-    this.loading = true;
-    this.error = null;
-    
-    const action = this.inCollection 
-      ? this.collectionService.removeCrateFromCollection(this.crateId)
-      : this.collectionService.addCrateToCollection(this.crateId);
-    
-    action.pipe(
-      takeUntil(this.destroy$),
-      catchError(error => {
-        console.error('Error toggling collection:', error);
-        if (error.status === 400 && error.error?.message) {
-          this.error = error.error.message;
-        } else {
-          this.error = this.inCollection ? 'Failed to remove from collection' : 'Failed to add to collection';
-        }
-        this.loading = false;
-        return of(null);
-      })
-    ).subscribe(result => {
-      if (result !== null) {
-        this.inCollection = !this.inCollection;
-      }
-      this.loading = false;
-      
-      // Remove focus to prevent confusing visual state
-      if (this.collectionButton) {
-        this.collectionButton.nativeElement.blur();
-      }
-    });
+    // Remove focus to prevent confusing visual state
+    if (this.collectionButton) {
+      this.collectionButton.nativeElement.blur();
+    }
   }
 
   get buttonClass(): string {
@@ -90,14 +73,14 @@ export class CollectionButtonComponent implements OnInit, OnDestroy {
     return `btn ${variantClass} ${sizeClass}`.trim();
   }
 
-  get buttonText(): string {
-    if (this.loading) {
-      return this.inCollection ? 'Removing...' : 'Adding...';
+  getButtonText(inCollection: boolean, loading: boolean): string {
+    if (loading) {
+      return inCollection ? 'Removing...' : 'Adding...';
     }
-    return this.inCollection ? 'Remove from Collection' : 'Add to Collection';
+    return inCollection ? 'Remove from Collection' : 'Add to Collection';
   }
 
-  get buttonIcon(): string {
-    return this.inCollection ? 'bi-bookmark-dash' : 'bi-bookmark-plus';
+  getButtonIcon(inCollection: boolean): string {
+    return inCollection ? 'bi-bookmark-dash' : 'bi-bookmark-plus';
   }
 }

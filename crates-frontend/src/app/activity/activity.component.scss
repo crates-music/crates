@@ -1,0 +1,128 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg-black);
+}
+
+.activity-header {
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-black);
+  flex-shrink: 0;
+  z-index: 10;
+  
+  h2 {
+    color: var(--text-white);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  
+  .btn-outline-primary {
+    font-size: 0.875rem;
+    border-color: var(--border-subtle);
+    color: var(--text-white);
+    background: transparent;
+    
+    &:hover {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.activity-feed {
+  background: var(--bg-black);
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  
+  // Hide scrollbars to match app style
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.alert {
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-white);
+  
+  &.alert-info {
+    background: rgba(29, 185, 84, 0.1);
+    border-color: rgba(29, 185, 84, 0.3);
+    color: var(--primary);
+  }
+  
+  &.alert-danger {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.3);
+    color: #ff6b6b;
+  }
+  
+  .btn-link {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 500;
+    padding: 0;
+  }
+}
+
+// Empty state styling
+.text-center {
+  color: var(--text-muted);
+  
+  i.fs-1 {
+    opacity: 0.5;
+    color: var(--text-dim);
+  }
+  
+  h4 {
+    font-weight: 600;
+    color: var(--text-white);
+    letter-spacing: -0.02em;
+  }
+  
+  p {
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+  
+  .btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    
+    &:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}
+
+// Loading states
+.spinner-border {
+  color: var(--primary);
+}
+
+.spinner-border-sm {
+  color: var(--primary);
+}
+
+// Mobile adjustments
+@media (max-width: 576px) {
+  .activity-header {
+    padding: 0.75rem !important;
+  }
+  
+  .activity-feed {
+    padding-bottom: 6rem !important; // Account for mobile footer
+  }
+}

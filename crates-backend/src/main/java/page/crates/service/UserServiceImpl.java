@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import page.crates.entity.SpotifyUser;
 import page.crates.entity.Token;
+import page.crates.exception.HandleAlreadyTakenException;
+import page.crates.exception.UserNotFoundException;
 import page.crates.repository.SpotifyUserRepository;
 import page.crates.repository.TokenRepository;
 import page.crates.service.mapper.SpotifyUserMapper;
@@ -79,7 +81,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public SpotifyUser findBySpotifyId(String spotifyId) {
         return spotifyUserRepository.findOneBySpotifyId(spotifyId)
-                .orElseThrow(() -> new RuntimeException("User not found with spotifyId: " + spotifyId));
+                .orElseThrow(() -> new UserNotFoundException(spotifyId, "spotifyId"));
     }
 
     @Override
@@ -92,20 +94,20 @@ public class UserServiceImpl implements UserService {
         
         // Fall back to Spotify ID lookup
         return spotifyUserRepository.findOneBySpotifyId(identifier)
-                .orElseThrow(() -> new RuntimeException("User not found with handle or spotifyId: " + identifier));
+                .orElseThrow(() -> new UserNotFoundException(identifier));
     }
 
     @Override
     public SpotifyUser updateProfile(Long userId, String handle, String bio) {
         SpotifyUser user = spotifyUserRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new UserNotFoundException(userId));
         
         // Validate handle uniqueness if provided
         if (handle != null && !handle.trim().isEmpty()) {
             String trimmedHandle = handle.trim();
             Optional<SpotifyUser> existingUser = spotifyUserRepository.findByHandle(trimmedHandle);
             if (existingUser.isPresent() && !existingUser.get().getId().equals(userId)) {
-                throw new RuntimeException("Handle already taken: " + trimmedHandle);
+                throw new HandleAlreadyTakenException(trimmedHandle);
             }
             user.setHandle(trimmedHandle);
         }
@@ -122,7 +124,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public SpotifyUser getUser(Long userId) {
         return spotifyUserRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
     @Override

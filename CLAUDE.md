@@ -90,7 +90,10 @@ Crates is a comprehensive music organization and sharing platform that allows us
 
 ### Backend
 ```bash
-# Build and run in Docker
+# Restart backend (preferred method)
+./restart.sh
+
+# Build and run in Docker (manual method)
 ./mvnw clean install -Pdocker -DskipTests
 ./mvnw docker:start
 
@@ -249,9 +252,38 @@ cd crates-database
 - **Mobile Responsive**: Mobile-first design with dedicated mobile navigation
 
 ### User Profile Management
-- **Custom Handles**: Unique usernames (64 chars, alphanumeric + hyphens)
+- **Custom Handles**: Unique usernames (64 chars, alphanumeric + hyphens) - **IMPORTANT: Not all users have handles**
 - **Bio**: Personal bio field (280 character limit)
 - **Privacy Controls**: Toggle individual crates between public/private
+
+## Important Development Notes
+
+### User Handles
+**CRITICAL:** Not all users have handles. Some users only have a `spotifyId` and no custom `handle`. 
+
+- **NEVER use handles for internal Angular routing - only for public URLs**
+- When navigating to user profiles, always use `user.id` (numeric ID), never `user.handle`
+- When displaying usernames, use fallback: `user.handle || user.spotifyId`
+- Public sharing URLs use: `user.handle || user.spotifyId` for the username segment
+- Internal app navigation should use: `/user/{user.id}` for reliability
+
+### Common Patterns
+```typescript
+// ❌ BAD - handle might be null
+this.router.navigate(['/user', user.handle]);
+
+// ❌ BAD - do not use handles for ANY internal Angular routing
+this.router.navigate(['/user/handle', user.handle]);
+
+// ✅ GOOD - ID is always present for internal navigation
+this.router.navigate(['/user', user.id]);
+
+// ✅ GOOD - handles only for public URLs
+window.open(`https://crates.page/${user.handle}`, '_blank');
+
+// ✅ GOOD - Display name with fallback
+displayName = user.handle || user.spotifyId;
+```
 
 ## Docker Network
 

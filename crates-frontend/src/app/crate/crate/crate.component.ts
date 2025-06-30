@@ -20,6 +20,8 @@ import { ListType } from '../../shared/model/list-type.model';
 import { PublicLinkService } from '../../shared/services/public-link.service';
 import { selectUser } from '../../user/store/selectors/user.selectors';
 import { User } from '../../user/shared/model/user.model';
+import * as NavigationActions from '../../shared/store/actions/navigation.actions';
+import { selectCurrentNavigationContext } from '../../shared/store/selectors/navigation.selectors';
 
 @Component({
   selector: 'crates-crate',
@@ -85,6 +87,29 @@ export class CrateComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.albums = [];
+    
+    // Determine navigation context based on crate ownership and navigation history
+    this.store.select(selectCrate).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(crate => {
+      if (crate && this.user) {
+        const isOwnCrate = crate.user?.id === this.user.id;
+        
+        if (isOwnCrate) {
+          // Own crate - set context to 'crates'
+          this.store.dispatch(NavigationActions.setNavigationContext({ context: 'crates' }));
+        } else {
+          // Someone else's crate - keep current context or default to 'discover'
+          this.store.select(selectCurrentNavigationContext).pipe(takeUntil(this.destroy$)).subscribe(currentContext => {
+            if (!currentContext) {
+              // No context set (direct navigation), default to 'discover'
+              this.store.dispatch(NavigationActions.setNavigationContext({ context: 'discover' }));
+            }
+            // If context is already set (e.g., from discover), keep it
+          });
+        }
+      }
+    });
   }
 
   ngOnDestroy(): void {

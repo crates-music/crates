@@ -8,6 +8,7 @@
   <!-- Search Input -->
   <div class="position-relative">
     <input
+      #searchInput
       type="text"
       class="form-control form-control-lg"
       placeholder="Search for users, crates, albums, or artists..."
@@ -42,7 +43,10 @@
         <div 
           *ngFor="let user of users$ | async; trackBy: trackByUserId"
           class="user-result-item d-flex align-items-center p-2 mb-1 rounded cursor-pointer"
-          (click)="openUser(user)">
+          (click)="openUser(user)"
+          (touchstart)="openUser(user)"
+          role="button"
+          tabindex="0">
           <div class="flex-shrink-0 me-2">
             <div class="user-avatar">
               <img 
@@ -62,7 +66,8 @@
           </div>
           <div class="flex-grow-1">
             <div class="fw-semibold small">{{ user.displayName }}</div>
-            <div class="text-muted" style="font-size: 0.75rem;">@{{ user.handle }}</div>
+            <div class="text-muted" style="font-size: 0.75rem;" *ngIf="user.handle && user.handle.trim().length > 0">@{{ user.handle }}</div>
+            <div class="text-muted" style="font-size: 0.75rem;" *ngIf="!user.handle || !user.handle.trim().length">{{ user.spotifyId }}</div>
           </div>
           <div class="flex-shrink-0">
             <i class="bi-chevron-right text-muted small"></i>

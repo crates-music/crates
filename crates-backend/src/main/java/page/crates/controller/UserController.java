@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import page.crates.controller.api.ProfileUpdateRequest;
 import page.crates.controller.api.SpotifyUser;
 import page.crates.controller.api.mapper.UserMapper;
+import page.crates.controller.api.mapper.PublicUserMapper;
+import page.crates.controller.api.PublicUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import page.crates.exception.ExpiredTokenException;
@@ -21,6 +23,7 @@ import page.crates.security.SpotifyAuthorization;
 import page.crates.service.CurrentUserService;
 import page.crates.service.UserService;
 import page.crates.service.CrateService;
+import page.crates.service.CrateDecorator;
 import page.crates.controller.api.mapper.CrateMapper;
 import page.crates.spotify.client.Context;
 import page.crates.spotify.client.Spotify;
@@ -35,11 +38,15 @@ public class UserController {
     @Resource
     private UserMapper userMapper;
     @Resource
+    private PublicUserMapper publicUserMapper;
+    @Resource
     private UserService userService;
     @Resource
     private CrateService crateService;
     @Resource
     private CrateMapper crateMapper;
+    @Resource
+    private CrateDecorator crateDecorator;
     @Resource
     private Spotify spotify;
 
@@ -93,6 +100,14 @@ public class UserController {
         return userMapper.map(user);
     }
 
+    @GetMapping(value = "/{userId}")
+    @SpotifyAuthorization
+    public PublicUser getUserById(@PathVariable Long userId) {
+        log.info("Getting user by ID: {}", userId);
+        page.crates.entity.SpotifyUser user = userService.getUser(userId);
+        return publicUserMapper.map(user);
+    }
+
     @GetMapping(value = "/{userId}/crates")
     @SpotifyAuthorization
     public Page<page.crates.controller.api.Crate> getUserPublicCrates(
@@ -102,6 +117,7 @@ public class UserController {
         log.info("Getting public crates for user: {}", userId);
         page.crates.entity.SpotifyUser user = userService.getUser(userId);
         return crateService.getUserPublicCrates(user, search, pageable)
-                .map(crateMapper::map);
+                .map(crateMapper::map)
+                .map(crateDecorator::decorate);
     }
 }

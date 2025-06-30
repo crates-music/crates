@@ -14,4 +14,5 @@ export class Crate {
   user: User; // The author/owner of the crate
   albumCount?: number;
   isInUserCollection?: boolean;
+  collected: boolean;
 }

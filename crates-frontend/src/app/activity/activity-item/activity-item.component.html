@@ -1,0 +1,82 @@
+<!-- Activity Item -->
+<div class="activity-item border rounded p-3 bg-white">
+  <!-- Activity Header -->
+  <div class="d-flex align-items-start">
+    <!-- User Avatar -->
+    <div class="flex-shrink-0 me-3">
+      <div class="user-avatar cursor-pointer" (click)="openUser()">
+        <img 
+          *ngIf="activity.user?.imageUrl"
+          [src]="activity.user.imageUrl" 
+          class="rounded-circle"
+          width="36" 
+          height="36"
+          [alt]="activity.user.displayName">
+        <div 
+          *ngIf="!activity.user?.imageUrl"
+          class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold"
+          style="width: 36px; height: 36px; font-size: 14px;">
+          {{ activity.user?.displayName?.charAt(0)?.toUpperCase() }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Content -->
+    <div class="flex-grow-1">
+      <!-- Activity Description -->
+      <div class="activity-description mb-2">
+        <span class="fw-semibold cursor-pointer" (click)="openUser()">
+          {{ activity.user?.displayName || activity.user?.spotifyId }}
+        </span>
+        <span class="text-muted mx-1">{{ getEventDescription() }}</span>
+        <span class="fw-semibold cursor-pointer" (click)="openCrate()">
+          {{ activity.crate?.name }}
+        </span>
+      </div>
+
+      <!-- Crate Preview -->
+      <div class="crate-preview cursor-pointer" (click)="openCrate()">
+        <div class="d-flex align-items-center p-2 border rounded bg-light">
+          <!-- Crate Image -->
+          <div class="flex-shrink-0 me-3">
+            <img 
+              [src]="activity.crate.imageUri" 
+              class="rounded"
+              width="48" 
+              height="48"
+              [alt]="activity.crate.name">
+          </div>
+
+          <!-- Crate Details -->
+          <div class="flex-grow-1">
+            <div class="fw-semibold">{{ activity.crate.name }}</div>
+            <div class="text-muted small" *ngIf="activity.crate.description">
+              {{ activity.crate.description }}
+            </div>
+            <div class="text-muted small">
+              {{ activity.crate.albumCount }} albums
+            </div>
+          </div>
+
+          <!-- Event Icon -->
+          <div class="flex-shrink-0">
+            <i [class]="getEventIcon() + ' ' + getEventColor() + ' fs-5'"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Footer -->
+      <div class="activity-footer d-flex justify-content-between align-items-center mt-2">
+        <!-- Time -->
+        <span class="text-muted small">{{ getTimeAgo() }}</span>
+        
+        <!-- Album Count for ALBUM_ADDED events -->
+        <span 
+          *ngIf="activity.eventType === CrateEventType.ALBUM_ADDED && activity.albumIds?.length > 1"
+          class="badge bg-primary">
+          +{{ activity.albumIds.length }} albums
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

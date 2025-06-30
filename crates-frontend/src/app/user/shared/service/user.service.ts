@@ -39,6 +39,13 @@ export class UserService {
       );
   }
 
+  getUserById(userId: number): Observable<User> {
+    return this.http.get(`${environment.baseUri}/v1/user/${userId}`)
+      .pipe(
+        map(response => Object.assign(new User(), response) as User)
+      );
+  }
+
   getUserPublicCrates(userId: number, search?: string): Observable<Page<Crate>> {
     let params = new HttpParams();
     if (search && search.trim()) {
@@ -46,5 +53,14 @@ export class UserService {
     }
     
     return this.http.get<Page<Crate>>(`${environment.baseUri}/v1/user/${userId}/crates`, { params });
+  }
+
+  getUserPublicCollection(userId: number, search?: string): Observable<Page<Crate>> {
+    let params = new HttpParams();
+    if (search && search.trim()) {
+      params = params.set('search', search.trim());
+    }
+    
+    return this.http.get<Page<Crate>>(`${environment.baseUri}/v1/user/${userId}/collection`, { params });
   }
 }

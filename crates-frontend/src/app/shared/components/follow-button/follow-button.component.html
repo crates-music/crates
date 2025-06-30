@@ -1,12 +1,12 @@
 <button 
   [class]="buttonClass"
-  [disabled]="loading"
+  [disabled]="loading$ | async"
   (click)="toggleFollow()"
   type="button">
   
   <!-- Loading Spinner -->
   <span 
-    *ngIf="loading" 
+    *ngIf="loading$ | async" 
     class="spinner-border spinner-border-sm me-2" 
     role="status" 
     aria-hidden="true">
@@ -14,14 +14,10 @@
   
   <!-- Follow/Unfollow Icon -->
   <i 
-    *ngIf="!loading" 
-    [class]="isFollowing ? 'bi-person-dash me-1' : 'bi-person-plus me-1'">
+    *ngIf="!(loading$ | async)" 
+    [class]="(isFollowing$ | async) ? 'bi-person-dash me-1' : 'bi-person-plus me-1'">
   </i>
   
-  {{ buttonText }}
+  {{ getButtonText((isFollowing$ | async) || false, (loading$ | async) || false) }}
 </button>
 
-<!-- Error Message -->
-<div class="text-danger small mt-1" *ngIf="error">
-  {{ error }}
-</div>

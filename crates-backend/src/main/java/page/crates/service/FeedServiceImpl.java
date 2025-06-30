@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import page.crates.entity.CrateEvent;
 import page.crates.entity.SpotifyUser;
+import page.crates.security.StructuredLogEntry;
 
 import java.time.Instant;
 import java.util.List;
@@ -26,17 +27,34 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     public Page<CrateEvent> getUserFeed(SpotifyUser user, Pageable pageable) {
-        log.debug("Getting feed for user {}", user.getId());
+        log.debug("Getting user feed", 
+            new StructuredLogEntry()
+                .withUserId(user.getId())
+                .withAction("get_user_feed")
+                .with("pageSize", pageable.getPageSize())
+                .with("pageNumber", pageable.getPageNumber())
+        );
         
         // Get list of users this user is following
         List<Long> followingUserIds = followService.getFollowingUserIds(user);
         
         if (followingUserIds.isEmpty()) {
-            log.debug("User {} is not following anyone, returning empty feed", user.getId());
+            log.debug("User not following anyone, returning empty feed", 
+                new StructuredLogEntry()
+                    .withUserId(user.getId())
+                    .withAction("get_user_feed")
+                    .with("result", "empty_feed")
+                    .with("followingCount", 0)
+            );
             return Page.empty(pageable);
         }
         
-        log.debug("User {} is following {} users, fetching feed events", user.getId(), followingUserIds.size());
+        log.debug("Fetching feed events for user", 
+            new StructuredLogEntry()
+                .withUserId(user.getId())
+                .withAction("get_user_feed")
+                .with("followingCount", followingUserIds.size())
+        );
         return crateEventService.getFeedEvents(followingUserIds, pageable);
     }
 
