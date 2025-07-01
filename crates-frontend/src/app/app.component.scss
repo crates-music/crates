@@ -36,6 +36,16 @@
   -ms-overflow-style: none; /* IE 10+ */
 }
 
+/* Main Content Container - Constrains content width on desktop */
+.main-content-container {
+  width: 100%;
+  
+  @media (min-width: 768px) {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+}
+
 .main-content-section::-webkit-scrollbar {
   width: 0px;
   background: transparent;
@@ -65,9 +75,6 @@
     grid-template-areas: 
       "user-header"
       "main-content";
-    /* Center the entire app container */
-    max-width: 800px;
-    margin: 0 auto;
   }
   
   .mobile-footer-section {

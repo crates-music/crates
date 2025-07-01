@@ -8,32 +8,12 @@
       <!-- Desktop Navigation Tabs -->
       <div class="nav-tabs d-none d-sm-flex">
         <button 
+          *ngFor="let tab of desktopTabs" 
           class="nav-tab" 
-          [class.active]="isCurrentRoute('/crate')"
-          (click)="navigateToCrates()">
-          <i class="bi-box-seam"></i>
-          <span>Crates</span>
-        </button>
-        <button 
-          class="nav-tab" 
-          [class.active]="isCurrentRoute('/library')"
-          (click)="navigateToLibrary()">
-          <i class="bi-disc"></i>
-          <span>Library</span>
-        </button>
-        <button 
-          class="nav-tab" 
-          [class.active]="isCurrentRoute('/discover')"
-          (click)="navigateToDiscover()">
-          <i class="bi-compass"></i>
-          <span>Discover</span>
-        </button>
-        <button 
-          class="nav-tab" 
-          [class.active]="isCurrentRoute('/activity')"
-          (click)="navigateToActivity()">
-          <i class="bi-activity"></i>
-          <span>Activity</span>
+          [class.active]="(currentTab$ | async) === tab.id"
+          (click)="navigateToTab(tab.id)">
+          <i [class]="tab.icon"></i>
+          <span>{{ tab.label }}</span>
         </button>
       </div>
       

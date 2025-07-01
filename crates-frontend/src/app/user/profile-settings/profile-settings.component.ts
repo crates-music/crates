@@ -11,6 +11,7 @@ import { Location } from '@angular/common';
 import { ApiError } from '../../shared/model/api-error.model';
 import { Actions, ofType } from '@ngrx/effects';
 import { takeUntil } from 'rxjs/operators';
+import * as NavigationActions from '../../shared/store/actions/navigation.actions';
 
 @Component({
   selector: 'app-profile-settings',
@@ -39,6 +40,9 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Set navigation context to profile
+    this.store.dispatch(NavigationActions.setNavigationContext({ context: 'profile' }));
+    
     // Dispatch action to load current user
     this.store.dispatch(loadUser());
     
