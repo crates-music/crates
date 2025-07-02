@@ -40,6 +40,16 @@ export class ActivityItemComponent {
     }
   }
 
+  openFollowedUser(): void {
+    if (this.activity.followedUser) {
+      this.store.dispatch(NavigationActions.trackUserNavigation({ 
+        userId: this.activity.followedUser.id, 
+        fromContext: 'activity' 
+      }));
+      this.router.navigate(['/user', this.activity.followedUser.id]);
+    }
+  }
+
   getEventDescription(): string {
     switch (this.activity.eventType) {
       case CrateEventType.CRATE_RELEASED:
@@ -49,6 +59,8 @@ export class ActivityItemComponent {
         return albumCount === 1 ? 'added an album to' : `added ${albumCount} albums to`;
       case CrateEventType.CRATE_ADDED_TO_COLLECTION:
         return 'saved a crate to their collection';
+      case CrateEventType.USER_FOLLOWED:
+        return 'followed';
       default:
         return 'had activity on';
     }
@@ -62,6 +74,8 @@ export class ActivityItemComponent {
         return 'bi-plus-circle';
       case CrateEventType.CRATE_ADDED_TO_COLLECTION:
         return 'bi-bookmark';
+      case CrateEventType.USER_FOLLOWED:
+        return 'bi-person-plus';
       default:
         return 'bi-activity';
     }
@@ -75,6 +89,8 @@ export class ActivityItemComponent {
         return 'text-primary';
       case CrateEventType.CRATE_ADDED_TO_COLLECTION:
         return 'text-warning';
+      case CrateEventType.USER_FOLLOWED:
+        return 'text-info';
       default:
         return 'text-muted';
     }

@@ -21,6 +21,9 @@ public class FollowServiceImpl implements FollowService {
 
     @Resource
     private UserFollowRepository userFollowRepository;
+    
+    @Resource
+    private CrateEventService crateEventService;
 
     @Override
     public UserFollow followUser(SpotifyUser follower, SpotifyUser userToFollow) {
@@ -42,6 +45,10 @@ public class FollowServiceImpl implements FollowService {
                 .build();
         
         UserFollow saved = userFollowRepository.save(userFollow);
+        
+        // Record follow event for activity feed
+        crateEventService.recordUserFollowed(follower, userToFollow);
+        
         log.info("User {} successfully followed user {}", follower.getId(), userToFollow.getId());
         
         return saved;

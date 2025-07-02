@@ -40,6 +40,10 @@ public class CrateEvent {
     @JoinColumn(name = "crate_id")
     private Crate crate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "followed_user_id")
+    private SpotifyUser followedUser;
+
     @Column(name = "event_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private CrateEventType eventType;

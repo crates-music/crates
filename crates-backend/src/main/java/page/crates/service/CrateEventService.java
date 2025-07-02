@@ -38,6 +38,14 @@ public interface CrateEventService {
     CrateEvent recordCrateAddedToCollection(SpotifyUser user, Crate crate);
     
     /**
+     * Record a user following another user
+     * @param follower The user who followed
+     * @param followedUser The user who was followed
+     * @return The created event
+     */
+    CrateEvent recordUserFollowed(SpotifyUser follower, SpotifyUser followedUser);
+    
+    /**
      * Get events for a specific user
      * @param user The user
      * @param pageable Pagination parameters

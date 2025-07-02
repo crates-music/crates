@@ -29,13 +29,25 @@
           {{ activity.user?.displayName || activity.user?.spotifyId }}
         </span>
         <span class="text-muted mx-1">{{ getEventDescription() }}</span>
-        <span class="fw-semibold cursor-pointer" (click)="openCrate()">
+        <span 
+          *ngIf="activity.eventType !== CrateEventType.USER_FOLLOWED"
+          class="fw-semibold cursor-pointer" 
+          (click)="openCrate()">
           {{ activity.crate?.name }}
+        </span>
+        <span 
+          *ngIf="activity.eventType === CrateEventType.USER_FOLLOWED"
+          class="fw-semibold cursor-pointer" 
+          (click)="openFollowedUser()">
+          {{ activity.followedUser?.displayName || activity.followedUser?.spotifyId }}
         </span>
       </div>
 
-      <!-- Crate Preview -->
-      <div class="crate-preview cursor-pointer" (click)="openCrate()">
+      <!-- Crate Preview (for crate-related events) -->
+      <div 
+        *ngIf="activity.eventType !== CrateEventType.USER_FOLLOWED"
+        class="crate-preview cursor-pointer" 
+        (click)="openCrate()">
         <div class="d-flex align-items-center p-2 border rounded bg-light">
           <!-- Crate Image -->
           <div class="flex-shrink-0 me-3">
@@ -55,6 +67,44 @@
             </div>
             <div class="text-muted small">
               {{ activity.crate.albumCount }} albums
+            </div>
+          </div>
+
+          <!-- Event Icon -->
+          <div class="flex-shrink-0">
+            <i [class]="getEventIcon() + ' ' + getEventColor() + ' fs-5'"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Preview (for follow events) -->
+      <div 
+        *ngIf="activity.eventType === CrateEventType.USER_FOLLOWED"
+        class="user-preview cursor-pointer" 
+        (click)="openFollowedUser()">
+        <div class="d-flex align-items-center p-2 border rounded bg-light">
+          <!-- User Image -->
+          <div class="flex-shrink-0 me-3">
+            <img 
+              *ngIf="activity.followedUser?.imageUrl"
+              [src]="activity.followedUser.imageUrl" 
+              class="rounded-circle"
+              width="48" 
+              height="48"
+              [alt]="activity.followedUser.displayName">
+            <div 
+              *ngIf="!activity.followedUser?.imageUrl"
+              class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold"
+              style="width: 48px; height: 48px; font-size: 18px;">
+              {{ activity.followedUser?.displayName?.charAt(0)?.toUpperCase() }}
+            </div>
+          </div>
+
+          <!-- User Details -->
+          <div class="flex-grow-1">
+            <div class="fw-semibold">{{ activity.followedUser?.displayName || activity.followedUser?.spotifyId }}</div>
+            <div class="text-muted small" *ngIf="activity.followedUser?.bio">
+              {{ activity.followedUser.bio }}
             </div>
           </div>
 
