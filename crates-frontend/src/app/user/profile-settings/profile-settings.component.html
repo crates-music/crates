@@ -16,6 +16,21 @@
       {{ error.message || 'Failed to update profile. Please try again.' }}
     </div>
 
+    <!-- Social Stats -->
+    <div *ngIf="socialStats$ | async as stats" class="stats-section">
+      <h3 class="stats-title">Your Stats</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.followerCount }}</div>
+          <div class="stat-label">Followers</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.followingCount }}</div>
+          <div class="stat-label">Following</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Form -->
     <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="settings-form">
       

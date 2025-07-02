@@ -46,6 +46,16 @@ export const loadSocialStatsResult = createAction(
   props<{ response: ApiResponse<SocialStats> }>()
 );
 
+export const loadUserSocialStats = createAction(
+  '[Social] Load User Social Stats',
+  props<{ userId: number }>()
+);
+
+export const loadUserSocialStatsResult = createAction(
+  '[Social] Load User Social Stats Result',
+  props<{ userId: number; response: ApiResponse<SocialStats> }>()
+);
+
 // User Search Actions
 export const searchUsers = createAction(
   '[Social] Search Users',

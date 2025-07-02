@@ -195,5 +195,22 @@ export class CrateComponent implements OnInit, OnDestroy {
     return !this.isCurrentUserCrate() && this.crate?.publicCrate === true;
   }
 
+  shouldShowAuthor(): boolean {
+    return !this.isCurrentUserCrate() && !!this.crate?.user;
+  }
+
+  getAuthorName(): string {
+    if (!this.crate?.user) return '';
+    return this.crate.user.handle || this.crate.user.spotifyId;
+  }
+
+  getAuthorId(): number | undefined {
+    return this.crate?.user?.id;
+  }
+
+  navigateToAuthor(authorId: number): void {
+    this.router.navigate(['/user', authorId]);
+  }
+
   protected readonly ListType = ListType;
 }

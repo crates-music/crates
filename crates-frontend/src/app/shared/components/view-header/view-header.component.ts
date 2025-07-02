@@ -21,6 +21,11 @@ export class ViewHeaderComponent {
   @Input() showShare: boolean = false;
   @Input() showCollection: boolean = false;
   @Input() crateId?: number;
+  @Input() collectorCount?: number;
+  @Input() showStats: boolean = false;
+  @Input() showAuthor: boolean = false;
+  @Input() authorName?: string;
+  @Input() authorId?: number;
   
   // Filter inputs
   @Input() hideCrated: boolean = false;
@@ -33,6 +38,7 @@ export class ViewHeaderComponent {
   @Output() settingsClick = new EventEmitter<void>();
   @Output() shareClick = new EventEmitter<void>();
   @Output() filterChange = new EventEmitter<boolean>();
+  @Output() authorClick = new EventEmitter<number>();
 
   // Expose ListType enum to template
   ListType = ListType;
@@ -62,5 +68,11 @@ export class ViewHeaderComponent {
   onFilterChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.filterChange.emit(target.checked);
+  }
+
+  onAuthorClick(): void {
+    if (this.authorId) {
+      this.authorClick.emit(this.authorId);
+    }
   }
 }

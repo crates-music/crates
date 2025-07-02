@@ -6,12 +6,42 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Copy to clipboard functionality
     window.copyToClipboard = function(text) {
-        navigator.clipboard.writeText(text).then(function() {
-            // You could show a toast notification here
-            console.log('Copied to clipboard');
-        }).catch(function(err) {
-            console.error('Could not copy text: ', err);
-        });
+        // Check if clipboard API is available (HTTPS required)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() {
+                console.log('Copied to clipboard');
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                fallbackCopyToClipboard(text);
+            });
+        } else {
+            fallbackCopyToClipboard(text);
+        }
+    };
+    
+    // Fallback copy to clipboard for HTTP or older browsers
+    window.fallbackCopyToClipboard = function(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                console.log('Fallback: Copied to clipboard');
+            } else {
+                console.error('Fallback: Copy failed');
+            }
+        } catch (err) {
+            console.error('Fallback: Copy failed', err);
+        }
+        
+        document.body.removeChild(textArea);
     };
     
     // Enhanced share functionality using Web Share API if available

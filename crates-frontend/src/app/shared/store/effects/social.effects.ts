@@ -78,6 +78,24 @@ export class SocialEffects {
     )
   );
 
+  loadUserSocialStats$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(SocialActions.loadUserSocialStats),
+      switchMap(action =>
+        this.socialService.getUserSocialStats(action.userId).pipe(
+          map(data => SocialActions.loadUserSocialStatsResult({
+            userId: action.userId,
+            response: { data, success: true }
+          })),
+          catchError(error => of(SocialActions.loadUserSocialStatsResult({
+            userId: action.userId,
+            response: { success: false, error }
+          })))
+        )
+      )
+    )
+  );
+
   searchUsers$ = createEffect(() =>
     this.actions$.pipe(
       ofType(SocialActions.searchUsers),

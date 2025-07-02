@@ -20,6 +20,7 @@ import { selectCrateCollectionStatus } from '../../shared/store/selectors/collec
 import * as CollectionActions from '../../shared/store/actions/collection.actions';
 import { ListType } from '../../shared/model/list-type.model';
 import { selectCurrentNavigationContext } from '../../shared/store/selectors/navigation.selectors';
+import { PublicLinkService } from '../../shared/services/public-link.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -40,7 +41,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private store: Store
+    private store: Store,
+    private publicLinkService: PublicLinkService
   ) {
     this.currentUserId$ = this.store.select(selectUser).pipe(
       map(user => user?.id || 0)
@@ -86,6 +88,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         this.store.dispatch(UserActions.loadUserPublicCrates({ userId }));
         this.store.dispatch(UserActions.loadUserPublicCollection({ userId }));
         this.store.dispatch(SocialActions.loadFollowStatus({ userId }));
+        this.store.dispatch(SocialActions.loadUserSocialStats({ userId }));
       }
     });
 
@@ -156,5 +159,10 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     } else {
       this.store.dispatch(CollectionActions.addCrateToCollection({ crateId: crate.id }));
     }
+  }
+
+  openPublicProfile(user: User): void {
+    const publicUrl = this.publicLinkService.getProfileUrl(user);
+    this.publicLinkService.openInNewTab(publicUrl);
   }
 }

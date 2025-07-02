@@ -19,6 +19,7 @@ import {
   addCrateToCollectionResult,
   removeCrateFromCollectionResult
 } from '../../../shared/store/actions/collection.actions';
+import { loadUserSocialStatsResult } from '../../../shared/store/actions/social.actions';
 
 export interface UserState {
   user: Loadable<User>;
@@ -187,6 +188,26 @@ const userReducer = createReducer(initialState,
       viewedUserCrates: {
         ...state.viewedUserCrates,
         value: updatedCrates
+      }
+    };
+  }),
+  
+  // Update viewed user with social stats
+  on(loadUserSocialStatsResult, (state, action): UserState => {
+    if (!action.response.success || !state.viewedUser.value || state.viewedUser.value.id !== action.userId) {
+      return state;
+    }
+    
+    const updatedUser = Object.assign(Object.create(Object.getPrototypeOf(state.viewedUser.value)), state.viewedUser.value, {
+      followerCount: action.response.data?.followerCount,
+      followingCount: action.response.data?.followingCount
+    });
+    
+    return {
+      ...state,
+      viewedUser: {
+        ...state.viewedUser,
+        value: updatedUser
       }
     };
   }));

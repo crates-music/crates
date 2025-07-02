@@ -23,9 +23,15 @@
                     {{if .user.Bio}}
                         <p class="mb-2 text-light">{{.user.Bio}}</p>
                     {{end}}
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
                         <p class="lead mb-0 text-light">
                             <span x-text="stats.totalCrates"></span> public crates
+                        </p>
+                        <p class="lead mb-0 text-light">
+                            {{.socialStats.FollowerCount}} followers
+                        </p>
+                        <p class="lead mb-0 text-light">
+                            {{.socialStats.FollowingCount}} following
                         </p>
                         <button type="button" 
                                 class="btn btn-link text-light p-1"

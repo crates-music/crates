@@ -287,6 +287,16 @@ func handleProfilePage(c *gin.Context) {
 		collection = &Page[Crate]{Content: []Crate{}}
 	}
 
+	// Fetch user social stats
+	socialStats, err := backendClient.GetUserSocialStats(username)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"username": username,
+			"action": "fetch_user_social_stats",
+		}).WithError(err).Warn("Failed to fetch user social stats, using zero values")
+		socialStats = &SocialStats{FollowingCount: 0, FollowerCount: 0}
+	}
+
 	c.HTML(http.StatusOK, "profile.html", gin.H{
 		"title":         user.DisplayName + " - Crates",
 		"user":          user,
@@ -294,6 +304,7 @@ func handleProfilePage(c *gin.Context) {
 		"hasMoreCrates": !crates.Last,
 		"collection":    collection.Content,
 		"hasMoreCollection": !collection.Last,
+		"socialStats":   socialStats,
 		"ogTitle":       user.DisplayName + " - Crates",
 		"ogDesc":        "Check out " + user.DisplayName + "'s music crates and collection",
 		"ogImage":       getFirstImage(user.Images),

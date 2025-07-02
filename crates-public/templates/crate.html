@@ -100,6 +100,8 @@
                         <p class="text-white-50 mb-0">
                             <span x-text="stats.totalAlbums"></span> albums
                             <span class="mx-2">•</span>
+                            {{.crate.FollowerCount}} {{ if eq .crate.FollowerCount 1 }}collector{{ else }}collectors{{ end }}
+                            <span class="mx-2">•</span>
                             {{if .isCollection}}
                                 Collected {{.crate.CreatedAt.Format "Jan 2, 2006"}}
                             {{else}}

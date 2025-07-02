@@ -20,7 +20,16 @@
               </div>
             </div>
             <div class="col">
-              <h2 class="card-title mb-1">{{ user.displayName }}</h2>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h2 class="card-title mb-0">{{ user.displayName }}</h2>
+                <button class="btn btn-link p-0 text-muted"
+                        *ngIf="(currentUserId$ | async) !== user.id"
+                        (click)="openPublicProfile(user)"
+                        title="View Public Profile"
+                        style="font-size: 1rem;">
+                  <i class="bi-box-arrow-up-right"></i>
+                </button>
+              </div>
               <p class="text-muted mb-1" *ngIf="user.handle">@{{ user.handle }}</p>
               <p class="text-muted mb-1" *ngIf="!user.handle">{{ user.spotifyId }}</p>
               <p class="card-text" *ngIf="user.bio">{{ user.bio }}</p>

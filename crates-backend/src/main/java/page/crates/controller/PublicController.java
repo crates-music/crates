@@ -21,6 +21,7 @@ import page.crates.exception.UnauthorizedAccessException;
 import page.crates.service.CrateCollectionService;
 import page.crates.service.CrateDecorator;
 import page.crates.service.CrateService;
+import page.crates.service.FollowService;
 import page.crates.service.UserService;
 
 @RestController
@@ -41,6 +42,8 @@ public class PublicController {
     private CrateDecorator crateDecorator;
     @Resource
     private CrateCollectionService crateCollectionService;
+    @Resource
+    private FollowService followService;
 
     @GetMapping("/user/{username}")
     public SpotifyUser getPublicUserProfile(@PathVariable String username) {
@@ -178,4 +181,18 @@ public class PublicController {
         return crateService.getPublicAlbums(crate.getId(), pageable)
                 .map(crateAlbumMapper::map);
     }
+
+    @GetMapping("/user/{username}/stats")
+    public SocialStats getPublicUserSocialStats(@PathVariable String username) {
+        log.info("Request received for public social stats for user: {}", username);
+        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
+        
+        Long followingCount = followService.getFollowingCount(user);
+        Long followerCount = followService.getFollowerCount(user);
+        
+        return new SocialStats(followingCount, followerCount);
+    }
+
+    // DTO classes
+    public record SocialStats(Long followingCount, Long followerCount) {}
 }

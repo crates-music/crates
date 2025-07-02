@@ -48,15 +48,19 @@ public class CrateDecoratorImpl implements CrateDecorator {
                     .orElse(null));
         }
         
+        // Set collector count (follower count)
+        page.crates.entity.Crate crateEntity = crateRepository.findById(crate.getId()).orElse(null);
+        if (crateEntity != null) {
+            Long collectorCount = crateCollectionService.getCrateFollowerCount(crateEntity);
+            crate.setFollowerCount(collectorCount.intValue());
+        }
+        
         // Set collection status for current user
         try {
             SpotifyUser currentUser = currentUserService.getCurrentUser();
-            if (currentUser != null) {
-                page.crates.entity.Crate crateEntity = crateRepository.findById(crate.getId()).orElse(null);
-                if (crateEntity != null) {
-                    boolean collected = crateCollectionService.isInCollection(currentUser, crateEntity);
-                    crate.setCollected(collected);
-                }
+            if (currentUser != null && crateEntity != null) {
+                boolean collected = crateCollectionService.isInCollection(currentUser, crateEntity);
+                crate.setCollected(collected);
             }
         } catch (Exception e) {
             // If there's no current user or any authentication issues, default to false

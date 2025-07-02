@@ -14,10 +14,16 @@
         [showSettings]="isCurrentUserCrate()"
         [showCollection]="shouldShowCollectionButton()"
         [crateId]="crate.id"
+        [showStats]="true"
+        [collectorCount]="crate.followerCount"
+        [showAuthor]="shouldShowAuthor()"
+        [authorName]="getAuthorName()"
+        [authorId]="getAuthorId()"
         (search)="handleSearch($event)"
         (listTypeToggle)="toggleCrateListType($event)"
         (shareClick)="shareCrate()"
-        (settingsClick)="openSettings()">
+        (settingsClick)="openSettings()"
+        (authorClick)="navigateToAuthor($event)">
       </crates-view-header>
     </div>
 

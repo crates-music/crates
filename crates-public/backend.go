@@ -34,16 +34,17 @@ type PublicUser struct {
 }
 
 type Crate struct {
-	ID          int64     `json:"id"`
-	Name        string    `json:"name"`
-	Handle      string    `json:"handle"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	State       string    `json:"state"`
-	ImageURI    string    `json:"imageUri"`
-	PublicCrate bool      `json:"publicCrate"`
-	Description *string   `json:"description"`
-	User        *PublicUser `json:"user"`
+	ID            int64     `json:"id"`
+	Name          string    `json:"name"`
+	Handle        string    `json:"handle"`
+	CreatedAt     time.Time `json:"createdAt"`
+	UpdatedAt     time.Time `json:"updatedAt"`
+	State         string    `json:"state"`
+	ImageURI      string    `json:"imageUri"`
+	PublicCrate   bool      `json:"publicCrate"`
+	Description   *string   `json:"description"`
+	User          *PublicUser `json:"user"`
+	FollowerCount int       `json:"followerCount"`
 }
 
 type Album struct {
@@ -93,6 +94,11 @@ type Page[T any] struct {
 	First            bool `json:"first"`
 	Last             bool `json:"last"`
 	Empty            bool `json:"empty"`
+}
+
+type SocialStats struct {
+	FollowingCount int64 `json:"followingCount"`
+	FollowerCount  int64 `json:"followerCount"`
 }
 
 func NewBackendClient() *BackendClient {
@@ -278,6 +284,21 @@ func (bc *BackendClient) GetCollectionCrateAlbums(username, handle string, page,
 	}
 
 	return &albums, nil
+}
+
+func (bc *BackendClient) GetUserSocialStats(username string) (*SocialStats, error) {
+	url := fmt.Sprintf("/v1/public/user/%s/stats", username)
+	body, err := bc.makeRequest(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var stats SocialStats
+	if err := json.Unmarshal(body, &stats); err != nil {
+		return nil, fmt.Errorf("failed to parse social stats response: %w", err)
+	}
+
+	return &stats, nil
 }
 
 func getPageFromQuery(query string) int {

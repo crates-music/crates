@@ -48,6 +48,27 @@
       <p class="mb-0 text-muted">{{ description }}</p>
     </div>
 
+    <!-- Author Row -->
+    <div class="author-row" *ngIf="showAuthor && authorName">
+      <p class="mb-0 text-muted">
+        by 
+        <button class="btn btn-link p-0 text-primary fw-semibold"
+                (click)="onAuthorClick()"
+                [disabled]="!authorId"
+                style="vertical-align: baseline; font-size: inherit;">
+          {{ authorName }}
+        </button>
+      </p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row" *ngIf="showStats && collectorCount !== undefined">
+      <p class="mb-0 text-muted">
+        <i class="bi-people me-1"></i>
+        {{ collectorCount }} {{ collectorCount === 1 ? 'collector' : 'collectors' }}
+      </p>
+    </div>
+
     <!-- Search and Controls Row -->
     <div class="search-controls-row align-items-center" *ngIf="showSearch || showListToggle">
       <div class="search-section" *ngIf="showSearch">
