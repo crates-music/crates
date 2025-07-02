@@ -90,6 +90,23 @@ public class CrateEventServiceImpl implements CrateEventService {
     }
 
     @Override
+    public CrateEvent recordUserFollowed(SpotifyUser follower, SpotifyUser followedUser) {
+        log.info("Recording user followed event for follower {} and followed user {}", 
+                follower.getId(), followedUser.getId());
+        
+        CrateEvent event = CrateEvent.builder()
+                .user(follower)
+                .followedUser(followedUser)
+                .eventType(CrateEventType.USER_FOLLOWED)
+                .createdAt(Instant.now())
+                .build();
+        
+        CrateEvent saved = crateEventRepository.save(event);
+        log.debug("Recorded user followed event with ID {}", saved.getId());
+        return saved;
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Page<CrateEvent> getUserEvents(SpotifyUser user, Pageable pageable) {
         return crateEventRepository.findByUser(user, pageable);
