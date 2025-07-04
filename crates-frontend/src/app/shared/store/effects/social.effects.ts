@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, map, exhaustMap, switchMap } from 'rxjs/operators';
+import { catchError, map, exhaustMap, switchMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { SocialService } from '../../services/social.service';
 import * as SocialActions from '../actions/social.actions';
@@ -141,6 +141,20 @@ export class SocialEffects {
           })))
         )
       )
+    )
+  );
+
+  // Reload user stats after successful follow/unfollow actions
+  reloadUserStatsAfterFollowAction$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(SocialActions.followUserResult, SocialActions.unfollowUserResult),
+      switchMap(action => {
+        if (action.response.success) {
+          // Reload the target user's social stats to get accurate counts from API
+          return of(SocialActions.loadUserSocialStats({ userId: action.userId }));
+        }
+        return of(); // Do nothing if action failed
+      })
     )
   );
 

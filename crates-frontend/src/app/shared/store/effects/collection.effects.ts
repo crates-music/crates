@@ -4,6 +4,7 @@ import { catchError, map, exhaustMap, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { CollectionService } from '../../services/collection.service';
 import * as CollectionActions from '../actions/collection.actions';
+import * as CrateActions from '../../../crate/store/actions/load-crates.actions';
 
 @Injectable()
 export class CollectionEffects {
@@ -75,6 +76,20 @@ export class CollectionEffects {
           })))
         )
       )
+    )
+  );
+
+  // Reload crate data after successful collection changes
+  reloadCrateAfterCollectionChange$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CollectionActions.addCrateToCollectionResult, CollectionActions.removeCrateFromCollectionResult),
+      switchMap(action => {
+        if (action.response.success) {
+          // Reload the specific crate to get updated follower count from API
+          return of(CrateActions.loadCrate({ id: action.crateId }));
+        }
+        return of(); // Do nothing if action failed
+      })
     )
   );
 

@@ -19,7 +19,11 @@ import {
   addCrateToCollectionResult,
   removeCrateFromCollectionResult
 } from '../../../shared/store/actions/collection.actions';
-import { loadUserSocialStatsResult } from '../../../shared/store/actions/social.actions';
+import { 
+  loadUserSocialStatsResult,
+  followUserResult,
+  unfollowUserResult
+} from '../../../shared/store/actions/social.actions';
 
 export interface UserState {
   user: Loadable<User>;
@@ -149,7 +153,7 @@ const userReducer = createReducer(initialState,
     };
   }),
   
-  // Collection actions - update crate.collected field in viewedUserCrates
+  // Collection actions - update crate.collected field and follower count in viewedUserCrates
   on(addCrateToCollectionResult, (state, action): UserState => {
     if (!action.response.success || !state.viewedUserCrates.value) {
       return state;
@@ -158,7 +162,11 @@ const userReducer = createReducer(initialState,
     // Find and update the crate in viewedUserCrates
     const updatedCrates = state.viewedUserCrates.value.map(crate => 
       crate.id === action.crateId 
-        ? { ...crate, collected: true }
+        ? { 
+            ...crate, 
+            collected: true,
+            followerCount: (crate.followerCount || 0) + 1
+          }
         : crate
     );
     
@@ -179,7 +187,11 @@ const userReducer = createReducer(initialState,
     // Find and update the crate in viewedUserCrates
     const updatedCrates = state.viewedUserCrates.value.map(crate => 
       crate.id === action.crateId 
-        ? { ...crate, collected: false }
+        ? { 
+            ...crate, 
+            collected: false,
+            followerCount: Math.max(0, (crate.followerCount || 0) - 1)
+          }
         : crate
     );
     
@@ -201,6 +213,44 @@ const userReducer = createReducer(initialState,
     const updatedUser = Object.assign(Object.create(Object.getPrototypeOf(state.viewedUser.value)), state.viewedUser.value, {
       followerCount: action.response.data?.followerCount,
       followingCount: action.response.data?.followingCount
+    });
+    
+    return {
+      ...state,
+      viewedUser: {
+        ...state.viewedUser,
+        value: updatedUser
+      }
+    };
+  }),
+  
+  // Update viewed user follower count optimistically on follow actions
+  on(followUserResult, (state, action): UserState => {
+    if (!action.response.success || !state.viewedUser.value || state.viewedUser.value.id !== action.userId) {
+      return state;
+    }
+    
+    const updatedUser = Object.assign(Object.create(Object.getPrototypeOf(state.viewedUser.value)), state.viewedUser.value, {
+      followerCount: (state.viewedUser.value.followerCount || 0) + 1
+    });
+    
+    return {
+      ...state,
+      viewedUser: {
+        ...state.viewedUser,
+        value: updatedUser
+      }
+    };
+  }),
+  
+  // Update viewed user follower count optimistically on unfollow actions
+  on(unfollowUserResult, (state, action): UserState => {
+    if (!action.response.success || !state.viewedUser.value || state.viewedUser.value.id !== action.userId) {
+      return state;
+    }
+    
+    const updatedUser = Object.assign(Object.create(Object.getPrototypeOf(state.viewedUser.value)), state.viewedUser.value, {
+      followerCount: Math.max(0, (state.viewedUser.value.followerCount || 0) - 1)
     });
     
     return {

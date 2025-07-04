@@ -14,6 +14,10 @@ export interface SocialState {
   socialStats: SocialStats | null;
   statsLoading: boolean;
   
+  // User social stats by user ID (for optimistic updates)
+  userSocialStats: { [userId: number]: SocialStats };
+  userStatsLoading: { [userId: number]: boolean };
+  
   // User search results
   searchResults: Page<User> | null;
   searchLoading: boolean;
@@ -34,6 +38,8 @@ export const initialState: SocialState = {
   followLoading: {},
   socialStats: null,
   statsLoading: false,
+  userSocialStats: {},
+  userStatsLoading: {},
   searchResults: null,
   searchLoading: false,
   following: null,
@@ -47,38 +53,106 @@ export const socialReducer = createReducer(
   initialState,
   
   // Follow User
-  on(SocialActions.followUser, (state, { userId }) => ({
-    ...state,
-    followLoading: { ...state.followLoading, [userId]: true },
-    error: null
-  })),
+  on(SocialActions.followUser, (state, { userId }) => {
+    // Optimistic update: increment follower count for the target user
+    const currentStats = state.userSocialStats[userId];
+    const updatedStats = currentStats ? {
+      ...currentStats,
+      followerCount: (currentStats.followerCount || 0) + 1
+    } : null;
+    
+    return {
+      ...state,
+      followLoading: { ...state.followLoading, [userId]: true },
+      userSocialStats: updatedStats ? {
+        ...state.userSocialStats,
+        [userId]: updatedStats
+      } : state.userSocialStats,
+      error: null
+    };
+  }),
   
-  on(SocialActions.followUserResult, (state, { userId, response }) => ({
-    ...state,
-    followLoading: { ...state.followLoading, [userId]: false },
-    followStatus: response.success ? { 
-      ...state.followStatus, 
-      [userId]: { isFollowing: true }
-    } : state.followStatus,
-    error: response.success ? null : response.error
-  })),
+  on(SocialActions.followUserResult, (state, { userId, response }) => {
+    // If API call failed, revert optimistic update
+    if (!response.success) {
+      const currentStats = state.userSocialStats[userId];
+      const revertedStats = currentStats ? {
+        ...currentStats,
+        followerCount: Math.max(0, (currentStats.followerCount || 0) - 1)
+      } : null;
+      
+      return {
+        ...state,
+        followLoading: { ...state.followLoading, [userId]: false },
+        userSocialStats: revertedStats ? {
+          ...state.userSocialStats,
+          [userId]: revertedStats
+        } : state.userSocialStats,
+        error: response.error
+      };
+    }
+    
+    return {
+      ...state,
+      followLoading: { ...state.followLoading, [userId]: false },
+      followStatus: { 
+        ...state.followStatus, 
+        [userId]: { isFollowing: true }
+      },
+      error: null
+    };
+  }),
   
   // Unfollow User
-  on(SocialActions.unfollowUser, (state, { userId }) => ({
-    ...state,
-    followLoading: { ...state.followLoading, [userId]: true },
-    error: null
-  })),
+  on(SocialActions.unfollowUser, (state, { userId }) => {
+    // Optimistic update: decrement follower count for the target user
+    const currentStats = state.userSocialStats[userId];
+    const updatedStats = currentStats ? {
+      ...currentStats,
+      followerCount: Math.max(0, (currentStats.followerCount || 0) - 1)
+    } : null;
+    
+    return {
+      ...state,
+      followLoading: { ...state.followLoading, [userId]: true },
+      userSocialStats: updatedStats ? {
+        ...state.userSocialStats,
+        [userId]: updatedStats
+      } : state.userSocialStats,
+      error: null
+    };
+  }),
   
-  on(SocialActions.unfollowUserResult, (state, { userId, response }) => ({
-    ...state,
-    followLoading: { ...state.followLoading, [userId]: false },
-    followStatus: response.success ? { 
-      ...state.followStatus, 
-      [userId]: { isFollowing: false }
-    } : state.followStatus,
-    error: response.success ? null : response.error
-  })),
+  on(SocialActions.unfollowUserResult, (state, { userId, response }) => {
+    // If API call failed, revert optimistic update
+    if (!response.success) {
+      const currentStats = state.userSocialStats[userId];
+      const revertedStats = currentStats ? {
+        ...currentStats,
+        followerCount: (currentStats.followerCount || 0) + 1
+      } : null;
+      
+      return {
+        ...state,
+        followLoading: { ...state.followLoading, [userId]: false },
+        userSocialStats: revertedStats ? {
+          ...state.userSocialStats,
+          [userId]: revertedStats
+        } : state.userSocialStats,
+        error: response.error
+      };
+    }
+    
+    return {
+      ...state,
+      followLoading: { ...state.followLoading, [userId]: false },
+      followStatus: { 
+        ...state.followStatus, 
+        [userId]: { isFollowing: false }
+      },
+      error: null
+    };
+  }),
   
   // Load Follow Status
   on(SocialActions.loadFollowStatus, (state, { userId }) => ({
@@ -107,6 +181,23 @@ export const socialReducer = createReducer(
     ...state,
     statsLoading: false,
     socialStats: response.success ? response.data! : null,
+    error: response.success ? null : response.error
+  })),
+  
+  // Load User Social Stats
+  on(SocialActions.loadUserSocialStats, (state, { userId }) => ({
+    ...state,
+    userStatsLoading: { ...state.userStatsLoading, [userId]: true },
+    error: null
+  })),
+  
+  on(SocialActions.loadUserSocialStatsResult, (state, { userId, response }) => ({
+    ...state,
+    userStatsLoading: { ...state.userStatsLoading, [userId]: false },
+    userSocialStats: response.success ? {
+      ...state.userSocialStats,
+      [userId]: response.data!
+    } : state.userSocialStats,
     error: response.success ? null : response.error
   })),
   
@@ -169,6 +260,8 @@ export const getFollowStatus = (state: SocialState) => state.followStatus;
 export const getFollowLoading = (state: SocialState) => state.followLoading;
 export const getSocialStats = (state: SocialState) => state.socialStats;
 export const getStatsLoading = (state: SocialState) => state.statsLoading;
+export const getUserSocialStats = (state: SocialState) => state.userSocialStats;
+export const getUserStatsLoading = (state: SocialState) => state.userStatsLoading;
 export const getSearchResults = (state: SocialState) => state.searchResults;
 export const getSearchLoading = (state: SocialState) => state.searchLoading;
 export const getFollowing = (state: SocialState) => state.following;

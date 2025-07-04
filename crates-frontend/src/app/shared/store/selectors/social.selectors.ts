@@ -36,6 +36,27 @@ export const selectStatsLoading = createSelector(
   fromSocial.getStatsLoading
 );
 
+// User Social Stats Selectors
+export const selectUserSocialStats = createSelector(
+  selectSocialState,
+  fromSocial.getUserSocialStats
+);
+
+export const selectUserStatsLoading = createSelector(
+  selectSocialState,
+  fromSocial.getUserStatsLoading
+);
+
+export const selectUserSocialStatsById = (userId: number) => createSelector(
+  selectUserSocialStats,
+  (userStats) => userStats[userId] || null
+);
+
+export const selectUserStatsLoadingById = (userId: number) => createSelector(
+  selectUserStatsLoading,
+  (userStatsLoading) => userStatsLoading[userId] || false
+);
+
 // User Search Selectors
 export const selectSearchResults = createSelector(
   selectSocialState,

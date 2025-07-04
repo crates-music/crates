@@ -25,6 +25,17 @@ export const selectCrateCollectionLoading = (crateId: number) => createSelector(
   (collectionLoading) => collectionLoading[crateId] || false
 );
 
+// Crate Follower Count Selectors
+export const selectCrateFollowerCounts = createSelector(
+  selectCollectionState,
+  fromCollection.getCrateFollowerCounts
+);
+
+export const selectCrateFollowerCount = (crateId: number) => createSelector(
+  selectCrateFollowerCounts,
+  (followerCounts) => followerCounts[crateId] || null
+);
+
 // My Collection Selectors
 export const selectMyCollection = createSelector(
   selectCollectionState,
