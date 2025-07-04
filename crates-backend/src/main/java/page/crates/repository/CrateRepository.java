@@ -14,30 +14,26 @@ import java.util.Optional;
 public interface CrateRepository extends JpaRepository<Crate, Long> {
     @Query("SELECT c FROM Crate c " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
-           "  AND c.user = :user " +
-           "ORDER BY c.createdAt DESC")
+           "  AND c.user = :user")
     Page<Crate> findActiveByUser(SpotifyUser user, Pageable pageable);
 
     @Query("SELECT c FROM Crate c " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
            "  AND c.user = :user " +
-           "  AND c.name ILIKE CONCAT('%', :search, '%') " +
-           "ORDER BY c.createdAt DESC")
+           "  AND c.name ILIKE CONCAT('%', :search, '%')")
     Page<Crate> findActiveByUserAndNameLike(SpotifyUser user, String search, Pageable pageable);
 
     @Query("SELECT c FROM Crate c " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
            "  AND c.user = :user " +
-           "  AND c.publicCrate = true " +
-           "ORDER BY c.createdAt DESC")
+           "  AND c.publicCrate = true")
     Page<Crate> findPublicByUser(SpotifyUser user, Pageable pageable);
 
     @Query("SELECT c FROM Crate c " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
            "  AND c.user = :user " +
            "  AND c.publicCrate = true " +
-           "  AND c.name ILIKE CONCAT('%', :search, '%') " +
-           "ORDER BY c.createdAt DESC")
+           "  AND c.name ILIKE CONCAT('%', :search, '%')")
     Page<Crate> findPublicByUserAndNameLike(SpotifyUser user, String search, Pageable pageable);
 
     @Query("SELECT c FROM Crate c " +
