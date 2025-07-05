@@ -273,4 +273,23 @@ public class CrateServiceImpl implements CrateService {
         }
         return crateRepository.findPublicByUser(user, pageable);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Crate> findAllPublicByTrending(Pageable pageable) {
+        return crateRepository.findAllPublicCratesByTrending(pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Crate> searchAllPublicByTrending(String search, Pageable pageable) {
+        return crateRepository.findAllPublicCratesWithUnifiedSearchByTrending(search, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Crate findById(Long id) {
+        return crateRepository.findById(id)
+                .orElseThrow(() -> new CrateNotFoundException(id));
+    }
 }

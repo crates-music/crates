@@ -18,6 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import page.crates.entity.enums.CrateState;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Data
@@ -54,4 +55,8 @@ public class Crate {
     private String description;
     @Column(name = "follower_count", nullable = false)
     private long followerCount;
+    @Column(name = "trending_score", nullable = false)
+    private BigDecimal trendingScore;
+    @Column(name = "last_trending_update", nullable = false)
+    private Instant lastTrendingUpdate;
 }

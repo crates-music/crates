@@ -9,8 +9,10 @@ import { UnifiedSearchResponse } from '../shared/model/unified-search.model';
 import { User } from '../user/shared/model/user.model';
 import { Crate } from '../crate/shared/model/crate.model';
 import * as SearchActions from '../shared/store/actions/search.actions';
+import * as TrendingActions from '../shared/store/actions/trending.actions';
 import * as NavigationActions from '../shared/store/actions/navigation.actions';
 import { selectSearchQuery, selectSearchResults, selectSearchLoading, selectSearchUsers, selectSearchCrates } from '../shared/store/selectors/search.selectors';
+import { selectTrendingCrates, selectTrendingCratesLoading, selectRecentCrates, selectRecentCratesLoading } from '../shared/store/selectors/trending.selectors';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -29,6 +31,16 @@ export class DiscoverComponent implements OnInit, OnDestroy {
   loading$: Observable<boolean>;
   users$: Observable<User[]>;
   crates$: Observable<Crate[]>;
+  
+  // Trending data
+  trendingCrates$: Observable<Crate[]>;
+  trendingLoading$: Observable<boolean>;
+  recentCrates$: Observable<Crate[]>;
+  recentLoading$: Observable<boolean>;
+  selectedTab: 'trending' | 'recent' = 'trending';
+  
+  // Search state
+  isSearchActive: boolean = false;
 
   constructor(
     private store: Store,
@@ -40,11 +52,20 @@ export class DiscoverComponent implements OnInit, OnDestroy {
     this.loading$ = this.store.select(selectSearchLoading);
     this.users$ = this.store.select(selectSearchUsers);
     this.crates$ = this.store.select(selectSearchCrates);
+    
+    // Trending selectors
+    this.trendingCrates$ = this.store.select(selectTrendingCrates);
+    this.trendingLoading$ = this.store.select(selectTrendingCratesLoading);
+    this.recentCrates$ = this.store.select(selectRecentCrates);
+    this.recentLoading$ = this.store.select(selectRecentCratesLoading);
   }
 
   ngOnInit() {
     // Set navigation context to 'discover'
     this.store.dispatch(NavigationActions.setNavigationContext({ context: 'discover' }));
+
+    // Load trending crates on init
+    this.loadTrendingCrates();
 
     // Restore search query from store if it exists
     this.store.select(selectSearchQuery).pipe(
@@ -53,6 +74,7 @@ export class DiscoverComponent implements OnInit, OnDestroy {
       if (storedQuery && storedQuery.trim().length > 0 && storedQuery !== this.searchControl.value) {
         // Set the search control value without triggering valueChanges (results are already in store)
         this.searchControl.setValue(storedQuery, { emitEvent: false });
+        this.isSearchActive = true;
       }
     });
 
@@ -62,7 +84,10 @@ export class DiscoverComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
       takeUntil(this.destroy$)
     ).subscribe(query => {
-      if (query && query.trim().length > 0) {
+      const hasQuery = query && query.trim().length > 0;
+      this.isSearchActive = hasQuery;
+      
+      if (hasQuery) {
         this.performSearch(query.trim());
       } else {
         this.store.dispatch(SearchActions.clearSearch());
@@ -98,6 +123,9 @@ export class DiscoverComponent implements OnInit, OnDestroy {
   }
 
   openCrate(crate: Crate) {
+    // Record the view for analytics
+    this.store.dispatch(TrendingActions.recordCrateView({ crateId: crate.id }));
+    
     // Track that we're navigating to this crate from discover context
     this.store.dispatch(NavigationActions.trackCrateNavigation({ 
       crateId: crate.id, 
@@ -118,6 +146,7 @@ export class DiscoverComponent implements OnInit, OnDestroy {
   private clearAndFocusSearch(): void {
     // Clear search control and store
     this.searchControl.setValue('', { emitEvent: false });
+    this.isSearchActive = false;
     this.store.dispatch(SearchActions.clearSearch());
     
     // Focus the search input
@@ -125,4 +154,29 @@ export class DiscoverComponent implements OnInit, OnDestroy {
       this.searchInput.nativeElement.focus();
     }
   }
+
+  private loadTrendingCrates(): void {
+    const pageable = Pageable.of(0, DEFAULT_PAGE_SIZE);
+    this.store.dispatch(TrendingActions.loadTrendingCrates({ pageable }));
+  }
+
+  switchTab(tab: 'trending' | 'recent'): void {
+    this.selectedTab = tab;
+    const pageable = Pageable.of(0, DEFAULT_PAGE_SIZE);
+    
+    if (tab === 'trending') {
+      this.store.dispatch(TrendingActions.loadTrendingCrates({ pageable }));
+    } else {
+      this.store.dispatch(TrendingActions.loadRecentCrates({ pageable }));
+    }
+  }
+
+  getCurrentCrates$(): Observable<Crate[]> {
+    return this.selectedTab === 'trending' ? this.trendingCrates$ : this.recentCrates$;
+  }
+
+  getCurrentLoading$(): Observable<boolean> {
+    return this.selectedTab === 'trending' ? this.trendingLoading$ : this.recentLoading$;
+  }
+
 }

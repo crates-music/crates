@@ -15,6 +15,7 @@ import { SocialEffects } from './shared/store/effects/social.effects';
 import { CollectionEffects } from './shared/store/effects/collection.effects';
 import { DiscoverEffects } from './shared/store/effects/discover.effects';
 import { SearchEffects } from './shared/store/effects/search.effects';
+import { TrendingEffects } from './shared/store/effects/trending.effects';
 import { ActivityEffects } from './shared/store/effects/activity.effects';
 import { MobileFooterComponent } from './layout/mobile-footer/mobile-footer.component';
 import { SharedModule } from './shared/shared.module';
@@ -39,6 +40,7 @@ import { SharedModule } from './shared/shared.module';
       CollectionEffects,
       DiscoverEffects,
       SearchEffects,
+      TrendingEffects,
       ActivityEffects
     ]),
     StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: !isDevMode() }),

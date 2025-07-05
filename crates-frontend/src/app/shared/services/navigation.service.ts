@@ -178,18 +178,24 @@ export class NavigationService implements OnDestroy {
    * Initialize tab tracking based on context and URL changes
    */
   private initializeTabTracking(): void {
-    // Subscribe to navigation context changes
+    // Subscribe to navigation context changes - context takes priority
     this.currentNavigationContext$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(context => {
-      this.updateCurrentTabFromContext(context);
+      if (context) {
+        this.updateCurrentTabFromContext(context);
+      } else {
+        // No context set, fall back to URL
+        this.updateCurrentTabFromUrl();
+      }
     });
 
-    // Fallback to URL parsing if no context is set (for direct navigation)
+    // Also listen to router events for direct navigation
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       takeUntil(this.destroy$)
     ).subscribe(() => {
+      // Set initial tab on page load/refresh
       this.updateCurrentTabFromUrl();
     });
   }
@@ -197,17 +203,10 @@ export class NavigationService implements OnDestroy {
   /**
    * Update current tab based on navigation context
    */
-  private updateCurrentTabFromContext(context: NavigationContext | null): void {
-    if (!context) {
-      return; // Let URL parsing handle it
-    }
-
+  private updateCurrentTabFromContext(context: NavigationContext): void {
     const tabConfig = this.tabs.find(tab => tab.context === context);
     if (tabConfig) {
       this.currentTab$.next(tabConfig.id);
-    } else {
-      // Fallback to URL parsing if unknown context
-      this.updateCurrentTabFromUrl();
     }
   }
 
@@ -215,31 +214,24 @@ export class NavigationService implements OnDestroy {
    * Update current tab based on current URL (fallback method)
    */
   private updateCurrentTabFromUrl(): void {
-    // Only update from URL if no navigation context is set
-    this.currentNavigationContext$.pipe(takeUntil(this.destroy$)).subscribe(context => {
-      if (context) {
-        return; // Context takes precedence
-      }
-
-      const segments = this.router.routerState.snapshot.url.split('/');
-      const url = this.router.routerState.snapshot.url;
-      
-      if (segments.includes('crate')) {
-        this.currentTab$.next(Tab.Crates);
-      } else if (segments.includes('library')) {
-        this.currentTab$.next(Tab.Library);
-      } else if (segments.includes('activity')) {
-        this.currentTab$.next(Tab.Activity);
-      } else if (segments.includes('discover')) {
-        this.currentTab$.next(Tab.Discover);
-      } else if (url.includes('/user/profile/settings')) {
-        this.currentTab$.next(Tab.Profile);
-      } else if (segments.includes('user')) {
-        // For other user routes (viewing other users), don't set any tab
-        this.currentTab$.next(undefined);
-      } else if (segments.includes('auth')) {
-        this.currentTab$.next(undefined);
-      }
-    });
+    const segments = this.router.routerState.snapshot.url.split('/');
+    const url = this.router.routerState.snapshot.url;
+    
+    if (segments.includes('crate')) {
+      this.currentTab$.next(Tab.Crates);
+    } else if (segments.includes('library')) {
+      this.currentTab$.next(Tab.Library);
+    } else if (segments.includes('activity')) {
+      this.currentTab$.next(Tab.Activity);
+    } else if (segments.includes('discover')) {
+      this.currentTab$.next(Tab.Discover);
+    } else if (url.includes('/user/profile/settings')) {
+      this.currentTab$.next(Tab.Profile);
+    } else if (segments.includes('user')) {
+      // For other user routes (viewing other users), don't set any tab
+      this.currentTab$.next(undefined);
+    } else if (segments.includes('auth')) {
+      this.currentTab$.next(undefined);
+    }
   }
 }

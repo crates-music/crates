@@ -2,7 +2,7 @@
 <div class="search-header p-3">
   <h2 class="mb-3">
     <i class="bi-search me-2"></i>
-    Search Everything
+    Discover
   </h2>
   
   <!-- Search Input -->
@@ -117,10 +117,76 @@
   </div>
 </div>
 
-<!-- Initial State -->
-<div *ngIf="!(query$ | async)" class="initial-state text-center py-5">
-  <i class="bi-search fs-1 text-muted mb-3"></i>
-  <h4 class="text-muted mb-3">Search Everything</h4>
-  <p class="text-muted">Find users, crates, albums, and artists all in one place</p>
-  <p class="text-muted small">Search across crate names, descriptions, and all the albums and artists within them</p>
+<!-- Trending Crates (when not searching) -->
+<div *ngIf="!isSearchActive" class="trending-section">
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <nav class="nav nav-pills nav-justified">
+      <button 
+        class="nav-link"
+        [class.active]="selectedTab === 'trending'"
+        (click)="switchTab('trending')"
+        type="button">
+        <i class="bi-fire me-1"></i>
+        Trending
+      </button>
+      <button 
+        class="nav-link"
+        [class.active]="selectedTab === 'recent'"
+        (click)="switchTab('recent')"
+        type="button">
+        <i class="bi-clock me-1"></i>
+        Recent
+      </button>
+    </nav>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="getCurrentLoading$() | async" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted mt-2 mb-0">Loading {{ selectedTab }} crates...</p>
+  </div>
+
+  <!-- Crates Grid -->
+  <div *ngIf="!(getCurrentLoading$() | async)" class="crate-grid-container p-3">
+    <div class="row">
+      <div 
+        *ngFor="let crate of getCurrentCrates$() | async; trackBy: trackByCrateId; let i = index"
+        class="col-6 col-sm-6 col-md-4 col-xl-3 p-0">
+        <div class="item-card-container m-2">
+          <div class="card item-card" (click)="openCrate(crate)">
+            <div class="item-image-container">
+              <img 
+                class="item-image" 
+                [src]="crate.imageUri || 'assets/images/crate-placeholder.webp'" 
+                [alt]="crate.name"/>
+              <!-- Ranking Badge -->
+              <div class="position-absolute top-0 start-0 ranking-badge">
+                <span class="badge bg-primary">{{ i + 1 }}</span>
+              </div>
+              <div class="card-img-overlay d-flex align-items-end p-0">
+                <div class="w-100 item-gradient p-3">
+                  <h6 class="card-title text-white mb-1 fw-bold">{{ crate.name }}</h6>
+                  <p class="card-text text-white-50 small mb-1" *ngIf="crate.description">{{ crate.description }}</p>
+                  <p class="card-text text-white-50 small mb-0">
+                    by {{ crate.user?.displayName }} • 
+                    <i class="bi-collection me-1"></i>{{ crate.followerCount }} collector{{ crate.followerCount !== 1 ? 's' : '' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="(getCurrentCrates$() | async)?.length === 0" class="text-center py-5">
+      <i class="bi-box-seam fs-1 text-muted mb-3"></i>
+      <h5 class="text-muted mb-2">No {{ selectedTab }} crates yet</h5>
+      <p class="text-muted small">Check back later for amazing music discoveries</p>
+    </div>
+  </div>
 </div>

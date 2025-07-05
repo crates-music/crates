@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -99,6 +100,12 @@ type Page[T any] struct {
 type SocialStats struct {
 	FollowingCount int64 `json:"followingCount"`
 	FollowerCount  int64 `json:"followerCount"`
+}
+
+type ViewRequest struct {
+	IPAddress string `json:"ipAddress"`
+	UserAgent string `json:"userAgent"`
+	Referrer  string `json:"referrer"`
 }
 
 func NewBackendClient() *BackendClient {
@@ -225,6 +232,57 @@ func (bc *BackendClient) GetAllPublicCrates(page, size int, sort string) (*Page[
 	}
 
 	return &crates, nil
+}
+
+func (bc *BackendClient) GetTrendingCrates(page, size int) (*Page[Crate], error) {
+	url := fmt.Sprintf("/v1/public/crates/trending?page=%d&size=%d", page, size)
+
+	body, err := bc.makeRequest(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var crates Page[Crate]
+	if err := json.Unmarshal(body, &crates); err != nil {
+		return nil, fmt.Errorf("failed to parse trending crates response: %w", err)
+	}
+
+	return &crates, nil
+}
+
+func (bc *BackendClient) RecordCrateView(crateID int64, ipAddress, userAgent, referrer string) error {
+	url := fmt.Sprintf("/v1/public/crate/%d/view", crateID)
+	
+	viewRequest := ViewRequest{
+		IPAddress: ipAddress,
+		UserAgent: userAgent,
+		Referrer:  referrer,
+	}
+	
+	jsonData, err := json.Marshal(viewRequest)
+	if err != nil {
+		return fmt.Errorf("failed to marshal view request: %w", err)
+	}
+	
+	req, err := http.NewRequest("POST", bc.BaseURL+url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	
+	req.Header.Set("Content-Type", "application/json")
+	
+	resp, err := bc.HTTPClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	
+	// Don't fail on view tracking errors - just log them
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("view recording failed with status: %d", resp.StatusCode)
+	}
+	
+	return nil
 }
 
 func (bc *BackendClient) GetUserCollection(username string, page, size int, search, sort string) (*Page[Crate], error) {

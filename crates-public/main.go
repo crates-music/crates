@@ -344,6 +344,17 @@ func handleCratePage(c *gin.Context) {
 		return
 	}
 
+	// Record the view for analytics (async, don't block page load)
+	go func() {
+		err := backendClient.RecordCrateView(crate.ID, c.ClientIP(), c.Request.UserAgent(), c.Request.Referer())
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"crateID": crate.ID,
+				"action": "record_crate_view",
+			}).WithError(err).Debug("Failed to record crate view")
+		}
+	}()
+
 	// Fetch initial albums (first page)
 	albums, err := backendClient.GetCrateAlbums(username, handle, 0, 20, "", "createdAt,desc")
 	if err != nil {
@@ -414,16 +425,26 @@ func handleCrateAlbumsAPI(c *gin.Context) {
 func handleHomePage(c *gin.Context) {
 	logrus.WithField("action", "render_home_page").Debug("Rendering home page template")
 	
-	// Fetch latest public crates for the featured section
+	// Fetch trending crates for the featured section
 	featuredCrates := []gin.H{}
-	cratesResponse, err := backendClient.GetAllPublicCrates(0, 3, "createdAt,desc")
+	cratesResponse, err := backendClient.GetTrendingCrates(0, 6)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
-			"action": "fetch_featured_crates",
+			"action": "fetch_trending_crates",
 			"error": err.Error(),
-		}).Warn("Failed to fetch featured crates, continuing with empty list")
-		// Continue with empty featured crates on error
-	} else {
+		}).Warn("Failed to fetch trending crates, falling back to recent crates")
+		
+		// Fallback to recent crates if trending fails
+		cratesResponse, err = backendClient.GetAllPublicCrates(0, 6, "createdAt,desc")
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"action": "fetch_recent_crates_fallback",
+				"error": err.Error(),
+			}).Warn("Failed to fetch recent crates fallback, continuing with empty list")
+		}
+	}
+	
+	if cratesResponse != nil {
 		// Transform crates with real user information
 		for _, crate := range cratesResponse.Content {
 			ownerName := "Unknown"
@@ -448,6 +469,7 @@ func handleHomePage(c *gin.Context) {
 				"ownerSpotifyId": ownerSpotifyId,
 				"imageUri":      crate.ImageURI,
 				"createdAt":     crate.CreatedAt,
+				"followerCount": crate.FollowerCount,
 			}
 			featuredCrates = append(featuredCrates, featuredCrate)
 		}
@@ -501,6 +523,17 @@ func handleCollectionCratePage(c *gin.Context) {
 		})
 		return
 	}
+
+	// Record the view for analytics (async, don't block page load)
+	go func() {
+		err := backendClient.RecordCrateView(crate.ID, c.ClientIP(), c.Request.UserAgent(), c.Request.Referer())
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"crateID": crate.ID,
+				"action": "record_collection_crate_view",
+			}).WithError(err).Debug("Failed to record collection crate view")
+		}
+	}()
 
 	// Fetch initial albums (first page)
 	albums, err := backendClient.GetCollectionCrateAlbums(username, handle, 0, 20, "", "createdAt,desc")
