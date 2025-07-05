@@ -113,7 +113,13 @@ export class DiscoverComponent implements OnInit, OnDestroy {
     this.store.dispatch(SearchActions.search({ query, pageable }));
   }
 
-  openUser(user: User) {
+  openUser(user: User, event?: Event) {
+    // Prevent default behavior and stop propagation to avoid conflicts with scrolling
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     // Track that we're navigating to this user from discover context
     this.store.dispatch(NavigationActions.trackUserNavigation({ 
       userId: user.id, 
@@ -122,7 +128,13 @@ export class DiscoverComponent implements OnInit, OnDestroy {
     this.router.navigate(['/user', user.id]);
   }
 
-  openCrate(crate: Crate) {
+  openCrate(crate: Crate, event?: Event) {
+    // Prevent default behavior and stop propagation to avoid conflicts with scrolling
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     // Record the view for analytics
     this.store.dispatch(TrendingActions.recordCrateView({ crateId: crate.id }));
     

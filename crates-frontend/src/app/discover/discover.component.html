@@ -43,8 +43,7 @@
         <div 
           *ngFor="let user of users$ | async; trackBy: trackByUserId"
           class="user-result-item d-flex align-items-center p-2 mb-1 rounded cursor-pointer"
-          (click)="openUser(user)"
-          (touchstart)="openUser(user)"
+          (click)="openUser(user, $event)"
           role="button"
           tabindex="0">
           <div class="flex-shrink-0 me-2">
@@ -86,7 +85,7 @@
         <div 
           *ngFor="let crate of crates$ | async; trackBy: trackByCrateId"
           class="crate-result-item d-flex align-items-center p-2 mb-1 rounded cursor-pointer"
-          (click)="openCrate(crate)">
+          (click)="openCrate(crate, $event)">
           <div class="flex-shrink-0 me-2">
             <img 
               [src]="crate.imageUri || 'assets/images/crate-placeholder.webp'" 
@@ -156,7 +155,7 @@
         *ngFor="let crate of getCurrentCrates$() | async; trackBy: trackByCrateId; let i = index"
         class="col-6 col-sm-6 col-md-4 col-xl-3 p-0">
         <div class="item-card-container m-2">
-          <div class="card item-card" (click)="openCrate(crate)">
+          <div class="card item-card" (click)="openCrate(crate, $event)">
             <div class="item-image-container">
               <img 
                 class="item-image" 

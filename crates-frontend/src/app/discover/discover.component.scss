@@ -6,6 +6,8 @@
 .search-results {
   max-height: calc(100vh - 140px);
   overflow-y: auto;
+  touch-action: pan-y; /* Allow vertical scrolling on mobile */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .user-result-item,
@@ -14,8 +16,7 @@
   border: 1px solid var(--bs-gray-800);
   transition: all 0.2s ease;
   min-height: 44px; // iOS minimum touch target
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
+  touch-action: manipulation; /* Optimize touch responsiveness */
   
   &:hover,
   &:active,
@@ -23,6 +24,14 @@
     background: var(--bs-gray-800);
     border-color: var(--bs-primary);
     outline: none;
+  }
+  
+  /* Improve touch feedback on mobile */
+  @media (max-width: 768px) {
+    &:active {
+      background: var(--bs-gray-700);
+      transform: scale(0.98);
+    }
   }
 }
 
