@@ -99,7 +99,7 @@
   .item-image-container {
     position: relative;
     width: 100%;
-    height: 200px;
+    aspect-ratio: 1;
     overflow: hidden;
   }
 
@@ -171,7 +171,7 @@
     padding-bottom: 6rem !important; // Account for mobile footer
 
     .item-image-container {
-      height: 150px; // Smaller height on mobile
+      // aspect-ratio: 1 handles mobile sizing automatically
     }
 
     .item-card-container {
