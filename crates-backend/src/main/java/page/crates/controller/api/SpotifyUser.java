@@ -20,6 +20,7 @@ public class SpotifyUser {
     private String email;
     private String handle;
     private String bio;
+    private boolean privateProfile;
     private String spotifyUri;
     private Instant createdAt;
     private Instant updatedAt;

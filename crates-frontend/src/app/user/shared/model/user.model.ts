@@ -9,6 +9,7 @@ export class User {
   email: string;
   handle?: string;
   bio?: string;
+  privateProfile?: boolean;
   spotifyUri: string;
   createdAt: Date;
   updatedAt: Date;

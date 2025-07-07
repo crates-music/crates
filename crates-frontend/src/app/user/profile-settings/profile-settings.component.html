@@ -5,13 +5,13 @@
   <div class="profile-content">
     
     <!-- Success Message -->
-    <div *ngIf="successMessage" class="alert alert-success" role="alert">
+    <div *ngIf="successMessage" class="toast-message toast-success" role="alert">
       <i class="bi-check-circle me-2"></i>
       {{ successMessage }}
     </div>
 
     <!-- Error Message -->
-    <div *ngIf="error$ | async as error" class="alert alert-danger" role="alert">
+    <div *ngIf="error$ | async as error" class="toast-message toast-error" role="alert">
       <i class="bi-exclamation-triangle me-2"></i>
       {{ error.message || 'Failed to update profile. Please try again.' }}
     </div>
@@ -80,6 +80,27 @@
         </div>
         <div *ngIf="bioErrors" class="form-error">
           {{ bioErrors }}
+        </div>
+      </div>
+
+      <!-- Privacy Setting -->
+      <div class="form-group">
+        <label class="form-label">
+          Privacy
+        </label>
+        <div class="form-check form-switch">
+          <input
+            type="checkbox"
+            id="privateProfile"
+            class="form-check-input"
+            formControlName="privateProfile">
+          <label for="privateProfile" class="form-check-label">
+            <strong>Private Profile</strong>
+          </label>
+        </div>
+        <div class="form-help">
+          When enabled, your profile won't appear in search results or discover pages. 
+          Your existing followers will still be able to see your public crates, but your profile won't be discoverable by new users.
         </div>
       </div>
 

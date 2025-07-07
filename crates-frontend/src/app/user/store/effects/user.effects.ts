@@ -45,7 +45,8 @@ export class UserEffects {
       ofType(updateUserProfile),
       exhaustMap(action => this.userService.updateProfile({
         handle: action.handle,
-        bio: action.bio
+        bio: action.bio,
+        privateProfile: action.privateProfile
       })
         .pipe(
           map(user => updateUserProfileResult({

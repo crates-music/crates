@@ -102,4 +102,32 @@ public class FollowServiceImpl implements FollowService {
     public List<Long> getFollowingUserIds(SpotifyUser user) {
         return userFollowRepository.findFollowingUserIds(user);
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<UserFollow> getFollowing(SpotifyUser user, SpotifyUser currentUser, Pageable pageable) {
+        boolean includePrivate = user.getId().equals(currentUser.getId());
+        return userFollowRepository.findFollowingByUserFilteringPrivate(user, includePrivate, pageable);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<UserFollow> getFollowers(SpotifyUser user, SpotifyUser currentUser, Pageable pageable) {
+        boolean includePrivate = user.getId().equals(currentUser.getId());
+        return userFollowRepository.findFollowersByUserFilteringPrivate(user, includePrivate, pageable);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Long getFollowingCount(SpotifyUser user, SpotifyUser currentUser) {
+        boolean includePrivate = user.getId().equals(currentUser.getId());
+        return userFollowRepository.countFollowingByUserFilteringPrivate(user, includePrivate);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Long getFollowerCount(SpotifyUser user, SpotifyUser currentUser) {
+        boolean includePrivate = user.getId().equals(currentUser.getId());
+        return userFollowRepository.countFollowersByUserFilteringPrivate(user, includePrivate);
+    }
 }

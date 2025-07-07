@@ -21,10 +21,17 @@ public interface SpotifyUserRepository extends JpaRepository<SpotifyUser, Long> 
            "(LOWER(u.displayName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(u.handle) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(u.spotifyId) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "AND u.privateProfile = false " +
            "ORDER BY u.updatedAt DESC",
            countQuery = "SELECT COUNT(DISTINCT u) FROM SpotifyUser u WHERE " +
            "(LOWER(u.displayName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(u.handle) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(u.spotifyId) LIKE LOWER(CONCAT('%', :search, '%')))")
+           "LOWER(u.spotifyId) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "AND u.privateProfile = false")
     Page<SpotifyUser> searchUsers(String search, Pageable pageable);
+    
+    @Query(value = "SELECT DISTINCT u FROM SpotifyUser u LEFT JOIN FETCH u.images WHERE " +
+           "(u.handle = :username OR u.spotifyId = :username) " +
+           "AND u.privateProfile = false")
+    Optional<SpotifyUser> findPublicUserByUsernameForPublicAccess(String username);
 }

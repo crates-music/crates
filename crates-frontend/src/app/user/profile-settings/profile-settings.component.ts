@@ -39,7 +39,8 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   ) {
     this.profileForm = this.fb.group({
       handle: ['', [Validators.maxLength(64), Validators.pattern(/^[a-zA-Z0-9-]*$/)]],
-      bio: ['', [Validators.maxLength(280)]]
+      bio: ['', [Validators.maxLength(280)]],
+      privateProfile: [false]
     });
   }
 
@@ -62,7 +63,8 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
         const defaultUsername = user.handle || user.spotifyId || '';
         this.profileForm.patchValue({
           handle: defaultUsername,
-          bio: user.bio || ''
+          bio: user.bio || '',
+          privateProfile: user.privateProfile || false
         });
       }
     });
@@ -75,6 +77,8 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
       if (action.response.success) {
         this.successMessage = 'Profile updated successfully!';
         setTimeout(() => this.successMessage = '', 3000);
+        // Reset form dirty state to hide save button
+        this.profileForm.markAsPristine();
       }
     });
   }
@@ -91,7 +95,8 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
       
       this.store.dispatch(updateUserProfile({
         handle: formValue.handle?.trim() || null,
-        bio: formValue.bio?.trim() || null
+        bio: formValue.bio?.trim() || null,
+        privateProfile: formValue.privateProfile
       }));
     }
   }

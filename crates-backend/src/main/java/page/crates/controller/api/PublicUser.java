@@ -17,5 +17,6 @@ public class PublicUser {
     private String displayName;
     private String handle;
     private String bio;
+    private boolean privateProfile;
     private Set<Image> images;
 }

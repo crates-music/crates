@@ -50,12 +50,14 @@ public interface CrateRepository extends JpaRepository<Crate, Long> {
 
     @Query("SELECT c FROM Crate c " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
-           "  AND c.publicCrate = true")
+           "  AND c.publicCrate = true " +
+           "  AND c.user.privateProfile = false")
     Page<Crate> findAllPublicCrates(Pageable pageable);
     
     @Query("SELECT c FROM Crate c " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
            "  AND c.publicCrate = true " +
+           "  AND c.user.privateProfile = false " +
            "  AND c.name ILIKE CONCAT('%', :search, '%') " +
            "ORDER BY c.updatedAt DESC")
     Page<Crate> findAllPublicCratesWithSearch(String search, Pageable pageable);
@@ -66,6 +68,7 @@ public interface CrateRepository extends JpaRepository<Crate, Long> {
            "LEFT JOIN a.artists ar " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
            "  AND c.publicCrate = true " +
+           "  AND c.user.privateProfile = false " +
            "  AND (" +
            "    c.name ILIKE CONCAT('%', :search, '%') OR " +
            "    c.description ILIKE CONCAT('%', :search, '%') OR " +
@@ -80,13 +83,15 @@ public interface CrateRepository extends JpaRepository<Crate, Long> {
     // Get all public crates (for trending calculation)
     @Query("SELECT c FROM Crate c " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
-           "  AND c.publicCrate = true")
+           "  AND c.publicCrate = true " +
+           "  AND c.user.privateProfile = false")
     List<Crate> findAllByPublicCrateTrue();
     
     // Get public crates ordered by trending score
     @Query("SELECT c FROM Crate c " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
            "  AND c.publicCrate = true " +
+           "  AND c.user.privateProfile = false " +
            "ORDER BY c.trendingScore DESC, c.followerCount DESC, c.createdAt DESC")
     Page<Crate> findAllPublicCratesByTrending(Pageable pageable);
     
@@ -97,6 +102,7 @@ public interface CrateRepository extends JpaRepository<Crate, Long> {
            "LEFT JOIN a.artists ar " +
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
            "  AND c.publicCrate = true " +
+           "  AND c.user.privateProfile = false " +
            "  AND (" +
            "    c.name ILIKE CONCAT('%', :search, '%') OR " +
            "    c.description ILIKE CONCAT('%', :search, '%') OR " +

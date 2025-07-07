@@ -16,7 +16,7 @@ export const loadUserPublicCratesResult = createAction('[User] Load User Public 
 export const loadUserPublicCollection = createAction('[User] Load User Public Collection', props<{ userId: number; search?: string }>());
 export const loadUserPublicCollectionResult = createAction('[User] Load User Public Collection Result', props<{ userId: number; response: ApiResponse<Page<Crate>> }>());
 
-export const updateUserProfile = createAction('[User] Update User Profile', props<{ handle: string | null, bio: string | null }>());
+export const updateUserProfile = createAction('[User] Update User Profile', props<{ handle: string | null, bio: string | null, privateProfile?: boolean }>());
 export const updateUserProfileResult = createAction('[User] Update User Profile Result', props<{ response: ApiResponse<User> }>());
 
 export const clearUserProfile = createAction('[User] Clear User Profile');

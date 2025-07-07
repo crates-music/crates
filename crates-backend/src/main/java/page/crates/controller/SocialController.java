@@ -19,6 +19,7 @@ import page.crates.security.SpotifyAuthorization;
 import page.crates.service.CurrentUserService;
 import page.crates.service.FollowService;
 import page.crates.service.UserService;
+import page.crates.exception.UnauthorizedAccessException;
 
 @RestController
 @RequestMapping("/v1/social")
@@ -76,7 +77,7 @@ public class SocialController {
     @SpotifyAuthorization
     public Page<UserFollow> getFollowing(Pageable pageable) {
         SpotifyUser currentUser = currentUserService.getCurrentUser();
-        return followService.getFollowing(currentUser, pageable)
+        return followService.getFollowing(currentUser, currentUser, pageable)
                 .map(userFollowMapper::map);
     }
 
@@ -84,7 +85,7 @@ public class SocialController {
     @SpotifyAuthorization
     public Page<UserFollow> getFollowers(Pageable pageable) {
         SpotifyUser currentUser = currentUserService.getCurrentUser();
-        return followService.getFollowers(currentUser, pageable)
+        return followService.getFollowers(currentUser, currentUser, pageable)
                 .map(userFollowMapper::map);
     }
 
@@ -93,8 +94,8 @@ public class SocialController {
     public SocialStats getSocialStats() {
         SpotifyUser currentUser = currentUserService.getCurrentUser();
         
-        Long followingCount = followService.getFollowingCount(currentUser);
-        Long followerCount = followService.getFollowerCount(currentUser);
+        Long followingCount = followService.getFollowingCount(currentUser, currentUser);
+        Long followerCount = followService.getFollowerCount(currentUser, currentUser);
         
         return new SocialStats(followingCount, followerCount);
     }
@@ -103,9 +104,15 @@ public class SocialController {
     @SpotifyAuthorization
     public SocialStats getUserSocialStats(@PathVariable Long userId) {
         SpotifyUser user = userService.getUser(userId);
+        SpotifyUser currentUser = currentUserService.getCurrentUser();
         
-        Long followingCount = followService.getFollowingCount(user);
-        Long followerCount = followService.getFollowerCount(user);
+        // Allow access to private profile stats only for the profile owner
+        if (user.isPrivateProfile() && !user.getId().equals(currentUser.getId())) {
+            throw new UnauthorizedAccessException();
+        }
+        
+        Long followingCount = followService.getFollowingCount(user, currentUser);
+        Long followerCount = followService.getFollowerCount(user, currentUser);
         
         return new SocialStats(followingCount, followerCount);
     }

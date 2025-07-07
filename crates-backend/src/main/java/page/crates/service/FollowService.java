@@ -70,4 +70,38 @@ public interface FollowService {
      * @return List of user IDs being followed
      */
     List<Long> getFollowingUserIds(SpotifyUser user);
+    
+    /**
+     * Get users that this user is following (with privacy filtering)
+     * @param user The user whose following list to retrieve
+     * @param currentUser The user viewing the list (to determine if private profiles should be shown)
+     * @param pageable Pagination parameters
+     * @return Page of UserFollow relationships
+     */
+    Page<UserFollow> getFollowing(SpotifyUser user, SpotifyUser currentUser, Pageable pageable);
+    
+    /**
+     * Get users that follow this user (with privacy filtering)
+     * @param user The user whose followers to retrieve
+     * @param currentUser The user viewing the list (to determine if private profiles should be shown)
+     * @param pageable Pagination parameters
+     * @return Page of UserFollow relationships
+     */
+    Page<UserFollow> getFollowers(SpotifyUser user, SpotifyUser currentUser, Pageable pageable);
+    
+    /**
+     * Get count of users this user is following (with privacy filtering)
+     * @param user The user
+     * @param currentUser The user viewing the count (to determine if private profiles should be counted)
+     * @return Count of users being followed
+     */
+    Long getFollowingCount(SpotifyUser user, SpotifyUser currentUser);
+    
+    /**
+     * Get count of users following this user (with privacy filtering)
+     * @param user The user
+     * @param currentUser The user viewing the count (to determine if private profiles should be counted)
+     * @return Count of followers
+     */
+    Long getFollowerCount(SpotifyUser user, SpotifyUser currentUser);
 }

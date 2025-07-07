@@ -10,4 +10,6 @@ public class ProfileUpdateRequest {
     
     @Size(max = 280, message = "Bio must be 280 characters or less")
     private String bio;
+    
+    private Boolean privateProfile;
 }

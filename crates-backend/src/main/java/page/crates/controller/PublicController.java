@@ -56,6 +56,11 @@ public class PublicController {
     public SpotifyUser getPublicUserProfile(@PathVariable String username) {
         log.info("Request received for public user profile: {}", username);
         page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
+        
+        if (user.isPrivateProfile()) {
+            throw new UnauthorizedAccessException();
+        }
+        
         return userMapper.map(user);
     }
 
@@ -65,6 +70,10 @@ public class PublicController {
                                           final Pageable pageable) {
         log.info("Request received for public crates for user: {}", username);
         page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
+        
+        if (user.isPrivateProfile()) {
+            throw new UnauthorizedAccessException();
+        }
         
         if (StringUtils.isBlank(search)) {
             return crateService.findPublicByUser(user, pageable)
@@ -82,7 +91,7 @@ public class PublicController {
         page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
         page.crates.entity.Crate crate = crateService.findByUserAndHandle(user, handle);
         
-        if (!crate.isPublicCrate()) {
+        if (user.isPrivateProfile() || !crate.isPublicCrate()) {
             throw new UnauthorizedAccessException();
         }
         
@@ -101,7 +110,7 @@ public class PublicController {
         page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
         page.crates.entity.Crate crate = crateService.findByUserAndHandle(user, handle);
         
-        if (!crate.isPublicCrate()) {
+        if (user.isPrivateProfile() || !crate.isPublicCrate()) {
             throw new UnauthorizedAccessException();
         }
         
@@ -148,6 +157,10 @@ public class PublicController {
         log.info("Request received for public collection for user: {}", username);
         page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
         
+        if (user.isPrivateProfile()) {
+            throw new UnauthorizedAccessException();
+        }
+        
         if (StringUtils.isNotBlank(search)) {
             return crateCollectionService.searchPublicUserCollection(user, search, pageable)
                     .map(collection -> crateDecorator.decorate(crateMapper.map(collection.getCrate())));
@@ -161,6 +174,10 @@ public class PublicController {
     public Crate getPublicCollectionCrate(@PathVariable String username, @PathVariable String handle) {
         log.info("Request received for public collection crate: {} by user: {}", handle, username);
         page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
+        
+        if (user.isPrivateProfile()) {
+            throw new UnauthorizedAccessException();
+        }
         
         // Check if this crate is in the user's collection
         page.crates.entity.Crate crate = crateService.findByHandle(handle);
@@ -183,6 +200,10 @@ public class PublicController {
                                                            final Pageable pageable) {
         log.info("Request received for albums in public collection crate: {} by user: {}", handle, username);
         page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
+        
+        if (user.isPrivateProfile()) {
+            throw new UnauthorizedAccessException();
+        }
         
         // Check if this crate is in the user's collection
         page.crates.entity.Crate crate = crateService.findByHandle(handle);
@@ -208,6 +229,12 @@ public class PublicController {
         log.info("Request received for public social stats for user: {}", username);
         page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
         
+        if (user.isPrivateProfile()) {
+            throw new UnauthorizedAccessException();
+        }
+        
+        // For public stats, we don't filter private profiles since this is anonymous access
+        // The profile owner already checked above
         Long followingCount = followService.getFollowingCount(user);
         Long followerCount = followService.getFollowerCount(user);
         

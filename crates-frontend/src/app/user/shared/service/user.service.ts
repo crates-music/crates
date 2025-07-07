@@ -21,7 +21,7 @@ export class UserService {
       );
   }
 
-  updateProfile(profileData: { handle?: string | null; bio?: string | null }): Observable<User> {
+  updateProfile(profileData: { handle?: string | null; bio?: string | null; privateProfile?: boolean }): Observable<User> {
     return this.http.put(`${environment.baseUri}/v1/user/profile`, profileData)
       .pipe(
         map(response => Object.assign(new User(), response) as User)

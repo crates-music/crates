@@ -53,6 +53,10 @@ public class SpotifyUser {
     @Column(name = "bio", length = 280)
     private String bio;
 
+    @Column(name = "private_profile", nullable = false)
+    @Builder.Default
+    private boolean privateProfile = false;
+
     @Column(name = "spotify_uri", nullable = false)
     private String spotifyUri;
 

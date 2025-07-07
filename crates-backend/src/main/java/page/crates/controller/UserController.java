@@ -17,6 +17,7 @@ import page.crates.controller.api.SpotifyUser;
 import page.crates.controller.api.mapper.UserMapper;
 import page.crates.controller.api.mapper.PublicUserMapper;
 import page.crates.controller.api.PublicUser;
+import page.crates.exception.UnauthorizedAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import page.crates.exception.ExpiredTokenException;
@@ -75,7 +76,8 @@ public class UserController {
         page.crates.entity.SpotifyUser updatedUser = userService.updateProfile(
                 currentUser.getId(), 
                 request.getHandle(), 
-                request.getBio()
+                request.getBio(),
+                request.getPrivateProfile()
         );
         return userMapper.map(updatedUser);
     }
@@ -93,6 +95,13 @@ public class UserController {
     public SpotifyUser getUserProfile(@PathVariable String identifier) {
         log.info("Getting user profile for identifier: {}", identifier);
         page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(identifier);
+        page.crates.entity.SpotifyUser currentUser = currentUserService.getCurrentUser();
+        
+        // Allow access to private profiles only for the profile owner
+        if (user.isPrivateProfile() && !user.getId().equals(currentUser.getId())) {
+            throw new UnauthorizedAccessException();
+        }
+        
         return userMapper.map(user);
     }
 
@@ -101,6 +110,13 @@ public class UserController {
     public SpotifyUser getUserByHandle(@PathVariable String handle) {
         log.info("Getting user by handle: {}", handle);
         page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(handle);
+        page.crates.entity.SpotifyUser currentUser = currentUserService.getCurrentUser();
+        
+        // Allow access to private profiles only for the profile owner
+        if (user.isPrivateProfile() && !user.getId().equals(currentUser.getId())) {
+            throw new UnauthorizedAccessException();
+        }
+        
         return userMapper.map(user);
     }
 
@@ -109,6 +125,13 @@ public class UserController {
     public PublicUser getUserById(@PathVariable Long userId) {
         log.info("Getting user by ID: {}", userId);
         page.crates.entity.SpotifyUser user = userService.getUser(userId);
+        page.crates.entity.SpotifyUser currentUser = currentUserService.getCurrentUser();
+        
+        // Allow access to private profiles only for the profile owner
+        if (user.isPrivateProfile() && !user.getId().equals(currentUser.getId())) {
+            throw new UnauthorizedAccessException();
+        }
+        
         return publicUserMapper.map(user);
     }
 
@@ -120,6 +143,13 @@ public class UserController {
             Pageable pageable) {
         log.info("Getting public crates for user: {}", userId);
         page.crates.entity.SpotifyUser user = userService.getUser(userId);
+        page.crates.entity.SpotifyUser currentUser = currentUserService.getCurrentUser();
+        
+        // Allow access to private profiles only for the profile owner
+        if (user.isPrivateProfile() && !user.getId().equals(currentUser.getId())) {
+            throw new UnauthorizedAccessException();
+        }
+        
         return crateService.getUserPublicCrates(user, search, pageable)
                 .map(crateMapper::map)
                 .map(crateDecorator::decorate);
@@ -133,6 +163,12 @@ public class UserController {
             Pageable pageable) {
         log.info("Getting public collection for user: {}", userId);
         page.crates.entity.SpotifyUser user = userService.getUser(userId);
+        page.crates.entity.SpotifyUser currentUser = currentUserService.getCurrentUser();
+        
+        // Allow access to private profiles only for the profile owner
+        if (user.isPrivateProfile() && !user.getId().equals(currentUser.getId())) {
+            throw new UnauthorizedAccessException();
+        }
         
         if (StringUtils.isNotBlank(search)) {
             return crateCollectionService.searchPublicUserCollection(user, search, pageable)

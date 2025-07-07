@@ -126,7 +126,9 @@ func BotFilteringMiddleware() gin.HandlerFunc {
 
 			c.HTML(http.StatusNotFound, "error.html", gin.H{
 				"title":   "Not Found",
-				"message": "The requested page was not found",
+				"message": "The page you're looking for doesn't exist or isn't available.",
+				"ogTitle": "Not Found - Crates",
+				"ogDesc":  "The page you're looking for doesn't exist or isn't available.",
 			})
 			c.Abort()
 			return
@@ -258,14 +260,24 @@ func handleProfilePage(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"action": "fetch_user_for_crate",
-		}).WithError(err).Error("Failed to fetch user for crate page")
+			"action": "fetch_user_for_profile",
+			"error": err.Error(),
+		}).Error("Failed to fetch user for profile page - rendering error template")
+		
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
-			"title":   "User Not Found",
-			"message": "User not found or profile is private",
+			"title":   "Not Found",
+			"message": "The page you're looking for doesn't exist or isn't available.",
+			"ogTitle": "Not Found - Crates",
+			"ogDesc":  "The page you're looking for doesn't exist or isn't available.",
 		})
 		return
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"username": username,
+		"userId": user.ID,
+		"action": "fetch_user_for_profile",
+	}).Debug("Successfully fetched user for profile page")
 
 	// Fetch initial authored crates (first page)
 	crates, err := backendClient.GetUserCrates(username, 0, 12, "", "updatedAt,desc")
@@ -324,8 +336,10 @@ func handleCratePage(c *gin.Context) {
 			"action": "fetch_user_for_crate",
 		}).WithError(err).Error("Failed to fetch user for crate page")
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
-			"title":   "User Not Found",
-			"message": "User not found",
+			"title":   "Not Found",
+			"message": "The page you're looking for doesn't exist or isn't available.",
+			"ogTitle": "Not Found - Crates",
+			"ogDesc":  "The page you're looking for doesn't exist or isn't available.",
 		})
 		return
 	}
@@ -338,8 +352,10 @@ func handleCratePage(c *gin.Context) {
 			"action": "fetch_crate",
 		}).WithError(err).Error("Failed to fetch crate")
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
-			"title":   "Crate Not Found",
-			"message": "Crate not found or is private",
+			"title":   "Not Found",
+			"message": "The page you're looking for doesn't exist or isn't available.",
+			"ogTitle": "Not Found - Crates",
+			"ogDesc":  "The page you're looking for doesn't exist or isn't available.",
 		})
 		return
 	}
@@ -501,11 +517,13 @@ func handleCollectionCratePage(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"action": "fetch_user_for_crate",
-		}).WithError(err).Error("Failed to fetch user for crate page")
+			"action": "fetch_user_for_collection_crate",
+		}).WithError(err).Error("Failed to fetch user for collection crate page")
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
-			"title":   "User Not Found",
-			"message": "User not found",
+			"title":   "Not Found",
+			"message": "The page you're looking for doesn't exist or isn't available.",
+			"ogTitle": "Not Found - Crates",
+			"ogDesc":  "The page you're looking for doesn't exist or isn't available.",
 		})
 		return
 	}
@@ -518,8 +536,10 @@ func handleCollectionCratePage(c *gin.Context) {
 			"action": "fetch_collection_crate",
 		}).WithError(err).Error("Failed to fetch collection crate")
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
-			"title":   "Crate Not Found",
-			"message": "Crate not found in collection or is private",
+			"title":   "Not Found",
+			"message": "The page you're looking for doesn't exist or isn't available.",
+			"ogTitle": "Not Found - Crates",
+			"ogDesc":  "The page you're looking for doesn't exist or isn't available.",
 		})
 		return
 	}

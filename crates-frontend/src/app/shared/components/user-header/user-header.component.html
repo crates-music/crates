@@ -23,7 +23,8 @@
           <button 
             class="btn btn-sm btn-outline-secondary" 
             (click)="openPublicProfile()"
-            title="View Public Profile">
+            title="View Public Profile"
+            *ngIf="!user.privateProfile">
             <i class="bi-box-arrow-up-right"></i>
           </button>
           <button 
@@ -45,7 +46,8 @@
           <button 
             class="btn btn-sm btn-outline-secondary" 
             (click)="openPublicProfile()"
-            title="View Public Profile">
+            title="View Public Profile"
+            *ngIf="!user.privateProfile">
             <i class="bi-box-arrow-up-right"></i>
           </button>
           <button 
