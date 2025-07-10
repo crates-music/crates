@@ -10,6 +10,8 @@ public interface AlbumService {
                        SearchType searchType,
                        Pageable pageable);
 
+    Page<Album> searchHybrid(String search, Pageable pageable);
+
     Album findOrCreate(String spotifyAlbumId);
 
     Album findOrCreate(Album album);

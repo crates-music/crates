@@ -146,11 +146,16 @@ export class LibraryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   trackByAlbumId(index: number, album: Album): string {
-    return String(album.id);
+    return album.spotifyId;
   }
 
   getArtistNames(album: Album) {
     return album.artists.map(artist => artist.name).join(', ');
+  }
+
+  isInLibrary(album: Album): boolean {
+    // Library albums have a database ID, global search results don't
+    return album.id != null;
   }
 
   loadMore() {

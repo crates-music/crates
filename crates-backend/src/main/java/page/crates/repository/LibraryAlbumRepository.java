@@ -20,7 +20,7 @@ public interface LibraryAlbumRepository extends JpaRepository<LibraryAlbum, Long
            "ORDER BY l.addedAt DESC")
     Page<LibraryAlbum> findActiveBySpotifyUser(SpotifyUser spotifyUser, Pageable pageable);
 
-    @Query(value = "SELECT * " +
+    @Query(value = "SELECT l.* " +
                    "FROM library_album l " +
                    "JOIN album a on l.album_id = a.id " +
                    "JOIN album_to_artist ata on a.id = ata.album_id " +
@@ -29,7 +29,7 @@ public interface LibraryAlbumRepository extends JpaRepository<LibraryAlbum, Long
                    "  AND l.spotify_user_id = :spotifyUserId " +
                    "  AND (a.name ILIKE CONCAT('%', :search, '%')" +
                    "    OR a2.name ILIKE CONCAT('%', :search, '%'))", nativeQuery = true)
-    Page<LibraryAlbum> findActiveBySpotifyUserAndSearchTerm(SpotifyUser spotifyUser, String search, Pageable pageable);
+    Page<LibraryAlbum> findActiveBySpotifyUserAndSearchTerm(Long spotifyUserId, String search, Pageable pageable);
 
     @Query(value = "SELECT * " +
                    "FROM library_album l " +

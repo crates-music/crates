@@ -9,5 +9,6 @@ RUN ./mvnw clean install -DskipTests
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /opt/app
 EXPOSE 8080
+EXPOSE 5003
 COPY --from=builder /opt/app/target/*.jar /opt/app/*.jar
-ENTRYPOINT ["java","-jar", "/opt/app/*.jar" ]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /opt/app/*.jar"]

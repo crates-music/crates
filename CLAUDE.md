@@ -90,8 +90,12 @@ Crates is a comprehensive music organization and sharing platform that allows us
 
 ### Backend
 ```bash
-# Restart backend (preferred method)
+# Restart backend (preferred method - rebuilds and restarts)
+cd crates-backend
 ./restart.sh
+
+# IMPORTANT: Do NOT use 'docker restart crates-backend' - it won't pick up code changes!
+# The restart.sh script rebuilds the Docker image with latest code changes
 
 # Build and run in Docker (manual method)
 ./mvnw clean install -Pdocker -DskipTests
@@ -107,7 +111,8 @@ Crates is a comprehensive music organization and sharing platform that allows us
 
 ### Frontend
 ```bash
-# Development server
+# Development server (auto-reloads on changes)
+cd crates-frontend
 yarn start  # Runs on http://localhost:4311
 
 # Build for production
@@ -122,7 +127,11 @@ ng generate component component-name
 
 ### Public Sharing Service
 ```bash
-# Build and run
+# Restart public service (preferred method - rebuilds and restarts)
+cd crates-public
+./restart-public.sh
+
+# Manual build and run
 go build
 BACKEND_URL=http://localhost:8980 ./crates-public
 
@@ -135,16 +144,22 @@ go build -ldflags="-s -w"
 
 ### Database
 ```bash
-# Start database container
+# Start database container (one time setup)
 cd crates-database
 ./start-database.sh
 
-# Stop container
+# Stop container (if needed)
 ./stop-database.sh
-
-# Restart container
-./restart-database.sh
 ```
+
+## Component Restart Summary
+
+**When you make code changes:**
+
+- **Backend**: `cd crates-backend && ./restart.sh` (rebuilds Docker image)
+- **Frontend**: No restart needed (auto-reloads)
+- **Public Service**: `cd crates-public && ./restart-public.sh` (rebuilds binary)
+- **Database**: No restart needed (runs continuously)
 
 ## Key Integrations
 

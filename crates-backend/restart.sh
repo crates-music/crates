@@ -33,7 +33,9 @@ docker run -d \
   --network crates-network \
   --network-alias crates-backend \
   -p 8980:8080 \
+  -p 5003:5003 \
   -e SPRING_PROFILES_ACTIVE=dev \
+  -e JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003" \
   crates/crates-backend:0.0.1-SNAPSHOT
 
 echo ""
@@ -41,6 +43,7 @@ echo "✅ Backend started successfully!"
 echo "- Container: crates-backend"
 echo "- Network: crates-network"  
 echo "- Port: http://localhost:8980"
+echo "- Debug Port: localhost:5003"
 echo "- Database: crates-database (running)"
 echo ""
 echo "View logs with: docker logs -f crates-backend"

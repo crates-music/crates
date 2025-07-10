@@ -3,6 +3,8 @@ package page.crates.service;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import page.crates.controller.api.SearchType;
@@ -14,6 +16,8 @@ import page.crates.spotify.client.Context;
 import page.crates.spotify.client.Spotify;
 import page.crates.spotify.client.SpotifyAuth;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +36,8 @@ public class AlbumServiceImpl implements AlbumService {
     private ImageService imageService;
     @Resource
     private GenreService genreService;
+    @Resource
+    private LibraryService libraryService;
 
     @Override
     public Album findOrCreate(String spotifyAlbumId) {
@@ -85,11 +91,36 @@ public class AlbumServiceImpl implements AlbumService {
                               final SearchType searchType,
                               final Pageable pageable) {
         if (SearchType.LIBRARY == searchType) {
-            throw new UnsupportedOperationException("not implemented");
+            return libraryService.searchLibraryAlbums(search, pageable)
+                    .map(libraryAlbum -> libraryAlbum.getAlbum());
         }
         final String token = spotifyAuth.getServiceToken().getAccessToken();
         final Context context = Context.forToken(token);
         return spotify.searchAlbums(context, search, pageable)
                 .map(spotifyAlbumMapper::map);
+    }
+
+    @Override
+    public Page<Album> searchHybrid(final String search, final Pageable pageable) {
+        // Get library results first
+        final Page<Album> libraryResults = search(search, SearchType.LIBRARY, pageable);
+        
+        // Always fetch global results to ensure good discovery
+        // Fetch at least 20 global results, or more if requested page size is larger
+        final int globalFetchSize = Math.max(20, pageable.getPageSize());
+        final Pageable globalPageable = PageRequest.of(0, globalFetchSize, pageable.getSort());
+        final Page<Album> globalResults = search(search, SearchType.GLOBAL, globalPageable);
+        
+        // Combine results - library first, then global
+        final List<Album> combinedContent = new ArrayList<>();
+        combinedContent.addAll(libraryResults.getContent());
+        
+        // Add global results, filtering out any duplicates that might already be in library
+        globalResults.getContent().stream()
+            .filter(globalAlbum -> libraryResults.getContent().stream()
+                .noneMatch(libraryAlbum -> libraryAlbum.getSpotifyId().equals(globalAlbum.getSpotifyId())))
+            .forEach(combinedContent::add);
+        
+        return new PageImpl<>(combinedContent, pageable, combinedContent.size());
     }
 }

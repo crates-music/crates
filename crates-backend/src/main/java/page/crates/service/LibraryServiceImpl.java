@@ -86,7 +86,7 @@ public class LibraryServiceImpl implements LibraryService {
                     user.getId(), search, pageable);
         }
         if (StringUtils.isNotBlank(search)) {
-            return libraryAlbumRepository.findActiveBySpotifyUserAndSearchTerm(user, search, pageable);
+            return libraryAlbumRepository.findActiveBySpotifyUserAndSearchTerm(user.getId(), search, pageable);
         }
         return libraryAlbumRepository.findActiveBySpotifyUser(user, pageable);
     }

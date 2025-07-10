@@ -16,7 +16,7 @@ export interface AlbumEntityState extends EntityState<Album> {
 }
 
 export const albumAdapter: EntityAdapter<Album> = createEntityAdapter({
-  selectId: album => album.id,
+  selectId: album => album.spotifyId,
 });
 
 export interface LibraryState {
@@ -104,7 +104,7 @@ const libraryReducer = createReducer(initialState,
       albums: {
         ...state.albums,
         value: albumAdapter.updateOne({
-          id: action.album.id,
+          id: action.album.spotifyId,
           changes: { selected: !action.album.selected }
         }, state.albums.value),
       }
@@ -206,7 +206,7 @@ const libraryReducer = createReducer(initialState,
         ...state,
         albums: {
           ...state.albums,
-          value: albumAdapter.removeMany(action.albums.map(album => album.id), state.albums.value)
+          value: albumAdapter.removeMany(action.albums.map(album => album.spotifyId), state.albums.value)
         },
       }
     }

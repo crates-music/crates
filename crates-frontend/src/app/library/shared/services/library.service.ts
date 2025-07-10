@@ -33,7 +33,13 @@ export class LibraryService {
         search,
       }
     }
-    return this.http.get(`${environment.baseUri}/v1/library/albums`, {
+    
+    // Use hybrid search endpoint when searching, otherwise use regular library endpoint
+    const endpoint = search 
+      ? `${environment.baseUri}/v1/library/albums/search`
+      : `${environment.baseUri}/v1/library/albums`;
+      
+    return this.http.get(endpoint, {
       params,
     }).pipe(
       map(response => Object.assign(new Page<Album>(), response) as Page<Album>),

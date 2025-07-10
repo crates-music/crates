@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import page.crates.controller.api.Album;
 import page.crates.controller.api.Library;
 import page.crates.controller.api.LibraryAlbumFilter;
+import page.crates.controller.api.mapper.AlbumMapper;
 import page.crates.controller.api.mapper.LibraryAlbumMapper;
 import page.crates.controller.api.mapper.LibraryMapper;
 import page.crates.security.SpotifyAuthorization;
+import page.crates.service.AlbumService;
 import page.crates.service.CurrentUserService;
 import page.crates.service.LibraryService;
 import page.crates.service.LibrarySyncService;
@@ -34,6 +36,10 @@ public class LibraryController {
     private LibraryAlbumMapper libraryAlbumMapper;
     @Resource
     private LibraryMapper libraryMapper;
+    @Resource
+    private AlbumService albumService;
+    @Resource
+    private AlbumMapper albumMapper;
 
     @GetMapping("/albums")
     @SpotifyAuthorization
@@ -45,6 +51,14 @@ public class LibraryController {
                         pageable,
                         null == filters ? null : filters.toArray(new LibraryAlbumFilter[0]))
                 .map(libraryAlbumMapper::map);
+    }
+
+    @GetMapping("/albums/search")
+    @SpotifyAuthorization
+    Page<Album> searchAlbums(@RequestParam("search") String search,
+                            Pageable pageable) {
+        return albumService.searchHybrid(search, pageable)
+                .map(albumMapper::map);
     }
 
     @GetMapping()
