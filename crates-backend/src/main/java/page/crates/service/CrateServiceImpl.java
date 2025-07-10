@@ -18,6 +18,7 @@ import page.crates.repository.CrateAlbumRepository;
 import page.crates.repository.CrateRepository;
 import page.crates.util.SystemTimeFacade;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -125,6 +126,7 @@ public class CrateServiceImpl implements CrateService {
         crate.setState(CrateState.ACTIVE);
         crate.setPublicCrate(true);
         crate.setFollowerCount(0);
+        crate.setTrendingScore(BigDecimal.ZERO);
         return crateRepository.save(crate);
     }
 
