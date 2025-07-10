@@ -94,12 +94,11 @@ public class LibrarySyncServiceImpl implements LibrarySyncService {
             // then do the slow part
             Pageable pageable = PageRequest.of(0, 25);
             Page<LibraryAlbum> albumPage;
-            boolean albumAdded;
             do {
                 albumPage = spotify.getSavedLibraryAlbums(context, pageable);
-                albumAdded = libraryPageSyncService.processPage(albumPage, user, library);
+                libraryPageSyncService.processPage(albumPage, user, library);
                 pageable = pageable.next();
-            } while (albumAdded && albumPage.hasNext());
+            } while (albumPage.hasNext());
         } catch (Exception e) {
             log.error("failed to synchronize library for user {} -- {}: {}",
                       user.getSpotifyId(), e.getClass().getName(), e.getMessage(), e);

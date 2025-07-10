@@ -51,7 +51,7 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
             
             // Log request start
             long startTime = System.currentTimeMillis();
-            log.info("HTTP request started", 
+            log.info("HTTP request started {}",
                 new StructuredLogEntry()
                     .with("event", "http_request_start")
                     .with("method", request.getMethod())
@@ -66,7 +66,7 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
             } finally {
                 // Log request completion
                 long duration = System.currentTimeMillis() - startTime;
-                log.info("HTTP request completed",
+                log.info("HTTP request completed {}",
                     new StructuredLogEntry()
                         .with("event", "http_request_complete")
                         .with("method", request.getMethod())
