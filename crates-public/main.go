@@ -42,13 +42,13 @@ func LoggingMiddleware() gin.HandlerFunc {
 
 		// Log request start with appropriate level
 		logEntry := logrus.WithFields(logrus.Fields{
-			"correlationId":    correlationID,
-			"method":           c.Request.Method,
-			"uri":              c.Request.RequestURI,
-			"userAgent":        c.Request.UserAgent(),
-			"remoteAddr":       c.ClientIP(),
-			"classification":   classification,
-			"event":            "http_request_start",
+			"correlationId":  correlationID,
+			"method":         c.Request.Method,
+			"uri":            c.Request.RequestURI,
+			"userAgent":      c.Request.UserAgent(),
+			"remoteAddr":     c.ClientIP(),
+			"classification": classification,
+			"event":          "http_request_start",
 		})
 
 		if logLevel == logrus.InfoLevel {
@@ -92,8 +92,8 @@ func BotFilteringMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Skip filtering for certain paths
 		path := c.Request.URL.Path
-		if path == "/health" || path == "/" || path == "/static" || 
-		   strings.HasPrefix(path, "/static/") || strings.HasPrefix(path, "/api/") {
+		if path == "/health" || path == "/" || path == "/static" ||
+			strings.HasPrefix(path, "/static/") || strings.HasPrefix(path, "/api/") {
 			c.Next()
 			return
 		}
@@ -117,11 +117,11 @@ func BotFilteringMiddleware() gin.HandlerFunc {
 		if ShouldBlockRequest(classification) {
 			logrus.WithFields(logrus.Fields{
 				"classification": classification,
-				"username": username,
-				"userAgent": c.Request.UserAgent(),
-				"path": path,
-				"remoteAddr": c.ClientIP(),
-				"action": "blocked_early",
+				"username":       username,
+				"userAgent":      c.Request.UserAgent(),
+				"path":           path,
+				"remoteAddr":     c.ClientIP(),
+				"action":         "blocked_early",
 			}).Debug("Blocked suspicious request")
 
 			c.HTML(http.StatusNotFound, "error.html", gin.H{
@@ -138,14 +138,26 @@ func BotFilteringMiddleware() gin.HandlerFunc {
 	}
 }
 
+func RedirectMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.Host == "crates.page" {
+			target := "https://crates.music" + c.Request.URL.RequestURI()
+			c.Redirect(http.StatusMovedPermanently, target)
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
 func main() {
 	// Configure structured logging
 	logrus.SetFormatter(&logrus.JSONFormatter{
 		TimestampFormat: "2006-01-02T15:04:05.000Z",
 		FieldMap: logrus.FieldMap{
-			logrus.FieldKeyTime: "timestamp",
+			logrus.FieldKeyTime:  "timestamp",
 			logrus.FieldKeyLevel: "level",
-			logrus.FieldKeyMsg: "message",
+			logrus.FieldKeyMsg:   "message",
 		},
 	})
 	logrus.SetLevel(logrus.InfoLevel)
@@ -164,6 +176,7 @@ func main() {
 	r.Use(gin.Recovery())
 	r.Use(BotFilteringMiddleware())
 	r.Use(LoggingMiddleware())
+	r.Use(RedirectMiddleware())
 
 	// Load HTML templates with custom functions
 	r.SetFuncMap(template.FuncMap{
@@ -187,7 +200,7 @@ func main() {
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"port": port,
+		"port":       port,
 		"backendURL": backendClient.BaseURL,
 	}).Info("Server starting")
 
@@ -221,7 +234,7 @@ func setupRoutes(r *gin.Engine) {
 	r.GET("/:username", func(c *gin.Context) {
 		username := c.Param("username")
 		logrus.WithFields(logrus.Fields{
-			"route": "profile",
+			"route":    "profile",
 			"username": username,
 		}).Debug("Profile route hit")
 		handleProfilePage(c)
@@ -232,9 +245,9 @@ func setupRoutes(r *gin.Engine) {
 		username := c.Param("username")
 		handle := c.Param("handle")
 		logrus.WithFields(logrus.Fields{
-			"route": "collection_crate",
+			"route":    "collection_crate",
 			"username": username,
-			"handle": handle,
+			"handle":   handle,
 		}).Debug("Collection crate route hit")
 		handleCollectionCratePage(c)
 	})
@@ -244,9 +257,9 @@ func setupRoutes(r *gin.Engine) {
 		username := c.Param("username")
 		handle := c.Param("handle")
 		logrus.WithFields(logrus.Fields{
-			"route": "crate",
+			"route":    "crate",
 			"username": username,
-			"handle": handle,
+			"handle":   handle,
 		}).Debug("Crate route hit")
 		handleCratePage(c)
 	})
@@ -260,10 +273,10 @@ func handleProfilePage(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"action": "fetch_user_for_profile",
-			"error": err.Error(),
+			"action":   "fetch_user_for_profile",
+			"error":    err.Error(),
 		}).Error("Failed to fetch user for profile page - rendering error template")
-		
+
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
 			"title":   "Not Found",
 			"message": "The page you're looking for doesn't exist or isn't available.",
@@ -275,8 +288,8 @@ func handleProfilePage(c *gin.Context) {
 
 	logrus.WithFields(logrus.Fields{
 		"username": username,
-		"userId": user.ID,
-		"action": "fetch_user_for_profile",
+		"userId":   user.ID,
+		"action":   "fetch_user_for_profile",
 	}).Debug("Successfully fetched user for profile page")
 
 	// Fetch initial authored crates (first page)
@@ -284,7 +297,7 @@ func handleProfilePage(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"action": "fetch_user_crates_profile",
+			"action":   "fetch_user_crates_profile",
 		}).WithError(err).Warn("Failed to fetch user crates for profile, using empty list")
 		crates = &Page[Crate]{Content: []Crate{}}
 	}
@@ -294,7 +307,7 @@ func handleProfilePage(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"action": "fetch_user_collection_profile",
+			"action":   "fetch_user_collection_profile",
 		}).WithError(err).Warn("Failed to fetch user collection for profile, using empty list")
 		collection = &Page[Crate]{Content: []Crate{}}
 	}
@@ -304,23 +317,23 @@ func handleProfilePage(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"action": "fetch_user_social_stats",
+			"action":   "fetch_user_social_stats",
 		}).WithError(err).Warn("Failed to fetch user social stats, using zero values")
 		socialStats = &SocialStats{FollowingCount: 0, FollowerCount: 0}
 	}
 
 	c.HTML(http.StatusOK, "profile.html", gin.H{
-		"title":         user.DisplayName + " - Crates",
-		"user":          user,
-		"crates":        crates.Content,
-		"hasMoreCrates": !crates.Last,
-		"collection":    collection.Content,
+		"title":             user.DisplayName + " - Crates",
+		"user":              user,
+		"crates":            crates.Content,
+		"hasMoreCrates":     !crates.Last,
+		"collection":        collection.Content,
 		"hasMoreCollection": !collection.Last,
-		"socialStats":   socialStats,
-		"ogTitle":       user.DisplayName + " - Crates",
-		"ogDesc":        "Check out " + user.DisplayName + "'s music crates and collection",
-		"ogImage":       getFirstImage(user.Images),
-		"ogURL":         c.Request.URL.String(),
+		"socialStats":       socialStats,
+		"ogTitle":           user.DisplayName + " - Crates",
+		"ogDesc":            "Check out " + user.DisplayName + "'s music crates and collection",
+		"ogImage":           getFirstImage(user.Images),
+		"ogURL":             c.Request.URL.String(),
 	})
 }
 
@@ -333,7 +346,7 @@ func handleCratePage(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"action": "fetch_user_for_crate",
+			"action":   "fetch_user_for_crate",
 		}).WithError(err).Error("Failed to fetch user for crate page")
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
 			"title":   "Not Found",
@@ -348,8 +361,8 @@ func handleCratePage(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"handle": handle,
-			"action": "fetch_crate",
+			"handle":   handle,
+			"action":   "fetch_crate",
 		}).WithError(err).Error("Failed to fetch crate")
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
 			"title":   "Not Found",
@@ -366,7 +379,7 @@ func handleCratePage(c *gin.Context) {
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"crateID": crate.ID,
-				"action": "record_crate_view",
+				"action":  "record_crate_view",
 			}).WithError(err).Debug("Failed to record crate view")
 		}
 	}()
@@ -387,15 +400,15 @@ func handleCratePage(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "crate.html", gin.H{
-		"title":      crate.Name + " by " + user.DisplayName,
-		"user":       user,
-		"crate":      crate,
-		"albums":     albums.Content,
-		"hasMore":    !albums.Last,
-		"ogTitle":    crate.Name + " by " + user.DisplayName,
-		"ogDesc":     "A music crate with " + strconv.Itoa(albums.TotalElements) + " albums",
-		"ogImage":    firstAlbumImage,
-		"ogURL":      c.Request.URL.String(),
+		"title":   crate.Name + " by " + user.DisplayName,
+		"user":    user,
+		"crate":   crate,
+		"albums":  albums.Content,
+		"hasMore": !albums.Last,
+		"ogTitle": crate.Name + " by " + user.DisplayName,
+		"ogDesc":  "A music crate with " + strconv.Itoa(albums.TotalElements) + " albums",
+		"ogImage": firstAlbumImage,
+		"ogURL":   c.Request.URL.String(),
 	})
 }
 
@@ -409,7 +422,7 @@ func handleUserCratesAPI(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"action": "fetch_user_crates_api",
+			"action":   "fetch_user_crates_api",
 		}).WithError(err).Error("Failed to fetch user crates")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch crates"})
 		return
@@ -440,35 +453,35 @@ func handleCrateAlbumsAPI(c *gin.Context) {
 
 func handleHomePage(c *gin.Context) {
 	logrus.WithField("action", "render_home_page").Debug("Rendering home page template")
-	
+
 	// Fetch trending crates for the featured section
 	featuredCrates := []gin.H{}
 	cratesResponse, err := backendClient.GetTrendingCrates(0, 6)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"action": "fetch_trending_crates",
-			"error": err.Error(),
+			"error":  err.Error(),
 		}).Warn("Failed to fetch trending crates, falling back to recent crates")
-		
+
 		// Fallback to recent crates if trending fails
 		cratesResponse, err = backendClient.GetAllPublicCrates(0, 6, "createdAt,desc")
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"action": "fetch_recent_crates_fallback",
-				"error": err.Error(),
+				"error":  err.Error(),
 			}).Warn("Failed to fetch recent crates fallback, continuing with empty list")
 		}
 	}
-	
+
 	if cratesResponse != nil {
 		// Transform crates with real user information
 		for _, crate := range cratesResponse.Content {
 			ownerName := "Unknown"
 			ownerSpotifyId := "unknown"
-			
+
 			if crate.User != nil {
 				ownerSpotifyId = crate.User.SpotifyID
-				
+
 				// Use custom handle if available, otherwise fall back to spotifyId
 				if crate.User.Handle != nil && *crate.User.Handle != "" {
 					ownerName = *crate.User.Handle
@@ -476,21 +489,21 @@ func handleHomePage(c *gin.Context) {
 					ownerName = crate.User.SpotifyID
 				}
 			}
-			
+
 			featuredCrate := gin.H{
-				"id":            crate.ID,
-				"name":          crate.Name,
-				"handle":        crate.Handle,
-				"ownerName":     ownerName,
+				"id":             crate.ID,
+				"name":           crate.Name,
+				"handle":         crate.Handle,
+				"ownerName":      ownerName,
 				"ownerSpotifyId": ownerSpotifyId,
-				"imageUri":      crate.ImageURI,
-				"createdAt":     crate.CreatedAt,
-				"followerCount": crate.FollowerCount,
+				"imageUri":       crate.ImageURI,
+				"createdAt":      crate.CreatedAt,
+				"followerCount":  crate.FollowerCount,
 			}
 			featuredCrates = append(featuredCrates, featuredCrate)
 		}
 	}
-	
+
 	data := gin.H{
 		"title":          "Crates - Organize Your Spotify Albums",
 		"ogTitle":        "Crates - Organize Your Spotify Albums",
@@ -499,9 +512,9 @@ func handleHomePage(c *gin.Context) {
 		"ogURL":          "https://crates.page",
 		"featuredCrates": featuredCrates,
 	}
-	
+
 	logrus.WithFields(logrus.Fields{
-		"action": "render_home_page",
+		"action":              "render_home_page",
 		"featuredCratesCount": len(featuredCrates),
 	}).Debug("Rendering home template with data")
 	c.HTML(http.StatusOK, "home.html", data)
@@ -517,7 +530,7 @@ func handleCollectionCratePage(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"action": "fetch_user_for_collection_crate",
+			"action":   "fetch_user_for_collection_crate",
 		}).WithError(err).Error("Failed to fetch user for collection crate page")
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
 			"title":   "Not Found",
@@ -532,8 +545,8 @@ func handleCollectionCratePage(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"handle": handle,
-			"action": "fetch_collection_crate",
+			"handle":   handle,
+			"action":   "fetch_collection_crate",
 		}).WithError(err).Error("Failed to fetch collection crate")
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
 			"title":   "Not Found",
@@ -550,7 +563,7 @@ func handleCollectionCratePage(c *gin.Context) {
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"crateID": crate.ID,
-				"action": "record_collection_crate_view",
+				"action":  "record_collection_crate_view",
 			}).WithError(err).Debug("Failed to record collection crate view")
 		}
 	}()
@@ -571,16 +584,16 @@ func handleCollectionCratePage(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "crate.html", gin.H{
-		"title":      crate.Name + " (collected by " + user.DisplayName + ")",
-		"user":       user,
-		"crate":      crate,
-		"albums":     albums.Content,
-		"hasMore":    !albums.Last,
+		"title":        crate.Name + " (collected by " + user.DisplayName + ")",
+		"user":         user,
+		"crate":        crate,
+		"albums":       albums.Content,
+		"hasMore":      !albums.Last,
 		"isCollection": true,
-		"ogTitle":    crate.Name + " (collected by " + user.DisplayName + ")",
-		"ogDesc":     "A music crate with " + strconv.Itoa(albums.TotalElements) + " albums, collected by " + user.DisplayName,
-		"ogImage":    firstAlbumImage,
-		"ogURL":      c.Request.URL.String(),
+		"ogTitle":      crate.Name + " (collected by " + user.DisplayName + ")",
+		"ogDesc":       "A music crate with " + strconv.Itoa(albums.TotalElements) + " albums, collected by " + user.DisplayName,
+		"ogImage":      firstAlbumImage,
+		"ogURL":        c.Request.URL.String(),
 	})
 }
 
@@ -594,7 +607,7 @@ func handleUserCollectionAPI(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"username": username,
-			"action": "fetch_user_collection_api",
+			"action":   "fetch_user_collection_api",
 		}).WithError(err).Error("Failed to fetch user collection")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch collection"})
 		return
