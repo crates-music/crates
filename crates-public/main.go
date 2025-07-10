@@ -221,6 +221,26 @@ func setupRoutes(r *gin.Engine) {
 		handleHomePage(c)
 	})
 
+	// Privacy policy page
+	r.GET("/privacy-policy", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "privacy-policy.html", gin.H{
+			"title":   "Privacy Policy - Crates",
+			"ogTitle": "Privacy Policy - Crates",
+			"ogDesc":  "Crates Privacy Policy - Learn how we protect your data and respect your privacy.",
+			"ogURL":   c.Request.URL.String(),
+		})
+	})
+
+	// Terms of service page
+	r.GET("/terms-of-service", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "terms-of-service.html", gin.H{
+			"title":   "Terms of Service - Crates",
+			"ogTitle": "Terms of Service - Crates",
+			"ogDesc":  "Crates Terms of Service - Review the terms and conditions for using our service.",
+			"ogURL":   c.Request.URL.String(),
+		})
+	})
+
 	// API routes for AJAX - must come before wildcard routes
 	api := r.Group("/api")
 	{

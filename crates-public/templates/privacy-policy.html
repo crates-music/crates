@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{.ogTitle}}">
+    <meta property="og:description" content="{{.ogDesc}}">
+    <meta property="og:url" content="{{.ogURL}}">
+    <meta property="og:site_name" content="Crates">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{.ogTitle}}">
+    <meta name="twitter:description" content="{{.ogDesc}}">
+    
+    <!-- General meta tags -->
+    <meta name="description" content="{{.ogDesc}}">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="/static/css/style.css" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+</head>
+<body class="bg-black text-white">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-white" href="/">
+                <img src="/static/images/logo.png" alt="Crates Logo" class="me-2" height="32">crates
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="https://app.crates.page" target="_blank">
+                    <i class="bi-box-arrow-up-right me-1"></i>Open App
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid p-0">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-body">
+                            <h1 class="card-title text-white mb-4">Privacy Policy</h1>
+                            
+                            <div class="text-light">
+                                <p><strong>Effective Date:</strong> January 10, 2025</p>
+                                
+                                <p>Crates ("we", "our", or "us") respects your privacy. This Privacy Policy explains what data we collect, how we use it, and your rights.</p>
+                                
+                                <h2 class="h4 text-white mt-4 mb-3">1. What We Collect</h2>
+                                <p>When you log in with Spotify, we collect:</p>
+                                <ul>
+                                    <li><strong>Spotify User ID</strong> (your public Spotify username)</li>
+                                    <li><strong>Spotify Library Data:</strong> A copy of the albums saved in your Spotify library</li>
+                                    <li><strong>Spotify Access Token:</strong> Stored securely and encrypted, used to access the Spotify API on your behalf</li>
+                                </ul>
+                                <p>We do not collect your email address, playlists, or listening history.</p>
+                                
+                                <h2 class="h4 text-white mt-4 mb-3">2. How We Use Your Data</h2>
+                                <p>We use your Spotify data to:</p>
+                                <ul>
+                                    <li>Display your saved albums</li>
+                                    <li>Let you organize them into "crates"</li>
+                                    <li>Power your public profile and shared crates (if you choose to make them public)</li>
+                                </ul>
+                                <p>We may also use aggregated, non-identifiable usage data to help improve the service.</p>
+                                
+                                <p>We do not:</p>
+                                <ul>
+                                    <li>Sell or share your personal data with third parties</li>
+                                    <li>Use your Spotify data for advertising</li>
+                                </ul>
+                                
+                                <h2 class="h4 text-white mt-4 mb-3">3. Analytics and Cookies</h2>
+                                <p>We may use analytics tools like Google Analytics to understand how users interact with Crates (e.g., which pages are visited, how long users stay). This data is collected in aggregate and cannot identify individual users.</p>
+                                
+                                <p>Cookies or local storage may be used to:</p>
+                                <ul>
+                                    <li>Keep you logged in</li>
+                                    <li>Store app preferences</li>
+                                </ul>
+                                <p>You can disable cookies in your browser settings if you prefer not to be tracked.</p>
+                                
+                                <h2 class="h4 text-white mt-4 mb-3">4. Data Security</h2>
+                                <ul>
+                                    <li>Spotify tokens are encrypted</li>
+                                    <li>Personal data is protected using industry-standard practices</li>
+                                    <li>No Spotify credentials (e.g., password) are ever accessed or stored</li>
+                                </ul>
+                                
+                                <h2 class="h4 text-white mt-4 mb-3">5. Your Rights</h2>
+                                <ul>
+                                    <li>You can revoke Crates' access from your Spotify connected apps</li>
+                                    <li>You can contact us to request deletion of your data</li>
+                                </ul>
+                                
+                                <h2 class="h4 text-white mt-4 mb-3">6. Changes to This Policy</h2>
+                                <p>We may update this policy in the future. Any material changes will be posted here with an updated "Effective Date."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black border-top border-secondary py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="text-muted mb-0">© 2025 Crates</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="/privacy-policy" class="text-muted text-decoration-none me-3">Privacy Policy</a>
+                    <a href="/terms-of-service" class="text-muted text-decoration-none">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alpine.js -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
