@@ -127,6 +127,7 @@ public class CrateServiceImpl implements CrateService {
         crate.setPublicCrate(true);
         crate.setFollowerCount(0);
         crate.setTrendingScore(BigDecimal.ZERO);
+        crate.setLastTrendingUpdate(systemTimeFacade.now());
         return crateRepository.save(crate);
     }
 

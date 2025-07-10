@@ -1,0 +1,87 @@
+<crates-view-layout 
+  title="FOLLOWERS"
+  [showSearch]="false"
+  [showListToggle]="false">
+  <div class="list-content">
+    
+    <!-- Back Button -->
+    <div class="back-button-container">
+      <button class="btn btn-outline-secondary btn-sm" (click)="onBackClick()">
+        <i class="bi-arrow-left me-2"></i>
+        Back to Settings
+      </button>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error$ | async as error" class="alert alert-danger" role="alert">
+      <i class="bi-exclamation-triangle me-2"></i>
+      {{ error.message || 'Failed to load followers. Please try again.' }}
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="(isLoading$ | async) && followers.length === 0" class="loading-container">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="loading-text">Loading followers...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!(isLoading$ | async) && followers.length === 0 && !(error$ | async)" class="empty-state">
+      <i class="bi-person-plus empty-icon"></i>
+      <h3>No followers yet</h3>
+      <p>When people follow you, they'll appear here.</p>
+    </div>
+
+    <!-- Followers List -->
+    <div *ngIf="followers.length > 0" class="users-list">
+      <div *ngFor="let follow of followers" class="user-item">
+        <div class="user-avatar">
+          <img 
+            *ngIf="follow.follower.images && follow.follower.images.length > 0" 
+            [src]="follow.follower.images[0].url" 
+            [alt]="getUserDisplayName(follow.follower)"
+            class="avatar-image">
+          <div 
+            *ngIf="!follow.follower.images || follow.follower.images.length === 0" 
+            class="avatar-placeholder">
+            <i class="bi-person-circle"></i>
+          </div>
+        </div>
+        
+        <div class="user-info">
+          <div class="user-name">
+            <a [routerLink]="getUserProfileLink(follow.follower)" class="user-link">
+              {{ getUserDisplayName(follow.follower) }}
+            </a>
+          </div>
+          <div class="user-bio" *ngIf="follow.follower.bio">
+            {{ follow.follower.bio }}
+          </div>
+          <div class="follow-date">
+            Following since {{ follow.createdAt | date:'MMM d, y' }}
+          </div>
+        </div>
+        
+        <div class="user-actions">
+          <app-follow-button 
+            [userId]="follow.follower.id"
+            [size]="'sm'"
+            (followChange)="onFollowChange(follow.follower.id, $event)">
+          </app-follow-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load More Button -->
+    <div *ngIf="hasMore && followers.length > 0" class="load-more-container">
+      <button 
+        class="btn btn-outline-primary" 
+        (click)="onLoadMore()"
+        [disabled]="isLoading$ | async">
+        <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm me-2" role="status"></span>
+        {{ (isLoading$ | async) ? 'Loading...' : 'Load More' }}
+      </button>
+    </div>
+  </div>
+</crates-view-layout>

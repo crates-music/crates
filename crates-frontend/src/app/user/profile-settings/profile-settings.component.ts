@@ -131,4 +131,12 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   get bioCharacterCount(): number {
     return this.profileForm.get('bio')?.value?.length || 0;
   }
+
+  viewFollowers(): void {
+    this.router.navigate(['/user/profile/settings/followers']);
+  }
+
+  viewFollowing(): void {
+    this.router.navigate(['/user/profile/settings/following']);
+  }
 }

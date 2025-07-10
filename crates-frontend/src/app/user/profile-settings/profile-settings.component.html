@@ -20,11 +20,11 @@
     <div *ngIf="socialStats$ | async as stats" class="stats-section">
       <h3 class="stats-title">Your Stats</h3>
       <div class="stats-grid">
-        <div class="stat-item">
+        <div class="stat-item stat-clickable" (click)="viewFollowers()">
           <div class="stat-value">{{ stats.followerCount }}</div>
           <div class="stat-label">Followers</div>
         </div>
-        <div class="stat-item">
+        <div class="stat-item stat-clickable" (click)="viewFollowing()">
           <div class="stat-value">{{ stats.followingCount }}</div>
           <div class="stat-label">Following</div>
         </div>
