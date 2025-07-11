@@ -41,8 +41,8 @@
                 <img src="/static/images/logo.png" alt="Crates Logo" class="me-2" height="32">crates
             </a>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="https://app.crates.page" target="_blank">
-                    <i class="bi-box-arrow-up-right me-1"></i>Open App
+                <a class="btn btn-primary cta-button" href="https://app.crates.music" target="_blank">
+                    <i class="bi-plus-circle me-1"></i><span class="d-none d-md-inline">Create Your Own Crate</span><span class="d-md-none">Create Crate</span>
                 </a>
             </div>
         </div>
@@ -52,7 +52,7 @@
     <main class="container-fluid p-0">
 <div x-data="crateApp()" x-init="init()">
     <!-- Crate Header -->
-    <div class="crate-header bg-gradient-dark p-4">
+    <div class="crate-header bg-gradient-dark pt-sm-2 pt-1">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-auto">
@@ -61,7 +61,7 @@
                     </a>
                 </div>
             </div>
-            <div class="row align-items-center mt-3">
+            <div class="row align-items-center mt-sm-3">
                 <div class="col-auto">
                     {{if .crate.ImageURI}}
                         <img src="{{.crate.ImageURI}}" 
@@ -81,7 +81,16 @@
                             </span>
                         </div>
                     {{end}}
-                    <h1 class="display-4 mb-2 text-primary">{{.crate.Name}}</h1>
+                    <div class="mb-2">
+                        <span class="display-4 text-primary d-none d-md-block">{{.crate.Name}}</span>
+                        <span class="h2 text-primary d-md-none">{{.crate.Name}}</span>
+                        <button type="button" 
+                                class="btn btn-link text-white p-1 share-btn"
+                                @click="shareCrate()"
+                                title="Share Crate">
+                            <i class="bi-share"></i>
+                        </button>
+                    </div>
                     {{if .crate.Description}}
                         <p class="text-white-50 mb-3">{{.crate.Description}}</p>
                     {{end}}
@@ -96,7 +105,7 @@
                             by <a href="/{{if .user.Handle}}{{.user.Handle}}{{else}}{{.user.SpotifyID}}{{end}}" class="text-white text-decoration-none fw-bold">{{.user.DisplayName}}</a>
                         </p>
                     {{end}}
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
                         <p class="text-white-50 mb-0">
                             <span x-text="stats.totalAlbums"></span> albums
                             <span class="mx-2">•</span>
@@ -108,12 +117,11 @@
                                 {{.crate.CreatedAt.Format "Jan 2, 2006"}}
                             {{end}}
                         </p>
-                        <button type="button" 
-                                class="btn btn-outline-light btn-sm"
-                                @click="shareCrate()"
-                                title="Share Crate">
-                            <i class="bi-share"></i>
-                        </button>
+                        <div class="d-flex align-items-center">
+                            <a href="https://app.crates.music" target="_blank" class="btn btn-success btn-sm cta-button">
+                                <i class="bi-bookmark-plus me-1"></i>Collect This Crate
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -253,6 +261,24 @@
     <!-- Intersection Observer Target -->
     <div x-ref="loadMoreTrigger" x-show="hasMore" class="load-more-trigger"></div>
 </div>
+
+<!-- Footer CTA -->
+<footer class="footer-cta bg-gradient-dark border-top border-secondary py-3 mt-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <p class="mb-0 text-white-50">
+                    Crates is a free tool for organizing and sharing your favorite albums. Ready to build your own?
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                <a href="https://app.crates.music" target="_blank" class="btn btn-primary btn-sm cta-button">
+                    Start Now <i class="bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
 
 <script>
 function crateApp() {

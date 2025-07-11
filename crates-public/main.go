@@ -15,6 +15,13 @@ import (
 
 var backendClient *BackendClient
 
+// getFullURL constructs a fully qualified URL for the current request
+func getFullURL(c *gin.Context) string {
+	// Use the canonical domain for og:url
+	baseURL := "https://crates.page"
+	return baseURL + c.Request.URL.Path
+}
+
 // LoggingMiddleware provides structured logging for HTTP requests
 func LoggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -227,7 +234,7 @@ func setupRoutes(r *gin.Engine) {
 			"title":   "Privacy Policy - Crates",
 			"ogTitle": "Privacy Policy - Crates",
 			"ogDesc":  "Crates Privacy Policy - Learn how we protect your data and respect your privacy.",
-			"ogURL":   c.Request.URL.String(),
+			"ogURL":   getFullURL(c),
 		})
 	})
 
@@ -237,7 +244,7 @@ func setupRoutes(r *gin.Engine) {
 			"title":   "Terms of Service - Crates",
 			"ogTitle": "Terms of Service - Crates",
 			"ogDesc":  "Crates Terms of Service - Review the terms and conditions for using our service.",
-			"ogURL":   c.Request.URL.String(),
+			"ogURL":   getFullURL(c),
 		})
 	})
 
@@ -353,7 +360,7 @@ func handleProfilePage(c *gin.Context) {
 		"ogTitle":           user.DisplayName + " - Crates",
 		"ogDesc":            "Check out " + user.DisplayName + "'s music crates and collection",
 		"ogImage":           getFirstImage(user.Images),
-		"ogURL":             c.Request.URL.String(),
+		"ogURL":             getFullURL(c),
 	})
 }
 
@@ -428,7 +435,7 @@ func handleCratePage(c *gin.Context) {
 		"ogTitle": crate.Name + " by " + user.DisplayName,
 		"ogDesc":  "A music crate with " + strconv.Itoa(albums.TotalElements) + " albums",
 		"ogImage": firstAlbumImage,
-		"ogURL":   c.Request.URL.String(),
+		"ogURL":   getFullURL(c),
 	})
 }
 
@@ -613,7 +620,7 @@ func handleCollectionCratePage(c *gin.Context) {
 		"ogTitle":      crate.Name + " (collected by " + user.DisplayName + ")",
 		"ogDesc":       "A music crate with " + strconv.Itoa(albums.TotalElements) + " albums, collected by " + user.DisplayName,
 		"ogImage":      firstAlbumImage,
-		"ogURL":        c.Request.URL.String(),
+		"ogURL":        getFullURL(c),
 	})
 }
 

@@ -19,26 +19,36 @@
                     {{end}}
                 </div>
                 <div class="col">
-                    <h1 class="display-4 mb-2 text-primary">@{{if .user.Handle}}{{.user.Handle}}{{else}}{{.user.SpotifyID}}{{end}}</h1>
-                    {{if .user.Bio}}
-                        <p class="mb-2 text-light">{{.user.Bio}}</p>
-                    {{end}}
-                    <div class="d-flex align-items-center gap-3 flex-wrap">
-                        <p class="lead mb-0 text-light">
-                            <span x-text="stats.totalCrates"></span> public crates
-                        </p>
-                        <p class="lead mb-0 text-light">
-                            {{.socialStats.FollowerCount}} followers
-                        </p>
-                        <p class="lead mb-0 text-light">
-                            {{.socialStats.FollowingCount}} following
-                        </p>
+                    <div class="mb-2">
+                        <span class="display-4 text-primary d-none d-md-block">@{{if .user.Handle}}{{.user.Handle}}{{else}}{{.user.SpotifyID}}{{end}}</span>
+                        <span class="h2 text-primary d-md-none">@{{if .user.Handle}}{{.user.Handle}}{{else}}{{.user.SpotifyID}}{{end}}</span>
                         <button type="button" 
-                                class="btn btn-link text-light p-1"
+                                class="btn btn-link text-white p-1 share-btn"
                                 @click="shareProfile()"
                                 title="Share Profile">
                             <i class="bi-share"></i>
                         </button>
+                    </div>
+                    {{if .user.Bio}}
+                        <p class="mb-2 text-light">{{.user.Bio}}</p>
+                    {{end}}
+                    <div class="d-flex align-items-center justify-content-between flex-wrap mb-sm-3">
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <p class="lead mb-0 text-white-50">
+                                <span x-text="stats.totalCrates"></span> public crates
+                            </p>
+                            <p class="lead mb-0 text-white-50">
+                                {{.socialStats.FollowerCount}} followers
+                            </p>
+                            <p class="lead mb-0 text-white-50">
+                                {{.socialStats.FollowingCount}} following
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <a href="https://app.crates.music" target="_blank" class="btn btn-success btn-sm cta-button">
+                                <i class="bi-person-plus me-1"></i><span class="d-none d-md-inline">Follow @{{if .user.Handle}}{{.user.Handle}}{{else}}{{.user.SpotifyID}}{{end}}</span><span class="d-md-none">Follow</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -46,7 +56,7 @@
     </div>
 
     <!-- Tab Navigation -->
-    <div class="container pb-3">
+    <div class="container pb-sm-3">
         <div class="profile-tabs d-flex w-100">
             <button class="profile-tab flex-fill" 
                     :class="{'active': activeTab === 'authored'}"
@@ -64,7 +74,7 @@
     </div>
 
     <!-- Search and Filter Controls -->
-    <div class="container pb-4">
+    <div class="container pb-sm-2 pb-4">
         <div class="d-flex align-items-center gap-3">
             <div class="flex-grow-1">
                 <div class="input-group">

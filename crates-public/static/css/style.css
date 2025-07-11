@@ -45,6 +45,32 @@ body {
     font-weight: 400;
     line-height: 1.6;
     overflow-x: hidden;
+    padding-bottom: 80px; /* Space for fixed footer */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Make main content scrollable */
+main.container-fluid {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbar for webkit browsers */
+main.container-fluid::-webkit-scrollbar {
+    display: none;
+}
+
+/* Navigation should be fixed */
+.navbar {
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
 }
 
 /* Navigation */
@@ -73,6 +99,19 @@ body {
     padding: 2rem 0 0 0 !important;
 }
 
+/* Username and share button alignment */
+.share-btn {
+    font-size: 0.8rem !important;
+    color: white !important;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.share-btn:hover {
+    opacity: 1;
+    color: white !important;
+}
+
 .profile-avatar {
     width: 80px;
     height: 80px;
@@ -84,7 +123,6 @@ body {
 .crate-header {
     min-height: 140px;
     background: var(--bg-black);
-    padding: 2rem 0 0 0 !important;
 }
 
 .crate-cover {
@@ -656,6 +694,253 @@ h1, h2, h3, h4, h5, h6 {
 
 .view-toggle-compact .btn-group .btn:last-child {
     border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+}
+
+/* CTA Button Styling */
+.cta-button {
+    font-weight: 600 !important;
+    border-radius: var(--radius-md) !important;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-primary);
+}
+
+.cta-button.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    border-color: var(--primary);
+    color: white !important;
+}
+
+.cta-button.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
+    border-color: var(--primary-hover);
+    color: white !important;
+}
+
+.cta-button.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-color: #28a745;
+    color: white !important;
+    font-size: 0.875rem;
+    padding: 6px 12px;
+}
+
+.cta-button.btn-success.btn-sm {
+    font-size: 0.875rem !important;
+    padding: 6px 12px !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+}
+
+.cta-button.btn-success:hover {
+    background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+    border-color: #20c997;
+    color: white !important;
+    transform: translateY(-1px);
+}
+
+/* Navigation CTA Button */
+.navbar .cta-button {
+    margin-left: 8px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+/* Footer CTA Styling - only show on profile and crate pages, not home page */
+body:not(.home-page) .footer-cta {
+    background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 50%, var(--bg-darker) 100%);
+    border-top: 1px solid var(--border-subtle) !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+/* Hide footer CTA on home page */
+.home-page .footer-cta {
+    display: none !important;
+}
+
+.footer-cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--primary) 50%, transparent 100%);
+    opacity: 0.3;
+}
+
+.footer-cta .cta-button {
+    font-size: 0.875rem;
+    padding: 8px 16px;
+}
+
+/* Responsive CTA Styling */
+@media (max-width: 768px) {
+    .navbar .cta-button {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+    
+    .navbar .cta-button .bi {
+        font-size: 0.9rem;
+    }
+    
+    /* Stack CTA buttons on mobile */
+    .d-flex.gap-2 {
+        flex-direction: column;
+        gap: 8px !important;
+    }
+    
+    .cta-button.btn-success {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+    
+    /* Hide footer on mobile */
+    .footer-cta {
+        display: none !important;
+        position: static !important;
+    }
+    
+    /* Remove body padding since footer is hidden */
+    body {
+        padding-bottom: 0 !important;
+    }
+    
+    /* Profile page mobile optimizations */
+    .profile-header {
+        padding: 1rem 0 0.5rem 0 !important;
+        min-height: auto !important;
+    }
+    
+    .profile-avatar {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    /* Float follow button to right on mobile */
+    .d-flex.justify-content-between > div:last-child {
+        margin-left: auto;
+    }
+    
+    /* Username and share button alignment */
+    .profile-header h1,
+    .profile-header h2 {
+        margin-bottom: 0 !important;
+        line-height: 1.2;
+    }
+    
+    /* Compact bio */
+    .profile-header .mb-2 {
+        margin-bottom: 0.5rem !important;
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+    
+    /* Compact stats text */
+    .lead {
+        font-size: 0.9rem !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Reduce crate stats font size on mobile */
+    .crate-header .text-white-50 {
+        font-size: 0.85rem !important;
+    }
+    
+    /* Compact tabs */
+    .profile-tabs {
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-tab {
+        padding: 8px 12px !important;
+        font-size: 0.85rem;
+    }
+    
+    .tab-badge {
+        font-size: 0.7rem;
+        padding: 1px 6px;
+    }
+    
+    /* Compact search and controls */
+    .container.pb-4 {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    
+    .form-control {
+        height: 36px !important;
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+    
+    .input-group-text {
+        height: 36px !important;
+        padding: 6px 10px;
+    }
+    
+    .view-toggle-compact .btn-group .btn {
+        min-width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+    
+    /* Reduce container padding */
+    .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    
+    /* Make home page footer smaller and not sticky on mobile */
+    footer.bg-black {
+        padding: 1rem 0 !important;
+        position: static !important;
+        font-size: 0.8rem;
+        bottom: auto !important;
+        left: auto !important;
+        right: auto !important;
+        z-index: auto !important;
+    }
+    
+    footer.bg-black p,
+    footer.bg-black a {
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem !important;
+    }
+    
+}
+
+@media (max-width: 576px) {
+    .navbar .cta-button {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+}
+
+/* Enhanced Hover States */
+.cta-button:focus {
+    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.25) !important;
+    outline: none;
+}
+
+.cta-button.btn-success:focus {
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25) !important;
+    outline: none;
 }
 
 /* Utility Classes */

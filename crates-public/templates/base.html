@@ -42,8 +42,8 @@
                 <img src="/static/images/logo.png" alt="Crates Logo" class="me-2" height="32">crates
             </a>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="https://app.crates.page" target="_blank">
-                    <i class="bi-box-arrow-up-right me-1"></i>Open App
+                <a class="btn btn-primary cta-button" href="https://app.crates.music" target="_blank">
+                    <i class="bi-plus-circle me-1"></i><span class="d-none d-md-inline">Create Your Own Crate</span><span class="d-md-none">Create Crate</span>
                 </a>
             </div>
         </div>
@@ -53,6 +53,24 @@
     <main class="container-fluid p-0">
         {{template "content" .}}
     </main>
+
+    <!-- Footer CTA -->
+    <footer class="footer-cta bg-gradient-dark border-top border-secondary py-3 mt-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <p class="mb-0 text-white-50">
+                        Crates is a free tool for organizing and sharing your favorite albums. Ready to build your own?
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                    <a href="https://app.crates.music" target="_blank" class="btn btn-primary btn-sm cta-button">
+                        Start Now <i class="bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <!-- Alpine.js -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
