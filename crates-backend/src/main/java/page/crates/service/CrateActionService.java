@@ -13,7 +13,7 @@ public interface CrateActionService {
     /**
      * Get user's recent library albums for AI to analyze taste
      */
-    List<SimpleLibraryAlbum> getUserLibrary(String userId, int limit);
+    List<SimpleLibraryAlbum> getUserLibrary(int limit);
     
     /**
      * Search Spotify for albums by query

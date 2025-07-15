@@ -38,11 +38,12 @@ public class CrateActionServiceImpl implements CrateActionService {
     private AlbumRepository albumRepository;
     
     @Override
-    public List<SimpleLibraryAlbum> getUserLibrary(String userId, int limit) {
-        log.info("Getting library for user {} (limit: {})", userId, limit);
+    public List<SimpleLibraryAlbum> getUserLibrary(int limit) {
+        SpotifyUser currentUser = currentUserService.getCurrentUser();
+        log.info("Getting library for user {} (limit: {})", currentUser.getSpotifyId(), limit);
         
-        // Use the existing method we created
-        return libraryService.getRecentLibraryAlbumsForAI(userId, limit);
+        // Use the existing method with the user's numeric ID
+        return libraryService.getRecentLibraryAlbumsForAI(currentUser.getId().toString(), limit);
     }
     
     @Override

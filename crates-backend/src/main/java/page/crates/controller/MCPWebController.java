@@ -71,10 +71,10 @@ public class MCPWebController {
             @RequestParam(value = "limit", defaultValue = "100") int limit) {
         
         try {
-            String userId = validateAndGetUserId(authHeader);
-            log.info("REST API: Getting library for user {} (limit: {})", userId, limit);
+            validateAndGetUserId(authHeader); // This sets the user context
+            log.info("REST API: Getting library (limit: {})", limit);
             
-            List<SimpleLibraryAlbum> library = crateActionService.getUserLibrary(userId, limit);
+            List<SimpleLibraryAlbum> library = crateActionService.getUserLibrary(limit);
             return ResponseEntity.ok(library);
             
         } catch (SecurityException e) {
