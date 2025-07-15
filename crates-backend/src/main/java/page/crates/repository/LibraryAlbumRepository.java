@@ -57,4 +57,11 @@ public interface LibraryAlbumRepository extends JpaRepository<LibraryAlbum, Long
     Page<LibraryAlbum> findActiveUncratedBySpotifyUserAndSearchTerm(Long spotifyUserId, String search, Pageable pageable);
 
     Optional<LibraryAlbum> findOneByAlbumAndSpotifyUser(Album album, SpotifyUser spotifyUser);
+    
+    @Query("SELECT l " +
+           "FROM LibraryAlbum l " +
+           "WHERE l.state = page.crates.entity.enums.State.ACTIVE " +
+           "  AND l.spotifyUser.id = :spotifyUserId " +
+           "ORDER BY l.addedAt DESC")
+    Page<LibraryAlbum> findRecentActiveBySpotifyUserId(Long spotifyUserId, Pageable pageable);
 }

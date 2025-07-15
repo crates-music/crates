@@ -78,6 +78,19 @@ public class UserServiceImpl implements UserService {
         return createOrUpdateUser(savedToken);
     }
 
+    /**
+     * MCP-specific method to create user from existing TokenResponse
+     * This avoids double token exchange in the MCP OAuth flow
+     */
+    @Override
+    public SpotifyUserCreation createUserFromTokenResponse(TokenResponse tokenResponse) {
+        final Token token = tokenMapper.map(tokenResponse);
+        token.setCode(""); // MCP flow doesn't need to store the original code
+        token.setAuthToken(RandomStringUtils.randomAlphanumeric(256));
+        final Token savedToken = tokenRepository.save(token);
+        return createOrUpdateUser(savedToken);
+    }
+
     @Override
     public SpotifyUser findBySpotifyId(String spotifyId) {
         return spotifyUserRepository.findOneBySpotifyId(spotifyId)
