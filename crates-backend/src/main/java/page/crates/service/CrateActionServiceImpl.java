@@ -76,7 +76,7 @@ public class CrateActionServiceImpl implements CrateActionService {
                     .description(description)
                     .publicCrate(isPublic)
                     .user(currentUser)
-                    .handle(generateCrateHandle(name))
+                    .handle(handleService.handelize(name))
                     .createdAt(Instant.now())
                     .updatedAt(Instant.now())
                     .build();
@@ -157,7 +157,7 @@ public class CrateActionServiceImpl implements CrateActionService {
             }
             
             // Generate public URL
-            String publicUrl = String.format("https://crates.page/%s/%s", 
+            String publicUrl = String.format("https://crates.music/%s/%s",
                     currentUser.getHandle(), crate.getHandle());
                     
             // Count albums in crate
@@ -218,14 +218,5 @@ public class CrateActionServiceImpl implements CrateActionService {
         }
         
         return String.valueOf(year);
-    }
-    
-    private String generateCrateHandle(String crateName) {
-        // Convert to URL-friendly handle
-        return crateName.toLowerCase()
-                .replaceAll("[^a-z0-9\\s-]", "") // Remove special chars
-                .replaceAll("\\s+", "-") // Replace spaces with hyphens
-                .replaceAll("-+", "-") // Remove multiple hyphens
-                .replaceAll("^-|-$", ""); // Remove leading/trailing hyphens
     }
 }
