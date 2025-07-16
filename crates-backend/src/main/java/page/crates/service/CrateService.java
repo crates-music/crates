@@ -48,6 +48,8 @@ public interface CrateService {
     
     Page<Crate> getUserPublicCrates(SpotifyUser user, String search, Pageable pageable);
     
+    Page<Crate> getUserAllCrates(SpotifyUser user, String search, Pageable pageable);
+    
     // Trending methods
     Page<Crate> findAllPublicByTrending(Pageable pageable);
     

@@ -276,6 +276,15 @@ public class CrateServiceImpl implements CrateService {
         }
         return crateRepository.findPublicByUser(user, pageable);
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Crate> getUserAllCrates(SpotifyUser user, String search, Pageable pageable) {
+        if (search != null && !search.trim().isEmpty()) {
+            return crateRepository.findActiveByUserAndNameLike(user, search, pageable);
+        }
+        return crateRepository.findActiveByUser(user, pageable);
+    }
 
     @Override
     @Transactional(readOnly = true)

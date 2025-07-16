@@ -64,31 +64,25 @@ public class MCPManifestController {
                                 ))
                                 .build(),
 
-                        // Tool 2: Search Spotify for albums
+                        // Tool 2: List user's crates
                         MCPTool.builder()
-                                .name("searchSpotifyAlbums")
-                                .description("Search Spotify for albums by artist and title")
+                                .name("getUserCrates")
+                                .description("List all user's crates (public and private) with optional search")
                                 .method("GET")
-                                .path("/mcp/web/search/albums")
+                                .path("/mcp/web/crates")
                                 .parameters(Map.of(
-                                        "q", MCPParameter.builder()
+                                        "search", MCPParameter.builder()
                                                 .type("string")
-                                                .description("Search query like 'Bon Iver For Emma' or 'Radiohead OK Computer'")
-                                                .required(true)
-                                                .build(),
-                                        "limit", MCPParameter.builder()
-                                                .type("integer")
-                                                .description("Maximum results to return (default 10)")
+                                                .description("Optional search term to filter crates by name")
                                                 .required(false)
-                                                .defaultValue(10)
                                                 .build()
                                 ))
                                 .build(),
 
-                        // Tool 3: Create new crate
+                        // Tool 3: Create crate with albums (consolidated)
                         MCPTool.builder()
-                                .name("createCrate")
-                                .description("Create a new crate with name and description")
+                                .name("createCrateWithAlbums")
+                                .description("Create a new crate and add multiple albums in one operation. Provide album references (title + artist), backend handles matching.")
                                 .method("POST")
                                 .path("/mcp/web/crates")
                                 .parameters(Map.of(
@@ -100,22 +94,27 @@ public class MCPManifestController {
                                         "description", MCPParameter.builder()
                                                 .type("string")
                                                 .description("Crate description")
-                                                .required(true)
+                                                .required(false)
                                                 .build(),
                                         "isPublic", MCPParameter.builder()
                                                 .type("boolean")
                                                 .description("Make crate public for sharing")
                                                 .required(false)
-                                                .defaultValue(true)
+                                                .defaultValue(false)
+                                                .build(),
+                                        "albums", MCPParameter.builder()
+                                                .type("array")
+                                                .description("Array of album references with 'title' and 'artist' fields")
+                                                .required(false)
                                                 .build()
                                 ))
                                 .build(),
 
-                        // Tool 4: Add album to crate
+                        // Tool 4: Add albums to existing crate (consolidated)
                         MCPTool.builder()
-                                .name("addAlbumToCrate")
-                                .description("Add a specific album to a crate using Spotify album ID")
-                                .method("POST")
+                                .name("addAlbumsToCrate")
+                                .description("Add multiple albums to existing crate (additive). Provide album references (title + artist), backend handles matching.")
+                                .method("PUT")
                                 .path("/mcp/web/crates/{crateId}/albums")
                                 .parameters(Map.of(
                                         "crateId", MCPParameter.builder()
@@ -123,28 +122,14 @@ public class MCPManifestController {
                                                 .description("The crate ID")
                                                 .required(true)
                                                 .build(),
-                                        "spotifyAlbumId", MCPParameter.builder()
-                                                .type("string")
-                                                .description("Spotify album ID")
-                                                .required(true)
-                                                .build()
-                                ))
-                                .build(),
-
-                        // Tool 5: Get public crate link
-                        MCPTool.builder()
-                                .name("getPublicCrateLink")
-                                .description("Generate public sharing link for a completed crate")
-                                .method("GET")
-                                .path("/mcp/web/crates/{crateId}/link")
-                                .parameters(Map.of(
-                                        "crateId", MCPParameter.builder()
-                                                .type("string")
-                                                .description("The crate ID")
+                                        "albums", MCPParameter.builder()
+                                                .type("array")
+                                                .description("Array of album references with 'title' and 'artist' fields")
                                                 .required(true)
                                                 .build()
                                 ))
                                 .build()
+
                 ))
                 .build();
 

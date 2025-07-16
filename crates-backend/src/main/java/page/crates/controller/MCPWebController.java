@@ -15,8 +15,8 @@ import page.crates.security.UserContextHolder;
 import java.util.List;
 
 /**
- * REST API controller for ChatGPT Custom GPT integration
- * Converts MCP tools to HTTP endpoints with Bearer token authentication
+ * Consolidated REST API controller for ChatGPT Custom GPT integration
+ * Provides consolidated endpoints that reduce API calls by doing bulk operations
  */
 @RestController
 @RequestMapping("/mcp/web")
@@ -51,7 +51,7 @@ public class MCPWebController {
             throw new SecurityException("Invalid or expired API key");
         }
         
-        // Look up the SpotifyUser by their Spotify ID and set in context (following your existing pattern)
+        // Look up the SpotifyUser by their Spotify ID and set in context
         SpotifyUser user = spotifyUserRepository.findOneBySpotifyId(mcpApiKey.getUserId())
                 .orElseThrow(() -> new SecurityException("User not found for Spotify ID: " + mcpApiKey.getUserId()));
         
@@ -71,7 +71,7 @@ public class MCPWebController {
             @RequestParam(value = "limit", defaultValue = "100") int limit) {
         
         try {
-            validateAndGetUserId(authHeader); // This sets the user context
+            validateAndGetUserId(authHeader);
             log.info("REST API: Getting library (limit: {})", limit);
             
             List<SimpleLibraryAlbum> library = crateActionService.getUserLibrary(limit);
@@ -87,118 +87,84 @@ public class MCPWebController {
     }
     
     /**
-     * REST endpoint: Search Spotify albums
-     * GET /mcp/web/search/albums?q=bon+iver+for+emma&limit=10
+     * REST endpoint: List user's crates
+     * GET /mcp/web/crates?search=jazz
      */
-    @GetMapping("/search/albums")
-    public ResponseEntity<List<SpotifyAlbumResult>> searchSpotifyAlbums(
+    @GetMapping("/crates")
+    public ResponseEntity<List<CrateListItem>> getUserCrates(
             @RequestHeader("Authorization") String authHeader,
-            @RequestParam("q") String query,
-            @RequestParam(value = "limit", defaultValue = "10") int limit) {
+            @RequestParam(value = "search", required = false) String search) {
         
         try {
-            validateAndGetUserId(authHeader); // Just validate auth, don't need user ID for search
-            log.info("REST API: Searching Spotify for: '{}' (limit: {})", query, limit);
+            validateAndGetUserId(authHeader);
+            log.info("REST API: Getting user crates (search: '{}')", search);
             
-            List<SpotifyAlbumResult> results = crateActionService.searchSpotifyAlbums(query);
-            
-            // Limit results if needed
-            if (results.size() > limit) {
-                results = results.subList(0, limit);
-            }
-            
-            return ResponseEntity.ok(results);
+            List<CrateListItem> crates = crateActionService.getUserCrates(search);
+            return ResponseEntity.ok(crates);
             
         } catch (SecurityException e) {
             log.warn("Authentication failed: {}", e.getMessage());
             return ResponseEntity.status(401).build();
         } catch (Exception e) {
-            log.error("Error searching Spotify albums", e);
+            log.error("Error getting user crates", e);
             return ResponseEntity.status(500).build();
         }
     }
     
     /**
-     * REST endpoint: Create new crate
+     * REST endpoint: Create crate with albums in one operation
      * POST /mcp/web/crates
-     * Body: {"name": "Rainy Day Vibes", "description": "Perfect for...", "isPublic": true}
+     * Body: {"name": "Rainy Day Vibes", "description": "Perfect for...", "isPublic": true, "albums": [{"title": "For Emma", "artist": "Bon Iver"}]}
      */
     @PostMapping("/crates")
-    public ResponseEntity<CrateResult> createCrate(
+    public ResponseEntity<CrateSummary> createCrateWithAlbums(
             @RequestHeader("Authorization") String authHeader,
-            @RequestBody CreateCrateRequest request) {
+            @RequestBody CreateCrateWithAlbumsRequest request) {
         
         try {
-            String userId = validateAndGetUserId(authHeader);
-            log.info("REST API: Creating crate '{}' for user {}", request.getName(), userId);
-            
-            CrateResult result = crateActionService.createCrate(
+            validateAndGetUserId(authHeader);
+            log.info("REST API: Creating crate '{}' with {} albums", 
                     request.getName(), 
-                    request.getDescription(), 
-                    request.isPublic()
-            );
+                    request.getAlbums() != null ? request.getAlbums().size() : 0);
             
+            CrateSummary result = crateActionService.createCrateWithAlbums(request);
             return ResponseEntity.ok(result);
             
         } catch (SecurityException e) {
             log.warn("Authentication failed: {}", e.getMessage());
             return ResponseEntity.status(401).build();
         } catch (Exception e) {
-            log.error("Error creating crate", e);
+            log.error("Error creating crate with albums", e);
             return ResponseEntity.status(500).build();
         }
     }
     
     /**
-     * REST endpoint: Add album to crate
-     * POST /mcp/web/crates/{crateId}/albums
-     * Body: {"spotifyAlbumId": "4aawyAB9vmqN3uQ7FjRGTy"}
+     * REST endpoint: Add albums to existing crate (additive)
+     * PUT /mcp/web/crates/{crateId}/albums
+     * Body: {"albums": [{"title": "For Emma", "artist": "Bon Iver"}, {"title": "22, A Million", "artist": "Bon Iver"}]}
      */
-    @PostMapping("/crates/{crateId}/albums")
-    public ResponseEntity<AdditionResult> addAlbumToCrate(
+    @PutMapping("/crates/{crateId}/albums")
+    public ResponseEntity<CrateSummary> addAlbumsToCrate(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String crateId,
-            @RequestBody AddAlbumRequest request) {
+            @RequestBody AddAlbumsRequest request) {
         
         try {
-            String userId = validateAndGetUserId(authHeader);
-            log.info("REST API: Adding album {} to crate {} for user {}", 
-                    request.getSpotifyAlbumId(), crateId, userId);
+            validateAndGetUserId(authHeader);
+            log.info("REST API: Adding {} albums to crate {}", 
+                    request.getAlbums() != null ? request.getAlbums().size() : 0, crateId);
             
-            AdditionResult result = crateActionService.addAlbumToCrate(crateId, request.getSpotifyAlbumId());
+            CrateSummary result = crateActionService.addAlbumsToCrate(crateId, request);
             return ResponseEntity.ok(result);
             
         } catch (SecurityException e) {
             log.warn("Authentication failed: {}", e.getMessage());
             return ResponseEntity.status(401).build();
         } catch (Exception e) {
-            log.error("Error adding album to crate", e);
+            log.error("Error adding albums to crate", e);
             return ResponseEntity.status(500).build();
         }
     }
     
-    /**
-     * REST endpoint: Get public crate link
-     * GET /mcp/web/crates/{crateId}/link
-     */
-    @GetMapping("/crates/{crateId}/link")
-    public ResponseEntity<ShareResult> getPublicCrateLink(
-            @RequestHeader("Authorization") String authHeader,
-            @PathVariable String crateId) {
-        
-        try {
-            String userId = validateAndGetUserId(authHeader);
-            log.info("REST API: Getting public link for crate {} (user: {})", crateId, userId);
-            
-            ShareResult result = crateActionService.getPublicCrateLink(crateId);
-            return ResponseEntity.ok(result);
-            
-        } catch (SecurityException e) {
-            log.warn("Authentication failed: {}", e.getMessage());
-            return ResponseEntity.status(401).build();
-        } catch (Exception e) {
-            log.error("Error getting public crate link", e);
-            return ResponseEntity.status(500).build();
-        }
-    }
 }

@@ -31,7 +31,17 @@ public interface CrateActionService {
     AdditionResult addAlbumToCrate(String crateId, String spotifyAlbumId);
     
     /**
-     * Generate public sharing link for crate
+     * Create crate with albums in one operation (consolidated)
      */
-    ShareResult getPublicCrateLink(String crateId);
+    CrateSummary createCrateWithAlbums(CreateCrateWithAlbumsRequest request);
+    
+    /**
+     * Add albums to existing crate (additive operation)
+     */
+    CrateSummary addAlbumsToCrate(String crateId, AddAlbumsRequest request);
+    
+    /**
+     * List all user's crates (both public and private)
+     */
+    List<CrateListItem> getUserCrates(String search);
 }

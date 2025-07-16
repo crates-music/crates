@@ -141,45 +141,6 @@ public class CrateActionServiceImpl implements CrateActionService {
         }
     }
     
-    @Override
-    public ShareResult getPublicCrateLink(String crateId) {
-        log.info("Generating public link for crate: {}", crateId);
-        
-        try {
-            SpotifyUser currentUser = currentUserService.getCurrentUser();
-            Crate crate = crateService.findById(Long.valueOf(crateId));
-            
-            // Ensure user has a handle for public sharing
-            if (currentUser.getHandle() == null || currentUser.getHandle().isEmpty()) {
-                // Auto-generate handle if needed
-                String generatedHandle = handleService.handelize(currentUser.getSpotifyId());
-                currentUser.setHandle(generatedHandle);
-                // Save updated user
-            }
-            
-            // Generate public URL
-            String publicUrl = String.format("https://crates.music/%s/%s",
-                    currentUser.getHandle(), crate.getHandle());
-                    
-            // Count albums in crate
-            Page<CrateAlbum> crateAlbums = crateService.getAlbums(crate.getId(), PageRequest.of(0, 1));
-            int albumCount = (int) crateAlbums.getTotalElements();
-            
-            String userMessage = String.format("Created '%s' with %d albums! Share: %s", 
-                    crate.getName(), albumCount, publicUrl);
-            
-            return ShareResult.builder()
-                    .publicUrl(publicUrl)
-                    .crateName(crate.getName())
-                    .albumCount(albumCount)
-                    .userMessage(userMessage)
-                    .build();
-                    
-        } catch (Exception e) {
-            log.error("Error generating public link for crate: {}", crateId, e);
-            throw new RuntimeException("Failed to generate public link: " + e.getMessage());
-        }
-    }
     
     private SpotifyAlbumResult convertToSpotifyAlbumResult(Album album) {
         String artistName = album.getArtists().stream()
@@ -219,5 +180,276 @@ public class CrateActionServiceImpl implements CrateActionService {
         }
         
         return String.valueOf(year);
+    }
+    
+    @Override
+    public CrateSummary createCrateWithAlbums(CreateCrateWithAlbumsRequest request) {
+        log.info("Creating crate '{}' with {} albums", request.getName(), 
+                request.getAlbums() != null ? request.getAlbums().size() : 0);
+        
+        try {
+            SpotifyUser currentUser = currentUserService.getCurrentUser();
+            
+            // Create crate entity
+            Crate newCrate = Crate.builder()
+                    .name(request.getName())
+                    .description(request.getDescription())
+                    .publicCrate(request.isPublic())
+                    .user(currentUser)
+                    .handle(handleService.handelize(request.getName()))
+                    .createdAt(Instant.now())
+                    .updatedAt(Instant.now())
+                    .build();
+            
+            // Save crate
+            Crate savedCrate = crateService.create(newCrate);
+            
+            // Add albums if provided
+            List<AlbumMatchResult> matchResults = List.of();
+            int albumsAdded = 0;
+            int albumsFailed = 0;
+            
+            if (request.getAlbums() != null && !request.getAlbums().isEmpty()) {
+                matchResults = addAlbumsToCreatedCrate(savedCrate.getId().toString(), request.getAlbums());
+                albumsAdded = (int) matchResults.stream().mapToLong(r -> r.isMatched() ? 1 : 0).sum();
+                albumsFailed = matchResults.size() - albumsAdded;
+            }
+            
+            // Generate public URL if crate is public
+            String publicUrl = null;
+            if (savedCrate.isPublicCrate()) {
+                publicUrl = generatePublicUrl(currentUser, savedCrate);
+            }
+            
+            String userMessage = String.format("Created '%s' with %d albums successfully added%s%s", 
+                    savedCrate.getName(), albumsAdded, 
+                    albumsFailed > 0 ? " (" + albumsFailed + " failed to match)" : "",
+                    publicUrl != null ? ". Share: " + publicUrl : "");
+            
+            return CrateSummary.builder()
+                    .crateId(savedCrate.getId().toString())
+                    .crateName(savedCrate.getName())
+                    .description(savedCrate.getDescription())
+                    .handle(savedCrate.getHandle())
+                    .isPublic(savedCrate.isPublicCrate())
+                    .totalAlbums(albumsAdded)
+                    .albumsAdded(albumsAdded)
+                    .albumsFailed(albumsFailed)
+                    .matchResults(matchResults)
+                    .userMessage(userMessage)
+                    .publicUrl(publicUrl)
+                    .build();
+                    
+        } catch (Exception e) {
+            log.error("Error creating crate with albums: '{}'", request.getName(), e);
+            throw new RuntimeException("Failed to create crate with albums: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public CrateSummary addAlbumsToCrate(String crateId, AddAlbumsRequest request) {
+        log.info("Adding {} albums to crate {}", 
+                request.getAlbums() != null ? request.getAlbums().size() : 0, crateId);
+        
+        try {
+            Crate crate = crateService.findById(Long.valueOf(crateId));
+            
+            // Add albums
+            List<AlbumMatchResult> matchResults = List.of();
+            int albumsAdded = 0;
+            int albumsFailed = 0;
+            
+            if (request.getAlbums() != null && !request.getAlbums().isEmpty()) {
+                matchResults = addAlbumsToCreatedCrate(crateId, request.getAlbums());
+                albumsAdded = (int) matchResults.stream().mapToLong(r -> r.isMatched() ? 1 : 0).sum();
+                albumsFailed = matchResults.size() - albumsAdded;
+            }
+            
+            // Get updated album count
+            Page<CrateAlbum> crateAlbums = crateService.getAlbums(crate.getId(), PageRequest.of(0, 1));
+            int totalAlbums = (int) crateAlbums.getTotalElements();
+            
+            // Generate public URL if crate is public
+            SpotifyUser currentUser = currentUserService.getCurrentUser();
+            String publicUrl = null;
+            if (crate.isPublicCrate()) {
+                publicUrl = generatePublicUrl(currentUser, crate);
+            }
+            
+            String userMessage = String.format("Added %d albums to '%s'%s (total: %d albums)%s", 
+                    albumsAdded, crate.getName(),
+                    albumsFailed > 0 ? " (" + albumsFailed + " failed to match)" : "",
+                    totalAlbums,
+                    publicUrl != null ? ". Share: " + publicUrl : "");
+            
+            return CrateSummary.builder()
+                    .crateId(crate.getId().toString())
+                    .crateName(crate.getName())
+                    .description(crate.getDescription())
+                    .handle(crate.getHandle())
+                    .isPublic(crate.isPublicCrate())
+                    .totalAlbums(totalAlbums)
+                    .albumsAdded(albumsAdded)
+                    .albumsFailed(albumsFailed)
+                    .matchResults(matchResults)
+                    .userMessage(userMessage)
+                    .publicUrl(publicUrl)
+                    .build();
+                    
+        } catch (Exception e) {
+            log.error("Error adding albums to crate {}", crateId, e);
+            throw new RuntimeException("Failed to add albums to crate: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public List<CrateListItem> getUserCrates(String search) {
+        try {
+            SpotifyUser currentUser = currentUserService.getCurrentUser();
+            log.info("Getting crates for user {} (search: '{}')", currentUser.getSpotifyId(), search);
+            
+            // Get all crates (both public and private) for the user
+            Page<Crate> crates = crateService.getUserAllCrates(currentUser, search, PageRequest.of(0, 100));
+            
+            return crates.getContent().stream()
+                    .map(this::convertToCrateListItem)
+                    .collect(Collectors.toList());
+                    
+        } catch (Exception e) {
+            log.error("Error getting user crates (search: '{}')", search, e);
+            throw new RuntimeException("Failed to get user crates: " + e.getMessage());
+        }
+    }
+    
+    private List<AlbumMatchResult> addAlbumsToCreatedCrate(String crateId, List<SimpleAlbumReference> albumRefs) {
+        return albumRefs.stream()
+                .map(albumRef -> matchAndAddAlbum(crateId, albumRef))
+                .collect(Collectors.toList());
+    }
+    
+    private AlbumMatchResult matchAndAddAlbum(String crateId, SimpleAlbumReference albumRef) {
+        try {
+            // Create search query combining artist and album
+            String searchQuery = albumRef.getArtist() + " " + albumRef.getTitle();
+            log.debug("Searching for album: '{}'", searchQuery);
+            
+            // Search for albums
+            Page<Album> searchResults = albumService.search(searchQuery, SearchType.GLOBAL, PageRequest.of(0, 5));
+            
+            if (searchResults.isEmpty()) {
+                return AlbumMatchResult.builder()
+                        .requestedTitle(albumRef.getTitle())
+                        .requestedArtist(albumRef.getArtist())
+                        .matched(false)
+                        .message("No albums found matching: " + albumRef.getArtist() + " - " + albumRef.getTitle())
+                        .build();
+            }
+            
+            // Find best match - prioritize exact matches
+            Album bestMatch = findBestAlbumMatch(albumRef, searchResults.getContent());
+            
+            if (bestMatch == null) {
+                return AlbumMatchResult.builder()
+                        .requestedTitle(albumRef.getTitle())
+                        .requestedArtist(albumRef.getArtist())
+                        .matched(false)
+                        .message("No good matches found for: " + albumRef.getArtist() + " - " + albumRef.getTitle())
+                        .build();
+            }
+            
+            // Add album to crate
+            crateService.addAlbum(Long.valueOf(crateId), bestMatch.getSpotifyId());
+            
+            String actualArtist = bestMatch.getArtists().stream()
+                    .findFirst()
+                    .map(Artist::getName)
+                    .orElse("Unknown Artist");
+            
+            return AlbumMatchResult.builder()
+                    .requestedTitle(albumRef.getTitle())
+                    .requestedArtist(albumRef.getArtist())
+                    .matched(true)
+                    .actualTitle(bestMatch.getName())
+                    .actualArtist(actualArtist)
+                    .message("Successfully added: " + actualArtist + " - " + bestMatch.getName())
+                    .build();
+                    
+        } catch (Exception e) {
+            log.warn("Error matching album: {} - {}", albumRef.getArtist(), albumRef.getTitle(), e);
+            return AlbumMatchResult.builder()
+                    .requestedTitle(albumRef.getTitle())
+                    .requestedArtist(albumRef.getArtist())
+                    .matched(false)
+                    .message("Error adding album: " + e.getMessage())
+                    .build();
+        }
+    }
+    
+    private Album findBestAlbumMatch(SimpleAlbumReference albumRef, List<Album> candidates) {
+        String requestedTitle = albumRef.getTitle().toLowerCase().trim();
+        String requestedArtist = albumRef.getArtist().toLowerCase().trim();
+        
+        // Look for exact title and artist matches first
+        for (Album album : candidates) {
+            String albumTitle = album.getName().toLowerCase().trim();
+            String albumArtist = album.getArtists().stream()
+                    .findFirst()
+                    .map(artist -> artist.getName().toLowerCase().trim())
+                    .orElse("");
+            
+            if (albumTitle.equals(requestedTitle) && albumArtist.equals(requestedArtist)) {
+                return album; // Perfect match
+            }
+        }
+        
+        // Look for partial matches - title contains or artist contains
+        for (Album album : candidates) {
+            String albumTitle = album.getName().toLowerCase().trim();
+            String albumArtist = album.getArtists().stream()
+                    .findFirst()
+                    .map(artist -> artist.getName().toLowerCase().trim())
+                    .orElse("");
+            
+            if ((albumTitle.contains(requestedTitle) || requestedTitle.contains(albumTitle)) &&
+                (albumArtist.contains(requestedArtist) || requestedArtist.contains(albumArtist))) {
+                return album; // Good partial match
+            }
+        }
+        
+        // Return first candidate if no good matches (let AI decide if it's acceptable)
+        return candidates.isEmpty() ? null : candidates.get(0);
+    }
+    
+    private CrateListItem convertToCrateListItem(Crate crate) {
+        // Get album count for this crate
+        Page<CrateAlbum> albums = crateService.getAlbums(crate.getId(), PageRequest.of(0, 1));
+        int albumCount = (int) albums.getTotalElements();
+        
+        return CrateListItem.builder()
+                .crateId(crate.getId().toString())
+                .name(crate.getName())
+                .description(crate.getDescription())
+                .isPublic(crate.isPublicCrate())
+                .albumCount(albumCount)
+                .build();
+    }
+    
+    private String generatePublicUrl(SpotifyUser user, Crate crate) {
+        try {
+            // Ensure user has a handle for public sharing
+            if (user.getHandle() == null || user.getHandle().isEmpty()) {
+                // Auto-generate handle if needed
+                String generatedHandle = handleService.handelize(user.getSpotifyId());
+                user.setHandle(generatedHandle);
+                // Note: In a real implementation, you'd save the user here
+            }
+            
+            // Generate public URL - using crates.page domain
+            return String.format("https://crates.page/%s/%s", 
+                    user.getHandle(), crate.getHandle());
+        } catch (Exception e) {
+            log.warn("Error generating public URL for crate {}: {}", crate.getId(), e.getMessage());
+            return null;
+        }
     }
 }
