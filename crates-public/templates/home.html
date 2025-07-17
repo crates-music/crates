@@ -40,7 +40,10 @@
             <a class="navbar-brand fw-bold text-white" href="/">
                 <img src="/static/images/logo.png" alt="Crates Logo" class="me-2" height="32">crates
             </a>
-            <div class="navbar-nav ms-auto">
+            <div class="navbar-nav ms-auto d-flex flex-row gap-2">
+                <a class="btn btn-outline-secondary btn-sm d-flex align-items-center" href="https://chatgpt.com/g/g-6875a074381c819190d0ef21578ccda9-cratesgpt?utm_source=crates&utm_medium=public_site&utm_campaign=navigation" target="_blank" rel="noopener">
+                    <i class="bi-robot me-1"></i><span class="d-none d-lg-inline">CratesGPT</span>
+                </a>
                 <a class="btn btn-primary cta-button" href="https://app.crates.music" target="_blank">
                     <i class="bi-plus-circle me-1"></i><span class="d-none d-md-inline">Create Your Own Crate</span><span class="d-md-none">Create Crate</span>
                 </a>
@@ -65,9 +68,12 @@
                                 <p class="lead text-white-50 mb-5">
                                     Organize your Spotify albums into custom categories, discover curated collections from other music lovers, and rediscover the joy of full albums curated just the way you like.
                                 </p>
-                                <div class="hero-actions d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+                                <div class="hero-actions d-flex flex-column gap-3 justify-content-center justify-content-lg-start">
                                     <a href="https://app.crates.music" class="btn btn-primary btn-lg px-4 py-3">
                                         <i class="bi-music-note-beamed me-2"></i>Start Organizing
+                                    </a>
+                                    <a href="https://chatgpt.com/g/g-6875a074381c819190d0ef21578ccda9-cratesgpt?utm_source=crates&utm_medium=public_site&utm_campaign=hero_section" target="_blank" rel="noopener" class="btn btn-outline-primary btn-lg px-4 py-3">
+                                        <i class="bi-robot me-2"></i>Try with AI
                                     </a>
                                     <button @click="scrollToExplore()" class="btn btn-outline-light btn-lg px-4 py-3">
                                         <i class="bi-search me-2"></i>Browse Public Crates
@@ -119,7 +125,7 @@
                         </div>
                     </div>
                     <div class="row g-4">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="feature-card text-center h-100 p-4">
                                 <div class="feature-icon mb-3">
                                     <i class="bi-collection display-4 text-primary"></i>
@@ -128,7 +134,16 @@
                                 <p class="text-white-50">Create custom crates to organize your albums by genre, mood, era, or any way that makes sense to you.</p>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <div class="feature-card text-center h-100 p-4">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi-robot display-4 text-primary"></i>
+                                </div>
+                                <h4 class="text-white mb-3">AI-Powered Creation</h4>
+                                <p class="text-white-50">Let CratesGPT analyze your taste and intelligently create themed collections based on your listening habits.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="feature-card text-center h-100 p-4">
                                 <div class="feature-icon mb-3">
                                     <i class="bi-share display-4 text-primary"></i>
@@ -137,7 +152,7 @@
                                 <p class="text-white-50">Make your crates public and share your curated music collections with friends and fellow music lovers.</p>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="feature-card text-center h-100 p-4">
                                 <div class="feature-icon mb-3">
                                     <i class="bi-lightning display-4 text-primary"></i>

@@ -18,8 +18,16 @@
       </div>
       
       <div class="user-actions">
-        <!-- Desktop: Show public profile, settings and logout -->
+        <!-- Desktop: Show CratesGPT, public profile, settings and logout -->
         <div class="d-none d-sm-flex align-items-center gap-2">
+          <a 
+            class="btn btn-sm btn-outline-primary" 
+            href="https://chatgpt.com/g/g-6875a074381c819190d0ef21578ccda9-cratesgpt?utm_source=crates&utm_medium=webapp&utm_campaign=user_header"
+            target="_blank" 
+            rel="noopener"
+            title="Try CratesGPT">
+            <i class="bi-robot"></i>
+          </a>
           <button 
             class="btn btn-sm btn-outline-secondary" 
             (click)="openPublicProfile()"
@@ -41,8 +49,16 @@
           </button>
         </div>
         
-        <!-- Mobile: Show public profile and logout -->
+        <!-- Mobile: Show CratesGPT, public profile and logout -->
         <div class="d-sm-none d-flex align-items-center gap-2">
+          <a 
+            class="btn btn-sm btn-outline-primary" 
+            href="https://chatgpt.com/g/g-6875a074381c819190d0ef21578ccda9-cratesgpt?utm_source=crates&utm_medium=webapp&utm_campaign=user_header_mobile"
+            target="_blank" 
+            rel="noopener"
+            title="Try CratesGPT">
+            <i class="bi-robot"></i>
+          </a>
           <button 
             class="btn btn-sm btn-outline-secondary" 
             (click)="openPublicProfile()"
