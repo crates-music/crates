@@ -444,8 +444,8 @@ public class CrateActionServiceImpl implements CrateActionService {
                 // Note: In a real implementation, you'd save the user here
             }
             
-            // Generate public URL - using crates.page domain
-            return String.format("https://crates.page/%s/%s", 
+            // Generate public URL - using crates.music domain
+            return String.format("https://crates.music/%s/%s", 
                     user.getHandle(), crate.getHandle());
         } catch (Exception e) {
             log.warn("Error generating public URL for crate {}: {}", crate.getId(), e.getMessage());

@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Crates is a comprehensive music organization and sharing platform that allows users to organize their Spotify library albums into custom categories called "crates" and share them publicly. The application consists of a Spring Boot backend, Angular frontend, Go-based public sharing service, and PostgreSQL database.
 
-**Live Version:** https://app.crates.page  
-**Public Sharing:** https://crates.page
+**Live Version:** https://app.crates.music  
+**Public Sharing:** https://crates.music
 
 ## Architecture
 
@@ -217,7 +217,7 @@ cd crates-database
 
 **Public Sharing URLs:**
 - Development: http://localhost:8337
-- Production: https://crates.page
+- Production: https://crates.music
 
 ## Development Patterns
 
@@ -303,7 +303,7 @@ this.router.navigate(['/user/handle', user.handle]);
 this.router.navigate(['/user', user.id]);
 
 // ✅ GOOD - handles only for public URLs
-window.open(`https://crates.page/${user.handle}`, '_blank');
+window.open(`https://crates.music/${user.handle}`, '_blank');
 
 // ✅ GOOD - Display name with fallback
 displayName = user.handle || user.spotifyId;

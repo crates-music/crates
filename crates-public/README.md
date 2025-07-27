@@ -6,7 +6,7 @@ A beautiful, server-side rendered public sharing interface for Crates music coll
 
 - **Server-side rendering** with perfect social media meta tags for unfurling
 - **Progressive enhancement** with Alpine.js for smooth SPA-like interactions
-- **Responsive design** matching the main crates.page aesthetic
+- **Responsive design** matching the main crates.music aesthetic
 - **Profile pages** displaying user's public crates (`/{username}`)
 - **Crate pages** with paginated album browsing (`/{username}/{handle}`)
 - **Search functionality** with debounced input
@@ -26,7 +26,7 @@ A beautiful, server-side rendered public sharing interface for Crates music coll
 
 - **Backend**: Go with Gin web framework
 - **Frontend**: Server-side rendered HTML + Alpine.js
-- **Styling**: Bootstrap 5 with custom CSS matching crates.page design
+- **Styling**: Bootstrap 5 with custom CSS matching crates.music design
 - **Social**: Open Graph and Twitter Card meta tags
 - **Deployment**: Docker containerization
 
@@ -90,11 +90,11 @@ The service proxies to the crates-backend public endpoints:
 
 ## Deployment
 
-The service is designed to be deployed at `share.crates.page` with the following architecture:
+The service is designed to be deployed at `share.crates.music` with the following architecture:
 
 ```
-share.crates.page/{username} → Profile Page
-share.crates.page/{username}/{handle} → Crate Page
+share.crates.music/{username} → Profile Page
+share.crates.music/{username}/{handle} → Crate Page
 ```
 
 ### Production Considerations
@@ -106,7 +106,7 @@ share.crates.page/{username}/{handle} → Crate Page
 
 ## Styling
 
-The UI maintains visual consistency with the main crates.page application:
+The UI maintains visual consistency with the main crates.music application:
 - **Primary Color**: #1DB954 (Spotify Green)
 - **Background**: #000000 (Pure Black)
 - **Dark Theme**: Bootstrap 5 dark mode

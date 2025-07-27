@@ -18,7 +18,7 @@ var backendClient *BackendClient
 // getFullURL constructs a fully qualified URL for the current request
 func getFullURL(c *gin.Context) string {
 	// Use the canonical domain for og:url
-	baseURL := "https://crates.page"
+	baseURL := "https://crates.music"
 	return baseURL + c.Request.URL.Path
 }
 
@@ -535,8 +535,8 @@ func handleHomePage(c *gin.Context) {
 		"title":          "Crates - Organize Your Spotify Albums",
 		"ogTitle":        "Crates - Organize Your Spotify Albums",
 		"ogDesc":         "Organize your Spotify albums into custom categories, discover curated collections from other music lovers, and rediscover the joy of full albums.",
-		"ogImage":        "https://crates.page/static/images/crates-card.png",
-		"ogURL":          "https://crates.page",
+		"ogImage":        "https://crates.music/static/images/crates-card.png",
+		"ogURL":          "https://crates.music",
 		"featuredCrates": featuredCrates,
 	}
 

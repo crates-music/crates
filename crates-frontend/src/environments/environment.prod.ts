@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  baseUri: 'https://app.crates.page/api',
-  publicBaseUrl: 'https://crates.page'
+  baseUri: 'https://app.crates.music/api',
+  publicBaseUrl: 'https://crates.music'
 };
