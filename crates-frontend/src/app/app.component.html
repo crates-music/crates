@@ -1,4 +1,4 @@
-<div class="app-container" *ngIf="loggedIn()">
+<div class="app-container" *ngIf="loggedIn$ | async">
   <!-- User Header (always visible at top) -->
   <div class="user-header-section">
     <crates-user-header 
@@ -22,6 +22,6 @@
 </div>
 
 <!-- Login/Welcome state for non-authenticated users -->
-<div class="welcome-container" *ngIf="!loggedIn()">
+<div class="welcome-container" *ngIf="!(loggedIn$ | async)">
   <router-outlet></router-outlet>
 </div>

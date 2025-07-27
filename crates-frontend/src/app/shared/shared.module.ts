@@ -16,6 +16,7 @@ import { ViewLayoutComponent } from './components/view-layout/view-layout.compon
 import { ListContentComponent } from './components/list-content/list-content.component';
 import { FollowButtonComponent } from './components/follow-button/follow-button.component';
 import { CollectionButtonComponent } from './components/collection-button/collection-button.component';
+import { UserListComponent } from './components/user-list/user-list.component';
 
 
 
@@ -32,6 +33,7 @@ import { CollectionButtonComponent } from './components/collection-button/collec
     ListContentComponent,
     FollowButtonComponent,
     CollectionButtonComponent,
+    UserListComponent,
   ],
   providers: [
     AuthGuard
@@ -48,6 +50,7 @@ import { CollectionButtonComponent } from './components/collection-button/collec
     ListContentComponent,
     FollowButtonComponent,
     CollectionButtonComponent,
+    UserListComponent,
     InfiniteScrollModule
   ],
   imports: [

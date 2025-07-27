@@ -35,6 +35,7 @@ export class FollowButtonComponent implements OnInit, OnDestroy {
     );
     this.loading$ = this.store.select(selectUserFollowLoading(this.userId));
     
+    
     // Load follow status
     this.store.dispatch(SocialActions.loadFollowStatus({ userId: this.userId }));
   }
@@ -54,7 +55,13 @@ export class FollowButtonComponent implements OnInit, OnDestroy {
       } else {
         this.store.dispatch(SocialActions.followUser({ userId: this.userId }));
       }
-      this.followChange.emit(!isFollowing);
+      
+      // Emit the change asynchronously to avoid ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        this.isFollowing$.pipe(take(1)).subscribe(newFollowingState => {
+          this.followChange.emit(newFollowingState);
+        });
+      }, 0);
     });
   }
 

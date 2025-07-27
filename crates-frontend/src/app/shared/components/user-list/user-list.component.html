@@ -1,5 +1,5 @@
 <crates-view-layout 
-  title="FOLLOWING"
+  [title]="title"
   [showSearch]="false"
   [showListToggle]="false">
   <div class="list-content">
@@ -15,35 +15,35 @@
     <!-- Error Message -->
     <div *ngIf="error$ | async as error" class="alert alert-danger" role="alert">
       <i class="bi-exclamation-triangle me-2"></i>
-      {{ error.message || 'Failed to load following. Please try again.' }}
+      {{ error.message || 'Failed to load data. Please try again.' }}
     </div>
 
     <!-- Loading State -->
-    <div *ngIf="(isLoading$ | async) && following.length === 0" class="loading-container">
+    <div *ngIf="(isLoading$ | async) && users.length === 0" class="loading-container">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
-      <p class="loading-text">Loading following...</p>
+      <p class="loading-text">Loading {{ listType }}...</p>
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="!(isLoading$ | async) && following.length === 0 && !(error$ | async)" class="empty-state">
-      <i class="bi-person-check empty-icon"></i>
-      <h3>Not following anyone yet</h3>
-      <p>When you follow people, they'll appear here.</p>
+    <div *ngIf="!(isLoading$ | async) && users.length === 0 && !(error$ | async)" class="empty-state">
+      <i [class]="emptyStateIcon + ' empty-icon'"></i>
+      <h3>{{ emptyStateTitle }}</h3>
+      <p>{{ emptyStateMessage }}</p>
     </div>
 
-    <!-- Following List -->
-    <div *ngIf="following.length > 0" class="users-list">
-      <div *ngFor="let follow of following" class="user-item">
+    <!-- Users List -->
+    <div *ngIf="users.length > 0" class="users-list">
+      <div *ngFor="let follow of users" class="user-item">
         <div class="user-avatar">
           <img 
-            *ngIf="follow.following.images && follow.following.images.length > 0" 
-            [src]="follow.following.images[0].url" 
-            [alt]="getUserDisplayName(follow.following)"
+            *ngIf="getUser(follow).images && getUser(follow).images.length > 0" 
+            [src]="getUser(follow).images[0].url" 
+            [alt]="getUserDisplayName(getUser(follow))"
             class="avatar-image">
           <div 
-            *ngIf="!follow.following.images || follow.following.images.length === 0" 
+            *ngIf="!getUser(follow).images || getUser(follow).images.length === 0" 
             class="avatar-placeholder">
             <i class="bi-person-circle"></i>
           </div>
@@ -51,30 +51,30 @@
         
         <div class="user-info">
           <div class="user-name">
-            <a [routerLink]="getUserProfileLink(follow.following)" class="user-link">
-              {{ getUserDisplayName(follow.following) }}
+            <a [routerLink]="getUserProfileLink(getUser(follow))" class="user-link">
+              {{ getUserDisplayName(getUser(follow)) }}
             </a>
           </div>
-          <div class="user-bio" *ngIf="follow.following.bio">
-            {{ follow.following.bio }}
+          <div class="user-bio" *ngIf="getUser(follow).bio">
+            {{ getUser(follow).bio }}
           </div>
           <div class="follow-date">
-            Following since {{ follow.createdAt | date:'MMM d, y' }}
+            {{ listType === 'following' ? 'Following' : 'Followed you' }} since {{ follow.createdAt | date:'MMM d, y' }}
           </div>
         </div>
         
         <div class="user-actions">
           <app-follow-button 
-            [userId]="follow.following.id"
+            [userId]="getUser(follow).id"
             [size]="'sm'"
-            (followChange)="onFollowChange(follow.following.id, $event)">
+            (followChange)="onFollowChange(getUser(follow).id, $event)">
           </app-follow-button>
         </div>
       </div>
     </div>
 
     <!-- Load More Button -->
-    <div *ngIf="hasMore && following.length > 0" class="load-more-container">
+    <div *ngIf="hasMore && users.length > 0" class="load-more-container">
       <button 
         class="btn btn-outline-primary" 
         (click)="onLoadMore()"
