@@ -1,40 +1,13 @@
 # crates
 
-![CRATES](https://app.crates.page/assets/images/crates-card-cropped.png)
+![CRATES](https://app.crates.music/assets/images/crates-card-cropped.png)
 
 Crates is a tool to organize your Spotify library albums into categories or "crates."
 
 Crates lets you organize your albums into custom categories, making it easier to find the perfect soundtrack for any moment. Sync your Spotify library, organize your Crates, and rediscover the joy of full albums curated just the way you like.
 
 ## Live Version
-check out the live version of this running at [app.crates.page](https://app.crates.page)
-
-## TODO
-
-- [X] Library UI - filters: uncrated-only by default
-- [X] Library UI - search by title/artist
-- [X] Library UI - loading state & poll for sync to be done 
-- [X] Overall - Tabs
-- [X] Overall - ngrx state management
-- [ ] Crates - Better styling on list page (first 4 albums??)
-- [X] Crates - search by title / album title
-- [X] Crates - Crate settings page (title, public or not, delete crate)
-- [ ] Crates - how to open in app on desktop (deep link)
-- [X] Library Sync - stop syncing after first existing is hit
-- [X] Library Sync - check for removed albums
-- [ ] tommy idea - [📦] Create playlists with box icon at the front for each crate.
-- [X] swap to root domain for share UI
-- [X] links from app to share UI for profiles and crates
-- [X] handles for profiles
-- [X] no slashes allowed in handles (other special character handling too, consider URL-encoding)
-- [X] main landing page isn't centered anymore
-- [X] need max width on the view layout
-- [X] fix double-tap issue on crate albums
-- [X] Profile - only show save if changes made
-- [X] Profile - Cancel should go "back", not always to Crates 
-- [ ] following crates & users
-- [ ] share landing page
-- [ ] discover section in app
+check out the live version of this running at [app.crates.music](https://app.crates.music)
 
 ## Building and Running
 
