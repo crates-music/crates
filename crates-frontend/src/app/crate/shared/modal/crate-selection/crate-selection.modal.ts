@@ -23,6 +23,7 @@ export class CrateSelectionModal {
   currentPage = 0;
   pageSize = 10;
   hasMore = true;
+  initialLoadComplete = false;
   private searchSubject = new Subject<string>();
 
   constructor(private activeModal: NgbActiveModal,
@@ -36,7 +37,21 @@ export class CrateSelectionModal {
       debounceTime(300),
       distinctUntilChanged()
     ).subscribe(searchTerm => {
+      // Store focus state before search
+      const searchInput = document.querySelector('.search-input') as HTMLInputElement;
+      const hadFocus = searchInput && document.activeElement === searchInput;
+      
       this.searchSubject.next(searchTerm || '');
+      
+      // Restore focus after a short delay to let the DOM update
+      if (hadFocus) {
+        setTimeout(() => {
+          const newSearchInput = document.querySelector('.search-input') as HTMLInputElement;
+          if (newSearchInput) {
+            newSearchInput.focus();
+          }
+        }, 50);
+      }
     });
 
     this.searchSubject.pipe(
@@ -50,7 +65,9 @@ export class CrateSelectionModal {
   }
 
   private loadCrates() {
-    this.loadCratesPage('').subscribe();
+    this.loadCratesPage('').subscribe(() => {
+      this.initialLoadComplete = true;
+    });
   }
 
   private loadCratesPage(searchTerm: string = '') {
@@ -71,6 +88,9 @@ export class CrateSelectionModal {
         
         this.hasMore = !cratePage.last;
         this.loading = false;
+        if (!this.initialLoadComplete) {
+          this.initialLoadComplete = true;
+        }
       })
     );
   }

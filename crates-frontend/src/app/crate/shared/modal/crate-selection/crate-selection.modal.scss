@@ -4,6 +4,7 @@
   color: $white;
   background: $dark;
   max-height: 80vh;
+  min-height: 400px;
   display: flex;
   flex-direction: column;
 
@@ -16,22 +17,26 @@
 
   .modal-search {
     flex-shrink: 0;
-    padding: 0 1rem;
+    padding: 0 1.5rem;
 
     .search-input {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: $white;
+      background: #000000 !important;
+      border: 2px solid rgba(255, 255, 255, 0.2) !important;
+      color: $white !important;
+      margin: 0 2px; // Add margin to prevent border clipping
+      box-sizing: border-box;
 
       &::placeholder {
         color: rgba(255, 255, 255, 0.6);
       }
 
       &:focus {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: $primary;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        color: $white;
+        background: #000000 !important;
+        border: 2px solid $primary !important;
+        box-shadow: none !important; // Remove box-shadow that might be clipped
+        color: $white !important;
+        outline: none;
+        margin: 0 2px;
       }
     }
   }
@@ -158,6 +163,7 @@
     overflow-y: auto;
     padding: 0 1rem;
     max-height: 400px;
+    min-height: 200px; // Ensure consistent height to prevent jumping
 
     .crates-list {
       display: flex;
@@ -173,6 +179,7 @@
   border-radius: 0.5rem;
   transition: all 0.2s ease;
   border: 1px solid transparent;
+  background: #111111;
 
   &:hover {
     border-color: $primary;

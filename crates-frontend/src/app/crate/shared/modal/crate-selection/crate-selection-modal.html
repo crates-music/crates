@@ -3,7 +3,7 @@
     <h4 class="text-center py-2 mb-0">Add to crate</h4>
   </div>
   
-  <div class="modal-search" *ngIf="!creating && allCrates.length > 0">
+  <div class="modal-search" *ngIf="!creating && initialLoadComplete">
     <div class="input-group mb-3">
       <input type="text" 
              class="form-control search-input" 
@@ -101,10 +101,17 @@
       </div>
     </div>
     
-    <div class="no-results" *ngIf="!loading && allCrates.length === 0 && searchControl.value">
+    <div class="no-results" *ngIf="!loading && allCrates.length === 0 && initialLoadComplete">
       <div class="text-center py-4">
-        <i class="bi bi-search fs-1 text-muted"></i>
-        <p class="text-muted mt-2">No crates found matching "{{ searchControl.value }}"</p>
+        <ng-container *ngIf="searchControl.value; else noCreatesYet">
+          <i class="bi bi-search fs-1 text-muted"></i>
+          <p class="text-muted mt-2">No crates found matching "{{ searchControl.value }}"</p>
+        </ng-container>
+        <ng-template #noCreatesYet>
+          <i class="bi bi-collection fs-1 text-muted"></i>
+          <p class="text-muted mt-2">You haven't created any crates yet</p>
+          <p class="text-muted mb-0">Click "Create New Crate" above to get started</p>
+        </ng-template>
       </div>
     </div>
     
@@ -115,6 +122,7 @@
         </button>
       </div>
     </div>
+    
     
     <div class="end-of-list" *ngIf="!hasMore && allCrates.length > 0">
       <div class="text-center py-2">
