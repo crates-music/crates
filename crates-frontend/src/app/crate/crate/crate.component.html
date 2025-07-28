@@ -50,7 +50,10 @@
   <div class="album-card-container m-4" (click)="openAlbum(album)">
     <div class="card album-card disable-select">
       <div class="album-image-container">
-        <img class="album-image" [src]="album.images[0].url" alt="{{ album.name }} artwork"/>
+        <img class="album-image" [src]="album.imageUrl" alt="{{ album.name }} artwork" *ngIf="album.imageUrl"/>
+        <div class="album-placeholder" *ngIf="!album.imageUrl">
+          <i class="bi-music-note-beamed"></i>
+        </div>
         <div class="card-img-overlay d-flex align-items-end p-0">
           <div class="close-button"
                *ngIf="isCurrentUserCrate()"
@@ -73,8 +76,12 @@
        (click)="openAlbum(album)">
     <div class="flex-shrink-0">
       <img class="list-album-image"
-           [src]="album.images[0].url"
-           alt="{{ album.name }} artwork"/>
+           [src]="album.imageUrl"
+           alt="{{ album.name }} artwork"
+           *ngIf="album.imageUrl"/>
+      <div class="list-album-placeholder" *ngIf="!album.imageUrl">
+        <i class="bi-music-note-beamed"></i>
+      </div>
     </div>
     <div class="flex-grow-1">
       <h6 class="list-album-title">{{ album.name }}</h6>
