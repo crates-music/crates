@@ -47,7 +47,7 @@
 
 <!-- Grid Item Template -->
 <ng-template #albumGridItem let-album>
-  <div class="album-card-container m-4" (click)="openAlbum(album)">
+  <div class="album-card-container m-2" (click)="openAlbum(album)">
     <div class="card album-card disable-select">
       <div class="album-image-container">
         <img class="album-image" [src]="album.imageUrl" alt="{{ album.name }} artwork" *ngIf="album.imageUrl"/>
@@ -88,7 +88,11 @@
       <p class="list-album-artist">{{ getArtistNames(album) }}</p>
     </div>
     <div class="flex-shrink-0">
-      <i class="bi-music-note-beamed text-primary opacity-75"></i>
+      <div class="list-close-button"
+           *ngIf="isCurrentUserCrate()"
+           (click)="removeAlbum($event, album)">
+        <i class="bi-x-lg"></i>
+      </div>
     </div>
   </div>
 </ng-template>

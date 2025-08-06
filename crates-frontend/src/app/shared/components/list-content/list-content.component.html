@@ -18,13 +18,13 @@
     
     <!-- Grid View -->
     <ng-container *ngIf="listType === ListType.Grid">
-      <div class="col-6 col-sm-6 col-md-4 col-xl-3 p-0" 
+      <div class="col-6 col-sm-6 col-md-6 col-lg-4 col-xl-3 p-0" 
            *ngFor="let item of items; trackBy: trackByFn">
         <ng-container *ngIf="gridItemTemplate; else defaultGridItem">
           <ng-container *ngTemplateOutlet="gridItemTemplate; context: { $implicit: item }"></ng-container>
         </ng-container>
         <ng-template #defaultGridItem>
-          <div class="item-card-container m-4">
+          <div class="item-card-container m-2">
             <div class="card item-card"
                  (click)="onItemClick(item)"
                  longPress

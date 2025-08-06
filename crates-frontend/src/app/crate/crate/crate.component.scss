@@ -224,10 +224,37 @@
   color: var(--text-muted);
 }
 
+/* List view close button */
+.list-close-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  color: var(--primary);
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.list-close-button:hover {
+  background: var(--primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+.list-album-row:hover .list-close-button {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* Responsive adjustments */
 @media (max-width: 576px) {
   .album-card-container {
-    margin: 0.75rem !important;
+    margin: 0.5rem !important;
   }
   
   .close-button {
@@ -235,6 +262,14 @@
     height: 28px;
     right: 0.5rem;
     top: 0.5rem;
+  }
+  
+  .list-close-button {
+    width: 28px;
+    height: 28px;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: rgba(0, 0, 0, 0.8);
   }
   
   /* Disable hover effects on mobile to prevent sticky states */
