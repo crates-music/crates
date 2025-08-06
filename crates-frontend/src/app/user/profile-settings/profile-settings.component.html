@@ -83,6 +83,40 @@
         </div>
       </div>
 
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email" class="form-label">
+          Email
+          <span class="form-label-optional">(Optional)</span>
+        </label>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          [class.is-invalid]="emailErrors"
+          formControlName="email"
+          placeholder="your.email@example.com"
+          maxlength="255">
+        <div class="form-help">
+          Your email address is kept private and will not be shared publicly.
+        </div>
+        <div *ngIf="emailErrors" class="form-error">
+          {{ emailErrors }}
+        </div>
+        
+        <!-- Email Opt-in Toggle (only show when email is entered) -->
+        <div *ngIf="hasEmail" class="form-check form-switch mt-3">
+          <input
+            type="checkbox"
+            id="emailOptIn"
+            class="form-check-input"
+            formControlName="emailOptIn">
+          <label for="emailOptIn" class="form-check-label">
+            <strong>Keep me updated about new features and news</strong>
+          </label>
+        </div>
+      </div>
+
       <!-- Privacy Setting -->
       <div class="form-group">
         <label class="form-label">

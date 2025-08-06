@@ -18,6 +18,7 @@ public class SpotifyUser {
     private String href;
     private String displayName;
     private String email;
+    private boolean emailOptIn;
     private String handle;
     private String bio;
     private boolean privateProfile;

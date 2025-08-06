@@ -29,6 +29,7 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   socialStats$: Observable<SocialStats | undefined>;
   successMessage = '';
   private destroy$ = new Subject<void>();
+  private isInitialLoad = true;
 
   constructor(
     private fb: FormBuilder,
@@ -40,6 +41,8 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
     this.profileForm = this.fb.group({
       handle: ['', [Validators.maxLength(64), Validators.pattern(/^[a-zA-Z0-9-]*$/)]],
       bio: ['', [Validators.maxLength(280)]],
+      email: ['', [Validators.email, Validators.maxLength(255)]],
+      emailOptIn: [false],
       privateProfile: [false]
     });
   }
@@ -64,8 +67,13 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
         this.profileForm.patchValue({
           handle: defaultUsername,
           bio: user.bio || '',
+          email: user.email || '',
+          emailOptIn: user.emailOptIn || false,
           privateProfile: user.privateProfile || false
         });
+        
+        // Mark initial load as complete
+        this.isInitialLoad = false;
       }
     });
     
@@ -79,6 +87,21 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
         setTimeout(() => this.successMessage = '', 3000);
         // Reset form dirty state to hide save button
         this.profileForm.markAsPristine();
+      }
+    });
+
+    // Auto-enable emailOptIn when user enters email (but not during initial load)
+    this.profileForm.get('email')?.valueChanges.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(email => {
+      if (this.isInitialLoad) return; // Skip auto-enable during initial load
+      
+      if (email && email.trim() && !this.profileForm.get('emailOptIn')?.value) {
+        // Only auto-enable if user hasn't explicitly set it to false
+        this.profileForm.patchValue({ emailOptIn: true }, { emitEvent: false });
+      } else if (!email || !email.trim()) {
+        // Reset to false when email is cleared
+        this.profileForm.patchValue({ emailOptIn: false }, { emitEvent: false });
       }
     });
   }
@@ -96,6 +119,8 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
       this.store.dispatch(updateUserProfile({
         handle: formValue.handle?.trim() || null,
         bio: formValue.bio?.trim() || null,
+        email: formValue.email?.trim() || null,
+        emailOptIn: formValue.emailOptIn,
         privateProfile: formValue.privateProfile
       }));
     }
@@ -128,8 +153,26 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
     return null;
   }
 
+  get emailErrors() {
+    const control = this.profileForm.get('email');
+    if (control?.errors && control.touched) {
+      if (control.errors['email']) {
+        return 'Please enter a valid email address';
+      }
+      if (control.errors['maxlength']) {
+        return 'Email must be 255 characters or less';
+      }
+    }
+    return null;
+  }
+
   get bioCharacterCount(): number {
     return this.profileForm.get('bio')?.value?.length || 0;
+  }
+
+  get hasEmail(): boolean {
+    const email = this.profileForm.get('email')?.value;
+    return email && email.trim().length > 0;
   }
 
   viewFollowers(): void {

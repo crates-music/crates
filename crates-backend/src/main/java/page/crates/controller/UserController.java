@@ -77,6 +77,8 @@ public class UserController {
                 currentUser.getId(), 
                 request.getHandle(), 
                 request.getBio(),
+                request.getEmail(),
+                request.getEmailOptIn(),
                 request.getPrivateProfile()
         );
         return userMapper.map(updatedUser);

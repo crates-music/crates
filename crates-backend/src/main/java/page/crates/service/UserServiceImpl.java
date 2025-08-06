@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SpotifyUser updateProfile(Long userId, String handle, String bio, Boolean privateProfile) {
+    public SpotifyUser updateProfile(Long userId, String handle, String bio, String email, Boolean emailOptIn, Boolean privateProfile) {
         SpotifyUser user = spotifyUserRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         
@@ -128,6 +128,16 @@ public class UserServiceImpl implements UserService {
         // Update bio if provided (can be null to clear it)
         if (bio != null) {
             user.setBio(bio.trim().isEmpty() ? null : bio.trim());
+        }
+        
+        // Update email if provided (can be null to clear it)
+        if (email != null) {
+            user.setEmail(email.trim().isEmpty() ? null : email.trim());
+        }
+        
+        // Update email opt-in setting if provided
+        if (emailOptIn != null) {
+            user.setEmailOptIn(emailOptIn);
         }
         
         // Update privacy setting if provided

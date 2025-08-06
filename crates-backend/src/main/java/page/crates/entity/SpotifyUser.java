@@ -47,6 +47,10 @@ public class SpotifyUser {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "email_opt_in", nullable = false)
+    @Builder.Default
+    private boolean emailOptIn = false;
+
     @Column(name = "handle", length = 64)
     private String handle;
 

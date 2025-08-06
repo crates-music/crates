@@ -7,6 +7,7 @@ export class User {
   href: string;
   displayName: string;
   email: string;
+  emailOptIn?: boolean;
   handle?: string;
   bio?: string;
   privateProfile?: boolean;

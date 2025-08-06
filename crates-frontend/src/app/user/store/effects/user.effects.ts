@@ -46,6 +46,8 @@ export class UserEffects {
       exhaustMap(action => this.userService.updateProfile({
         handle: action.handle,
         bio: action.bio,
+        email: action.email,
+        emailOptIn: action.emailOptIn,
         privateProfile: action.privateProfile
       })
         .pipe(

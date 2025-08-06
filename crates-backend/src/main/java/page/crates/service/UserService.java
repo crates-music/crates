@@ -14,7 +14,7 @@ public interface UserService {
     
     SpotifyUser findByHandleOrSpotifyId(String identifier);
     
-    SpotifyUser updateProfile(Long userId, String handle, String bio, Boolean privateProfile);
+    SpotifyUser updateProfile(Long userId, String handle, String bio, String email, Boolean emailOptIn, Boolean privateProfile);
     
     SpotifyUser getUser(Long userId);
     
