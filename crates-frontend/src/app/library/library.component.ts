@@ -153,6 +153,10 @@ export class LibraryComponent implements OnInit, OnDestroy, AfterViewInit {
     return album.artists.map(artist => artist.name).join(', ');
   }
 
+  getAlbumImageUrl(album: Album): string | null {
+    return album.images && album.images.length > 0 ? album.images[0].url : null;
+  }
+
   isInLibrary(album: Album): boolean {
     // Library albums have a database ID, global search results don't
     return album.id != null;
@@ -193,12 +197,21 @@ export class LibraryComponent implements OnInit, OnDestroy, AfterViewInit {
     const modalRef = this.modal.open(CrateSelectionModal, {
       centered: true
     });
+    
+    // Handle successful crate selection
     modalRef.closed.pipe(
       withLatestFrom(this.selectedAlbums$),
       tap(([crate, selectedAlbums]) => {
         this.store.dispatch(addAlbumsToCrate({ crate, albums: selectedAlbums }));
         this.clearSelection();
       }),
+    ).subscribe();
+    
+    // Handle modal dismissal/cancellation
+    modalRef.dismissed.pipe(
+      tap(() => {
+        this.clearSelection();
+      })
     ).subscribe();
   }
 

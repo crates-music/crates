@@ -61,10 +61,11 @@
 <ng-template #albumGridItem let-album>
   <div class="album-card-container m-2">
     <div class="card album-card"
-         [ngClass]="{ 'selected': album.selected }">
+         [ngClass]="{ 'selected': album.selected }"
+         (click)="toggledSelected(album)">
       <div class="album-image-container">
-        <img class="album-image" [src]="album.imageUrl" alt="{{ album.name }} artwork" *ngIf="album.imageUrl"/>
-        <div class="album-placeholder" *ngIf="!album.imageUrl">
+        <img class="album-image" [src]="getAlbumImageUrl(album)" alt="{{ album.name }} artwork" *ngIf="getAlbumImageUrl(album)"/>
+        <div class="album-placeholder" *ngIf="!getAlbumImageUrl(album)">
           <i class="bi-music-note-beamed"></i>
         </div>
         
@@ -85,10 +86,10 @@
        [ngClass]="{ 'selected': album.selected }">
     <div class="flex-shrink-0">
       <img class="list-album-image"
-           [src]="album.imageUrl"
+           [src]="getAlbumImageUrl(album)"
            alt="{{ album.name }} artwork"
-           *ngIf="album.imageUrl"/>
-      <div class="list-album-placeholder" *ngIf="!album.imageUrl">
+           *ngIf="getAlbumImageUrl(album)"/>
+      <div class="list-album-placeholder" *ngIf="!getAlbumImageUrl(album)">
         <i class="bi-music-note-beamed"></i>
       </div>
     </div>

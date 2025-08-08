@@ -115,11 +115,10 @@ const libraryReducer = createReducer(initialState,
       ...state,
       albums: {
         ...state.albums,
-        value: albumAdapter.map(album => {
-          const updatedAlbum = Object.assign(new Album(), album);
-          updatedAlbum.selected = false;
-          return updatedAlbum;
-        }, state.albums.value),
+        value: albumAdapter.map(album => ({
+          ...album,
+          selected: false
+        }), state.albums.value),
       }
     }
   }),

@@ -131,6 +131,10 @@ export class CrateComponent implements OnInit, OnDestroy {
     return album.artists.map(artist => artist.name).join(', ');
   }
 
+  getAlbumImageUrl(album: Album): string | null {
+    return album.images && album.images.length > 0 ? album.images[0].url : null;
+  }
+
   // https://open.spotify.com/album/2TklWyQdmNHg7d2Xmam8G8?si=660e00a203414f19
   openAlbum(album: Album) {
     window.location.href = `https://open.spotify.com/album/${album.spotifyId}`;

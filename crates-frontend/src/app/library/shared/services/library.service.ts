@@ -44,11 +44,10 @@ export class LibraryService {
     }).pipe(
       map(response => Object.assign(new Page<Album>(), response) as Page<Album>),
       map(page => {
-        page.content = page.content.map(album => {
-          const result: Album = Object.assign(new Album(), album);
-          result.images.sort((a, b) => b.width - a.width);
-          return result;
-        });
+        page.content = page.content.map(album => ({
+          ...album,
+          images: [...(album.images || [])].sort((a, b) => b.width - a.width)
+        }));
         return page;
       })
     );

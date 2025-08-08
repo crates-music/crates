@@ -92,13 +92,13 @@ export class CrateService {
         map(response => Object.assign(new Page<CrateAlbum>(), response)),
         map(cratePage => {
           cratePage.content = cratePage.content
-            .map(crateAlbum => Object.assign(new CrateAlbum(), crateAlbum))
-            .map(crateAlbum => {
-              const result: Album = Object.assign(new Album(), crateAlbum.album);
-              result.images.sort((a, b) => b.width - a.width);
-              crateAlbum.album = result;
-              return crateAlbum;
-            })
+            .map(crateAlbum => ({
+              ...crateAlbum,
+              album: {
+                ...crateAlbum.album,
+                images: [...(crateAlbum.album.images || [])].sort((a, b) => b.width - a.width)
+              }
+            }))
           return cratePage;
         })
       )

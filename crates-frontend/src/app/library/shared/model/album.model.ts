@@ -14,8 +14,4 @@ export class Album {
 
   // UI properties
   selected = false;
-
-  get imageUrl(): string | null {
-    return this.images && this.images.length > 0 ? this.images[0].url : null;
-  }
 }
