@@ -1,4 +1,4 @@
-import LogRocket from 'logrocket';
+import * as LogRocket from 'logrocket';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { AppModule } from './app/app.module';

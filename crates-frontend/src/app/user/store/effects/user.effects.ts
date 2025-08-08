@@ -15,7 +15,7 @@ import {
 } from '../actions/load-user.actions';
 import { catchError, exhaustMap, map, of, tap } from 'rxjs';
 import { ApiError } from '../../../shared/model/api-error.model';
-import LogRocket from 'logrocket';
+import * as LogRocket from 'logrocket';
 
 @Injectable({
   providedIn: 'root'
