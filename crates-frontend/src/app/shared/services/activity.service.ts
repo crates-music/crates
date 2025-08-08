@@ -28,14 +28,14 @@ export class ActivityService {
   // Get feed events since a specific timestamp (for refresh/new content detection)
   getFeedSince(timestamp: Date): Observable<CrateEvent[]> {
     const params = new HttpParams()
-      .set('timestamp', timestamp.toISOString());
+      .set('since', timestamp.toISOString());
     return this.http.get<CrateEvent[]>(`${this.baseUrl}/since`, { params });
   }
 
   // Get feed events before a specific timestamp (for infinite scroll)
   getFeedBefore(timestamp: Date, size: number = 20): Observable<CrateEvent[]> {
     const params = new HttpParams()
-      .set('timestamp', timestamp.toISOString())
+      .set('before', timestamp.toISOString())
       .set('size', size.toString());
     return this.http.get<CrateEvent[]>(`${this.baseUrl}/before`, { params });
   }
@@ -43,7 +43,7 @@ export class ActivityService {
   // Check if there are new events since a timestamp
   hasNewEvents(timestamp: Date): Observable<boolean> {
     const params = new HttpParams()
-      .set('timestamp', timestamp.toISOString());
+      .set('since', timestamp.toISOString());
     return this.http.get<boolean>(`${this.baseUrl}/has-new`, { params });
   }
 }

@@ -228,8 +228,8 @@ export class NavigationService implements OnDestroy {
     } else if (url.includes('/user/profile/settings')) {
       this.currentTab$.next(Tab.Profile);
     } else if (segments.includes('user')) {
-      // For other user routes (viewing other users), don't set any tab
-      this.currentTab$.next(undefined);
+      // For other user routes (viewing other users), keep discover tab active
+      this.currentTab$.next(Tab.Discover);
     } else if (segments.includes('auth')) {
       this.currentTab$.next(undefined);
     }
