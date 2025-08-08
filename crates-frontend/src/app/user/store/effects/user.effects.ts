@@ -13,8 +13,9 @@ import {
   updateUserProfile, 
   updateUserProfileResult 
 } from '../actions/load-user.actions';
-import { catchError, exhaustMap, map, of } from 'rxjs';
+import { catchError, exhaustMap, map, of, tap } from 'rxjs';
 import { ApiError } from '../../../shared/model/api-error.model';
+import LogRocket from 'logrocket';
 
 @Injectable({
   providedIn: 'root'
@@ -25,12 +26,22 @@ export class UserEffects {
       ofType(loadUser),
       exhaustMap(action => this.userService.getUser()
         .pipe(
-          map(user => loadUserResult({
-            response: {
-              data: user,
-              success: true,
-            }
-          })),
+          map(user => {
+            // Identify user in LogRocket session
+            LogRocket.identify(user.id.toString(), {
+              name: user.displayName,
+              email: user.email,
+              spotifyId: user.spotifyId,
+              handle: user.handle
+            });
+            
+            return loadUserResult({
+              response: {
+                data: user,
+                success: true,
+              }
+            });
+          }),
           catchError(err => of(loadUserResult({
             response: {
               success: false,
@@ -51,12 +62,22 @@ export class UserEffects {
         privateProfile: action.privateProfile
       })
         .pipe(
-          map(user => updateUserProfileResult({
-            response: {
-              data: user,
-              success: true,
-            }
-          })),
+          map(user => {
+            // Update user identity in LogRocket session
+            LogRocket.identify(user.id.toString(), {
+              name: user.displayName,
+              email: user.email,
+              spotifyId: user.spotifyId,
+              handle: user.handle
+            });
+            
+            return updateUserProfileResult({
+              response: {
+                data: user,
+                success: true,
+              }
+            });
+          }),
           catchError(err => of(updateUserProfileResult({
             response: {
               success: false,

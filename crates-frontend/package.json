@@ -28,6 +28,7 @@
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^5.2.3",
     "bootstrap-icons": "^1.11.2",
+    "logrocket": "^10.1.0",
     "ng-bootstrap": "^1.6.3",
     "ngx-infinite-scroll": "^15.0.0",
     "rxjs": "~7.5.0",
