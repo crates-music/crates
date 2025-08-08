@@ -64,13 +64,28 @@ export const activityReducer = createReducer(
     error: null
   })),
   
-  on(ActivityActions.loadMoreActivityResult, (state, { response }) => ({
-    ...state,
-    loadingMore: false,
-    feed: response.success ? [...state.feed, ...response.data!] : state.feed,
-    hasNextPage: response.success ? response.data!.length > 0 : state.hasNextPage,
-    error: response.success ? null : response.error
-  })),
+  on(ActivityActions.loadMoreActivityResult, (state, { response }) => {
+    if (!response.success) {
+      return {
+        ...state,
+        loadingMore: false,
+        error: response.error
+      };
+    }
+    
+    // Handle both array and Page response structures
+    const newEvents = Array.isArray(response.data) 
+      ? response.data 
+      : (response.data as any)?.content || [];
+      
+    return {
+      ...state,
+      loadingMore: false,
+      feed: [...state.feed, ...newEvents],
+      hasNextPage: newEvents.length > 0,
+      error: null
+    };
+  }),
   
   // Refresh Activity Feed
   on(ActivityActions.refreshActivityFeed, (state) => ({
