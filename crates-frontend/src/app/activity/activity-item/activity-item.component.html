@@ -43,9 +43,77 @@
         </span>
       </div>
 
-      <!-- Crate Preview (for crate-related events) -->
+      <!-- Album Preview (for ALBUM_ADDED events) -->
       <div 
-        *ngIf="activity.eventType !== CrateEventType.USER_FOLLOWED"
+        *ngIf="activity.eventType === CrateEventType.ALBUM_ADDED && activity.albums && activity.albums.length > 0"
+        class="album-preview cursor-pointer" 
+        (click)="openCrate()">
+        <div class="d-flex align-items-center p-2 border rounded bg-light">
+          <!-- Album Image -->
+          <div class="flex-shrink-0 me-3">
+            <img 
+              [src]="getAlbumImageUrl(activity.albums[0])" 
+              class="rounded"
+              width="48" 
+              height="48"
+              [alt]="activity.albums[0].name">
+          </div>
+
+          <!-- Album Details -->
+          <div class="flex-grow-1">
+            <div class="fw-semibold">{{ activity.albums[0].name }}</div>
+            <div class="text-muted small" *ngIf="activity.albums[0].artists && activity.albums[0].artists.length > 0">
+              {{ getArtistNames(activity.albums[0]) }}
+            </div>
+            <div class="text-muted small" *ngIf="activity.albums.length > 1">
+              +{{ activity.albums.length - 1 }} more albums
+            </div>
+          </div>
+
+          <!-- Event Icon -->
+          <div class="flex-shrink-0">
+            <i [class]="getEventIcon() + ' ' + getEventColor() + ' fs-5'"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crate Preview (for non-ALBUM_ADDED crate-related events) -->
+      <div 
+        *ngIf="activity.eventType !== CrateEventType.USER_FOLLOWED && activity.eventType !== CrateEventType.ALBUM_ADDED"
+        class="crate-preview cursor-pointer" 
+        (click)="openCrate()">
+        <div class="d-flex align-items-center p-2 border rounded bg-light">
+          <!-- Crate Image -->
+          <div class="flex-shrink-0 me-3">
+            <img 
+              [src]="activity.crate.imageUri" 
+              class="rounded"
+              width="48" 
+              height="48"
+              [alt]="activity.crate.name">
+          </div>
+
+          <!-- Crate Details -->
+          <div class="flex-grow-1">
+            <div class="fw-semibold">{{ activity.crate.name }}</div>
+            <div class="text-muted small" *ngIf="activity.crate.description">
+              {{ activity.crate.description }}
+            </div>
+            <div class="text-muted small">
+              {{ activity.crate.albumCount }} albums
+            </div>
+          </div>
+
+          <!-- Event Icon -->
+          <div class="flex-shrink-0">
+            <i [class]="getEventIcon() + ' ' + getEventColor() + ' fs-5'"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fallback: Show crate for ALBUM_ADDED events without album details -->
+      <div 
+        *ngIf="activity.eventType === CrateEventType.ALBUM_ADDED && (!activity.albums || activity.albums.length === 0)"
         class="crate-preview cursor-pointer" 
         (click)="openCrate()">
         <div class="d-flex align-items-center p-2 border rounded bg-light">

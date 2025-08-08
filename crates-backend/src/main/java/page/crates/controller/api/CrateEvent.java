@@ -17,7 +17,9 @@ public class CrateEvent {
     private Long id;
     private SpotifyUser user;
     private Crate crate;
+    private SpotifyUser followedUser;
     private CrateEventType eventType;
     private List<Long> albumIds;
+    private List<Album> albums; // Album details for ALBUM_ADDED events
     private Instant createdAt;
 }

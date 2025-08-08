@@ -13,5 +13,7 @@ public interface CrateEventMapper {
     @Mapping(target = "albumIds", source = "albumIdsList")
     @Mapping(target = "user", source = "user")
     @Mapping(target = "crate", source = "crate")
+    @Mapping(target = "followedUser", source = "followedUser")
+    @Mapping(target = "albums", ignore = true) // Will be populated manually in controller
     CrateEvent map(page.crates.entity.CrateEvent crateEvent);
 }

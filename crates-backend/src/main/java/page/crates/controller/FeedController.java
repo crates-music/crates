@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import page.crates.controller.api.CrateEvent;
 import page.crates.controller.api.mapper.CrateEventMapper;
+import page.crates.controller.api.mapper.AlbumMapper;
 import page.crates.entity.SpotifyUser;
+import page.crates.repository.AlbumRepository;
 import page.crates.security.SpotifyAuthorization;
 import page.crates.service.CurrentUserService;
 import page.crates.service.CrateDecorator;
@@ -35,6 +37,12 @@ public class FeedController {
     
     @Resource
     private CrateDecorator crateDecorator;
+    
+    @Resource
+    private AlbumRepository albumRepository;
+    
+    @Resource
+    private AlbumMapper albumMapper;
 
     @GetMapping
     @SpotifyAuthorization
@@ -91,7 +99,43 @@ public class FeedController {
             apiEvent.setCrate(crateDecorator.decorate(apiEvent.getCrate()));
         }
         
+        // Filter sensitive information from followedUser
+        if (apiEvent.getFollowedUser() != null) {
+            apiEvent.setFollowedUser(sanitizePublicUser(apiEvent.getFollowedUser()));
+        }
+        
+        // Populate album details for ALBUM_ADDED events
+        if (entityEvent.getEventType() == page.crates.entity.enums.CrateEventType.ALBUM_ADDED && 
+            entityEvent.getAlbumIdsList() != null && !entityEvent.getAlbumIdsList().isEmpty()) {
+            apiEvent.setAlbums(getAlbumDetails(entityEvent.getAlbumIdsList()));
+        }
+        
         return apiEvent;
+    }
+
+    // Helper method to sanitize user info for public consumption
+    private page.crates.controller.api.SpotifyUser sanitizePublicUser(page.crates.controller.api.SpotifyUser user) {
+        return page.crates.controller.api.SpotifyUser.builder()
+                .id(user.getId())
+                .spotifyId(user.getSpotifyId())
+                .displayName(user.getDisplayName())
+                .handle(user.getHandle())
+                .bio(user.getBio())
+                .images(user.getImages())
+                // Explicitly exclude sensitive fields: email, emailOptIn, privateProfile, etc.
+                .build();
+    }
+
+    // Helper method to get album details
+    private java.util.List<page.crates.controller.api.Album> getAlbumDetails(java.util.List<Long> albumIds) {
+        try {
+            return albumRepository.findAllById(albumIds).stream()
+                    .map(albumMapper::map)
+                    .collect(java.util.stream.Collectors.toList());
+        } catch (Exception e) {
+            log.warn("Failed to fetch album details for IDs: {}, error: {}", albumIds, e.getMessage());
+            return java.util.Collections.emptyList();
+        }
     }
 
     // DTO class

@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { CrateEvent, CrateEventType } from '../../shared/model/crate-event.model';
+import { Album } from '../../library/shared/model/album.model';
 import * as NavigationActions from '../../shared/store/actions/navigation.actions';
 
 @Component({
@@ -119,6 +120,27 @@ export class ActivityItemComponent {
     } else {
       return activityDate.toLocaleDateString();
     }
+  }
+
+  getAlbumImageUrl(album: Album): string {
+    if (album.images && album.images.length > 0) {
+      // Get a medium-sized image (typically 300x300 from Spotify)
+      // Create a copy and sort by width descending
+      const sortedImages = [...album.images].sort((a, b) => (b.width || 0) - (a.width || 0));
+      if (sortedImages.length >= 2) {
+        return sortedImages[1].url; // Second largest (usually 300x300)
+      } else {
+        return sortedImages[0].url; // Only one image available
+      }
+    }
+    return '/assets/images/default-album.png';
+  }
+
+  getArtistNames(album: Album): string {
+    if (album.artists && album.artists.length > 0) {
+      return album.artists.map(artist => artist.name).join(', ');
+    }
+    return 'Unknown Artist';
   }
 
 }

@@ -1,5 +1,6 @@
 import { User } from '../../user/shared/model/user.model';
 import { Crate } from '../../crate/shared/model/crate.model';
+import { Album } from '../../library/shared/model/album.model';
 
 export enum CrateEventType {
   CRATE_RELEASED = 'CRATE_RELEASED',
@@ -15,5 +16,6 @@ export class CrateEvent {
   followedUser: User;
   eventType: CrateEventType;
   albumIds: number[];
+  albums: Album[]; // Album details for ALBUM_ADDED events
   createdAt: Date;
 }
