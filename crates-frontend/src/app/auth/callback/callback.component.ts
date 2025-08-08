@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { Store } from '@ngrx/store';
-import { loadUser } from '../../user/store/actions/load-user.actions';
 
 @Component({
   selector: 'crate-callback',
@@ -22,8 +21,8 @@ export class CallbackComponent implements OnInit {
       this.router.navigate(['/auth', 'login']);
       return;
     }
+    // AuthService now dispatches loginSuccess action which triggers loadUser via effects
     this.authService.setToken(token);
-    this.store.dispatch(loadUser());
     this.router.navigate(['/crate', 'list']);
   }
 }

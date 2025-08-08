@@ -10,6 +10,7 @@ import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { metaReducers, reducers } from './store/reducers';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { AuthEffects } from './auth/store/effects/auth.effects';
 import { UserEffects } from './user/store/effects/user.effects';
 import { SocialEffects } from './shared/store/effects/social.effects';
 import { CollectionEffects } from './shared/store/effects/collection.effects';
@@ -35,6 +36,7 @@ import { SharedModule } from './shared/shared.module';
       metaReducers
     }),
     EffectsModule.forRoot([
+      AuthEffects,
       UserEffects,
       SocialEffects,
       CollectionEffects,

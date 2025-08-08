@@ -1,6 +1,7 @@
 import { ActionReducerMap, MetaReducer } from '@ngrx/store';
 import { environment } from '../../../environments/environment';
 import { logger } from './logger.reducer';
+import * as fromAuth from '../../auth/store/reducers/auth.reducer';
 import * as fromUser from '../../user/store/reducers/user.reducer';
 import * as fromLibrary from '../../library/store/reducers/library.reducer';
 import * as fromCrate from '../../crate/store/reducers/crate.reducer';
@@ -13,6 +14,7 @@ import * as fromNavigation from '../../shared/store/reducers/navigation.reducer'
 import * as fromActivity from '../../shared/store/reducers/activity.reducer';
 
 export interface State {
+  auth: fromAuth.AuthState,
   user: fromUser.UserState,
   library: fromLibrary.LibraryState,
   crate: fromCrate.CrateState,
@@ -26,6 +28,7 @@ export interface State {
 }
 
 export const reducers: ActionReducerMap<State> = {
+  auth: fromAuth.reducer,
   user: fromUser.reducer,
   library: fromLibrary.reducer,
   crate: fromCrate.reducer,

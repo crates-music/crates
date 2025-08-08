@@ -147,6 +147,7 @@ const userReducer = createReducer(initialState,
   on(clearUserProfile, (state): UserState => {
     return {
       ...state,
+      user: emptyLoadable(),
       viewedUser: emptyLoadable(),
       viewedUserCrates: emptyLoadable(),
       viewedUserCollection: emptyLoadable()

@@ -3,10 +3,9 @@ import { AuthService } from './auth/auth.service';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { selectUser, selectUserLoaded } from './user/store/selectors/user.selectors';
+import { selectIsAuthenticated } from './auth/store/selectors/auth.selectors';
 import { User } from './user/shared/model/user.model';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { loadUser } from './user/store/actions/load-user.actions';
 
 @Component({
   selector: 'crates-root',
@@ -23,15 +22,12 @@ export class AppComponent {
   constructor(private authService: AuthService,
               private router: Router,
               private store: Store) {
-    this.store.dispatch(loadUser());
+    // Initialize auth status from localStorage
+    this.authService.checkAuthStatus();
 
     this.user$ = this.store.select(selectUser);
     this.userLoaded$ = this.store.select(selectUserLoaded);
-    
-    // Convert loggedIn to an observable to prevent change detection issues
-    this.loggedIn$ = this.userLoaded$.pipe(
-      map(() => this.authService.isLoggedIn())
-    );
+    this.loggedIn$ = this.store.select(selectIsAuthenticated);
   }
 
   logout() {
