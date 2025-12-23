@@ -5,15 +5,6 @@
       <div class="title-section d-flex align-items-center">
         <h1 class="mb-0 me-3">{{ title }}</h1>
 
-        <!-- Collection button (for other users' public crates) -->
-        <div *ngIf="showCollection && crateId" class="me-2">
-          <app-collection-button 
-            [crateId]="crateId"
-            size="sm"
-            variant="outline">
-          </app-collection-button>
-        </div>
-
         <!-- Share button (for public crates) -->
         <button class="btn btn-sm text-light"
                 *ngIf="showShare"
@@ -51,21 +42,13 @@
     <!-- Author Row -->
     <div class="author-row" *ngIf="showAuthor && authorName">
       <p class="mb-0 text-muted">
-        by 
+        by
         <button class="btn btn-link p-0 text-primary fw-semibold"
                 (click)="onAuthorClick()"
                 [disabled]="!authorId"
                 style="vertical-align: baseline; font-size: inherit;">
           {{ authorName }}
         </button>
-      </p>
-    </div>
-
-    <!-- Stats Row -->
-    <div class="stats-row" *ngIf="showStats && collectorCount !== undefined">
-      <p class="mb-0 text-muted">
-        <i class="bi-people me-1"></i>
-        {{ collectorCount }} {{ collectorCount === 1 ? 'collector' : 'collectors' }}
       </p>
     </div>
 

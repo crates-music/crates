@@ -26,7 +26,6 @@ import page.crates.service.CurrentUserService;
 import page.crates.service.UserService;
 import page.crates.service.CrateService;
 import page.crates.service.CrateDecorator;
-import page.crates.service.CrateCollectionService;
 import page.crates.controller.api.mapper.CrateMapper;
 import page.crates.spotify.client.Context;
 import page.crates.spotify.client.Spotify;
@@ -50,8 +49,6 @@ public class UserController {
     private CrateMapper crateMapper;
     @Resource
     private CrateDecorator crateDecorator;
-    @Resource
-    private CrateCollectionService crateCollectionService;
     @Resource
     private Spotify spotify;
 
@@ -155,29 +152,5 @@ public class UserController {
         return crateService.getUserPublicCrates(user, search, pageable)
                 .map(crateMapper::map)
                 .map(crateDecorator::decorate);
-    }
-
-    @GetMapping(value = "/{userId}/collection")
-    @SpotifyAuthorization
-    public Page<page.crates.controller.api.Crate> getUserPublicCollection(
-            @PathVariable Long userId, 
-            @RequestParam(value = "search", required = false) String search,
-            Pageable pageable) {
-        log.info("Getting public collection for user: {}", userId);
-        page.crates.entity.SpotifyUser user = userService.getUser(userId);
-        page.crates.entity.SpotifyUser currentUser = currentUserService.getCurrentUser();
-        
-        // Allow access to private profiles only for the profile owner
-        if (user.isPrivateProfile() && !user.getId().equals(currentUser.getId())) {
-            throw new UnauthorizedAccessException();
-        }
-        
-        if (StringUtils.isNotBlank(search)) {
-            return crateCollectionService.searchPublicUserCollection(user, search, pageable)
-                    .map(collection -> crateDecorator.decorate(crateMapper.map(collection.getCrate())));
-        }
-        
-        return crateCollectionService.getPublicUserCollection(user, pageable)
-                .map(collection -> crateDecorator.decorate(crateMapper.map(collection.getCrate())));
     }
 }

@@ -92,7 +92,7 @@ public interface CrateRepository extends JpaRepository<Crate, Long> {
            "WHERE c.state = page.crates.entity.enums.CrateState.ACTIVE " +
            "  AND c.publicCrate = true " +
            "  AND c.user.privateProfile = false " +
-           "ORDER BY c.trendingScore DESC, c.followerCount DESC, c.createdAt DESC")
+           "ORDER BY c.trendingScore DESC, c.createdAt DESC")
     Page<Crate> findAllPublicCratesByTrending(Pageable pageable);
     
     // Search public crates with unified search ordered by trending score
@@ -109,6 +109,6 @@ public interface CrateRepository extends JpaRepository<Crate, Long> {
            "    a.name ILIKE CONCAT('%', :search, '%') OR " +
            "    ar.name ILIKE CONCAT('%', :search, '%')" +
            "  ) " +
-           "ORDER BY c.trendingScore DESC, c.followerCount DESC, c.createdAt DESC")
+           "ORDER BY c.trendingScore DESC, c.createdAt DESC")
     Page<Crate> findAllPublicCratesWithUnifiedSearchByTrending(String search, Pageable pageable);
 }

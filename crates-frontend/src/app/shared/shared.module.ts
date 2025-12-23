@@ -14,11 +14,6 @@ import { UserHeaderComponent } from './components/user-header/user-header.compon
 import { ViewHeaderComponent } from './components/view-header/view-header.component';
 import { ViewLayoutComponent } from './components/view-layout/view-layout.component';
 import { ListContentComponent } from './components/list-content/list-content.component';
-import { FollowButtonComponent } from './components/follow-button/follow-button.component';
-import { CollectionButtonComponent } from './components/collection-button/collection-button.component';
-import { UserListComponent } from './components/user-list/user-list.component';
-
-
 
 @NgModule({
   declarations: [
@@ -30,10 +25,7 @@ import { UserListComponent } from './components/user-list/user-list.component';
     UserHeaderComponent,
     ViewHeaderComponent,
     ViewLayoutComponent,
-    ListContentComponent,
-    FollowButtonComponent,
-    CollectionButtonComponent,
-    UserListComponent,
+    ListContentComponent
   ],
   providers: [
     AuthGuard
@@ -48,9 +40,6 @@ import { UserListComponent } from './components/user-list/user-list.component';
     ViewHeaderComponent,
     ViewLayoutComponent,
     ListContentComponent,
-    FollowButtonComponent,
-    CollectionButtonComponent,
-    UserListComponent,
     InfiniteScrollModule
   ],
   imports: [

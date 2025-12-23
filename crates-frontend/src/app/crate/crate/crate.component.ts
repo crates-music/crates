@@ -172,17 +172,9 @@ export class CrateComponent implements OnInit, OnDestroy {
   }
 
   shareCrate() {
-    if (this.user && this.crate) {
-      let url: string;
-      
-      if (this.isCurrentUserCrate()) {
-        // User owns this crate - use authored URL
-        url = this.publicLinkService.getCrateUrl(this.user, this.crate);
-      } else {
-        // User is viewing someone else's crate (it's in their collection) - use collection URL
-        url = this.publicLinkService.getCollectionCrateUrl(this.user, this.crate);
-      }
-      
+    if (this.crate?.user) {
+      // Always use the crate owner's URL for sharing
+      const url = this.publicLinkService.getCrateUrl(this.crate.user, this.crate);
       this.publicLinkService.openInNewTab(url);
     }
   }

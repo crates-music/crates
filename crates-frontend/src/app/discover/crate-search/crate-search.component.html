@@ -50,15 +50,7 @@
           <span *ngIf="crate.user.handle" class="text-muted">(@{{ crate.user.handle }})</span>
         </p>
         <p class="crate-description text-muted mb-1" *ngIf="crate.description">{{ crate.description }}</p>
-        <small class="crate-stats text-muted">
-          <i class="bi-people me-1"></i>{{ crate.followerCount || 0 }} follower{{ (crate.followerCount || 0) !== 1 ? 's' : '' }}
-        </small>
       </div>
-    </div>
-    
-    <!-- Actions -->
-    <div class="crate-actions">
-      <app-collection-button [crateId]="crate.id"></app-collection-button>
     </div>
   </div>
   

@@ -17,9 +17,3 @@ export const selectViewedUserCrates = createSelector(selectUserState, fromUser.g
 export const selectViewedUserCratesLoading = createSelector(selectUserState, fromUser.getViewedUserCratesLoading);
 export const selectViewedUserCratesLoaded = createSelector(selectUserState, fromUser.getViewedUserCratesLoaded);
 export const selectViewedUserCratesError = createSelector(selectUserState, fromUser.getViewedUserCratesError);
-
-export const selectViewedUserCollection = createSelector(selectUserState, fromUser.getViewedUserCollection);
-export const selectViewedUserCollectionLoading = createSelector(selectUserState, fromUser.getViewedUserCollectionLoading);
-export const selectViewedUserCollectionLoaded = createSelector(selectUserState, fromUser.getViewedUserCollectionLoaded);
-export const selectViewedUserCollectionError = createSelector(selectUserState, fromUser.getViewedUserCollectionError);
-

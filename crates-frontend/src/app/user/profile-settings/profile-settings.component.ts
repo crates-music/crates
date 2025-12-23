@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable, Subject, combineLatest } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { UserState } from '../store/reducers/user.reducer';
 import { selectUser, selectUserLoading, selectUserError } from '../store/selectors/user.selectors';
@@ -12,9 +12,6 @@ import { ApiError } from '../../shared/model/api-error.model';
 import { Actions, ofType } from '@ngrx/effects';
 import { takeUntil } from 'rxjs/operators';
 import * as NavigationActions from '../../shared/store/actions/navigation.actions';
-import { selectSocialStats } from '../../shared/store/selectors/social.selectors';
-import { loadSocialStats } from '../../shared/store/actions/social.actions';
-import { SocialStats } from '../../shared/model/social-stats.model';
 
 @Component({
   selector: 'app-profile-settings',
@@ -26,7 +23,6 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   currentUser$: Observable<User | undefined>;
   isLoading$: Observable<boolean>;
   error$: Observable<ApiError | undefined>;
-  socialStats$: Observable<SocialStats | undefined>;
   successMessage = '';
   private destroy$ = new Subject<void>();
   private isInitialLoad = true;
@@ -50,15 +46,13 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Set navigation context to profile
     this.store.dispatch(NavigationActions.setNavigationContext({ context: 'profile' }));
-    
-    // Dispatch action to load current user and social stats
+
+    // Dispatch action to load current user
     this.store.dispatch(loadUser());
-    this.store.dispatch(loadSocialStats());
-    
+
     this.currentUser$ = this.store.select(selectUser);
     this.isLoading$ = this.store.select(selectUserLoading);
     this.error$ = this.store.select(selectUserError);
-    this.socialStats$ = this.store.select(selectSocialStats);
     
     this.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(user => {
       if (user) {
@@ -173,13 +167,5 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   get hasEmail(): boolean {
     const email = this.profileForm.get('email')?.value;
     return email && email.trim().length > 0;
-  }
-
-  viewFollowers(): void {
-    this.router.navigate(['/user/profile/settings/followers']);
-  }
-
-  viewFollowing(): void {
-    this.router.navigate(['/user/profile/settings/following']);
   }
 }

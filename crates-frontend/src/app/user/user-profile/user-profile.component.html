@@ -33,84 +33,27 @@
               <p class="text-muted mb-1" *ngIf="user.handle">@{{ user.handle }}</p>
               <p class="text-muted mb-1" *ngIf="!user.handle">{{ user.spotifyId }}</p>
               <p class="card-text" *ngIf="user.bio">{{ user.bio }}</p>
-              
-              <div class="d-flex gap-3 mt-2 align-items-center justify-content-between">
-                <div class="d-flex gap-3">
-                  <span class="text-muted">
-                    <strong>{{ user.followerCount || 0 }}</strong> followers
-                  </span>
-                  <span class="text-muted">
-                    <strong>{{ user.followingCount || 0 }}</strong> following
-                  </span>
-                </div>
-                <app-follow-button 
-                  *ngIf="(currentUserId$ | async) !== user.id"
-                  [userId]="user.id" 
-                  [size]="'sm'"
-                  (followChange)="onFollowChange(user.id)">
-                </app-follow-button>
-              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="col-12">
-      <ul class="nav nav-tabs mb-3">
-        <li class="nav-item">
-          <button class="nav-link" 
-                  [class.active]="activeTab === 'authored'"
-                  (click)="setActiveTab('authored')"
-                  type="button">
-            <i class="bi-collection me-2"></i>Crates
-          </button>
-        </li>
-        <li class="nav-item">
-          <button class="nav-link" 
-                  [class.active]="activeTab === 'collection'"
-                  (click)="setActiveTab('collection')"
-                  type="button">
-            <i class="bi-bookmark-star me-2"></i>Collection
-          </button>
-        </li>
-      </ul>
-    </div>
-
     <!-- Crates Display -->
     <div class="col-12">
-      <!-- Authored Crates Tab -->
-      <ng-container *ngIf="activeTab === 'authored'">
-        <crates-list-content
-          [items]="publicCrates$ | async"
-          [listType]="listType"
-          [hasNextPage]="false"
-          [emptyStateTitle]="'No public crates yet'"
-          [emptyStateMessage]="'This user has not shared any crates publicly.'"
-          [showEmptyState]="true"
-          [showLoadMore]="false"
-          [gridItemTemplate]="crateGridItem"
-          [listItemTemplate]="crateListItem"
-          (itemClick)="openCrate($event)">
-        </crates-list-content>
-      </ng-container>
-
-      <!-- Collection Crates Tab -->
-      <ng-container *ngIf="activeTab === 'collection'">
-        <crates-list-content
-          [items]="collectionCrates$ | async"
-          [listType]="listType"
-          [hasNextPage]="false"
-          [emptyStateTitle]="'No collected crates yet'"
-          [emptyStateMessage]="'This user has not collected any public crates yet.'"
-          [showEmptyState]="true"
-          [showLoadMore]="false"
-          [gridItemTemplate]="crateGridItem"
-          [listItemTemplate]="crateListItem"
-          (itemClick)="openCrate($event)">
-        </crates-list-content>
-      </ng-container>
+      <h5 class="mb-3"><i class="bi-collection me-2"></i>Crates</h5>
+      <crates-list-content
+        [items]="publicCrates$ | async"
+        [listType]="listType"
+        [hasNextPage]="false"
+        [emptyStateTitle]="'No public crates yet'"
+        [emptyStateMessage]="'This user has not shared any crates publicly.'"
+        [showEmptyState]="true"
+        [showLoadMore]="false"
+        [gridItemTemplate]="crateGridItem"
+        [listItemTemplate]="crateListItem"
+        (itemClick)="openCrate($event)">
+      </crates-list-content>
     </div>
   </div>
 </div>
@@ -135,14 +78,6 @@
               by {{ crate.user.displayName }}
             </p>
           </div>
-        </div>
-        <!-- Collection Plus Button in top-right corner -->
-        <div class="collection-plus-btn" 
-             *ngIf="!isOwnedCrate(crate)"
-             (click)="$event.stopPropagation(); toggleCrateCollection(crate)"
-             [title]="crate.collected ? 'Remove from collection' : 'Add to collection'">
-          <i class="bi-plus" *ngIf="!crate.collected"></i>
-          <i class="bi-check" *ngIf="crate.collected"></i>
         </div>
       </div>
     </div>
@@ -169,14 +104,6 @@
       </p>
     </div>
     <div class="flex-shrink-0 d-flex align-items-center">
-      <!-- Collection Plus Button -->
-      <button class="btn btn-sm btn-outline-primary rounded-circle collection-plus-btn me-2"
-              *ngIf="!isOwnedCrate(crate)"
-              (click)="$event.stopPropagation(); toggleCrateCollection(crate)"
-              [title]="crate.collected ? 'Remove from collection' : 'Add to collection'">
-        <i class="bi-plus" *ngIf="!crate.collected"></i>
-        <i class="bi-check" *ngIf="crate.collected"></i>
-      </button>
       <i class="bi-chevron-right text-muted"></i>
     </div>
   </div>

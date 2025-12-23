@@ -2,6 +2,16 @@
 
 set -e -o pipefail
 
+# Start ngrok if not already running
+if ! pgrep -f "ngrok http 8980" > /dev/null; then
+  echo "Starting ngrok tunnel..."
+  ngrok http 8980 --domain=cosmic-alien-finer.ngrok-free.app > /dev/null 2>&1 &
+  sleep 2
+  echo "ngrok started: https://cosmic-alien-finer.ngrok-free.app"
+else
+  echo "ngrok already running"
+fi
+
 # Create the custom network if it doesn't exist
 docker network create crates-network 2>/dev/null || echo "Network crates-network already exists"
 
@@ -41,8 +51,9 @@ docker run -d \
 echo ""
 echo "✅ Backend started successfully!"
 echo "- Container: crates-backend"
-echo "- Network: crates-network"  
+echo "- Network: crates-network"
 echo "- Port: http://localhost:8980"
+echo "- Tunnel: https://cosmic-alien-finer.ngrok-free.app"
 echo "- Debug Port: localhost:5003"
 echo "- Database: crates-database (running)"
 echo ""
