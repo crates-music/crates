@@ -168,8 +168,8 @@
                 <div class="w-100 item-gradient p-3">
                   <h6 class="card-title text-white mb-1 fw-bold">{{ crate.name }}</h6>
                   <p class="card-text text-white-50 small mb-0">
-                    by {{ crate.user?.displayName }} • 
-                    <i class="bi-collection me-1"></i>{{ crate.followerCount }} collector{{ crate.followerCount !== 1 ? 's' : '' }}
+                    by {{ crate.user?.displayName }} •
+                    <i class="bi-vinyl me-1"></i>{{ crate.albumCount || 0 }} album{{ crate.albumCount !== 1 ? 's' : '' }}
                   </p>
                 </div>
               </div>

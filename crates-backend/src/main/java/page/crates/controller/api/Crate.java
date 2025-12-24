@@ -24,8 +24,6 @@ public class Crate {
     private boolean publicCrate;
     private String description;
     private PublicUser user;
-    private int followerCount;
-    private boolean collected;
     private int albumCount;
     private BigDecimal trendingScore;
     private Instant lastTrendingUpdate;

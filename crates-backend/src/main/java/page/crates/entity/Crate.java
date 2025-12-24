@@ -53,8 +53,6 @@ public class Crate {
     private boolean publicCrate;
     @Column(name = "description", length = 300)
     private String description;
-    @Column(name = "follower_count", nullable = false)
-    private long followerCount;
     @Column(name = "trending_score", nullable = false)
     private BigDecimal trendingScore;
     @Column(name = "last_trending_update", nullable = false)

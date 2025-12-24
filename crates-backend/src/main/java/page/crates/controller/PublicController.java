@@ -22,10 +22,8 @@ import page.crates.controller.api.mapper.CrateAlbumMapper;
 import page.crates.controller.api.mapper.CrateMapper;
 import page.crates.controller.api.mapper.UserMapper;
 import page.crates.exception.UnauthorizedAccessException;
-import page.crates.service.CrateCollectionService;
 import page.crates.service.CrateDecorator;
 import page.crates.service.CrateService;
-import page.crates.service.FollowService;
 import page.crates.service.UserService;
 import page.crates.service.ViewTrackingService;
 
@@ -45,10 +43,6 @@ public class PublicController {
     private CrateAlbumMapper crateAlbumMapper;
     @Resource
     private CrateDecorator crateDecorator;
-    @Resource
-    private CrateCollectionService crateCollectionService;
-    @Resource
-    private FollowService followService;
     @Resource
     private ViewTrackingService viewTrackingService;
 
@@ -148,99 +142,6 @@ public class PublicController {
                 .map(crateDecorator::decorate);
     }
 
-    // Collection endpoints for public profiles
-
-    @GetMapping("/user/{username}/collection")
-    public Page<Crate> getPublicUserCollection(@PathVariable String username,
-                                              @RequestParam(value = "search", required = false) String search,
-                                              final Pageable pageable) {
-        log.info("Request received for public collection for user: {}", username);
-        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
-        
-        if (user.isPrivateProfile()) {
-            throw new UnauthorizedAccessException();
-        }
-        
-        if (StringUtils.isNotBlank(search)) {
-            return crateCollectionService.searchPublicUserCollection(user, search, pageable)
-                    .map(collection -> crateDecorator.decorate(crateMapper.map(collection.getCrate())));
-        }
-        
-        return crateCollectionService.getPublicUserCollection(user, pageable)
-                .map(collection -> crateDecorator.decorate(crateMapper.map(collection.getCrate())));
-    }
-
-    @GetMapping("/user/{username}/collection/{handle}")
-    public Crate getPublicCollectionCrate(@PathVariable String username, @PathVariable String handle) {
-        log.info("Request received for public collection crate: {} by user: {}", handle, username);
-        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
-        
-        if (user.isPrivateProfile()) {
-            throw new UnauthorizedAccessException();
-        }
-        
-        // Check if this crate is in the user's collection
-        page.crates.entity.Crate crate = crateService.findByHandle(handle);
-        
-        if (!crate.isPublicCrate()) {
-            throw new UnauthorizedAccessException();
-        }
-        
-        if (!crateCollectionService.isInCollection(user, crate)) {
-            throw new UnauthorizedAccessException();
-        }
-        
-        return crateDecorator.decorate(crateMapper.map(crate));
-    }
-
-    @GetMapping("/user/{username}/collection/{handle}/albums")
-    public Page<CrateAlbum> getPublicCollectionCrateAlbums(@PathVariable String username, 
-                                                           @PathVariable String handle,
-                                                           @RequestParam(value = "search", required = false) String search,
-                                                           final Pageable pageable) {
-        log.info("Request received for albums in public collection crate: {} by user: {}", handle, username);
-        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
-        
-        if (user.isPrivateProfile()) {
-            throw new UnauthorizedAccessException();
-        }
-        
-        // Check if this crate is in the user's collection
-        page.crates.entity.Crate crate = crateService.findByHandle(handle);
-        
-        if (!crate.isPublicCrate()) {
-            throw new UnauthorizedAccessException();
-        }
-        
-        if (!crateCollectionService.isInCollection(user, crate)) {
-            throw new UnauthorizedAccessException();
-        }
-        
-        if (StringUtils.isNotBlank(search)) {
-            return crateService.searchPublicAlbums(crate.getId(), search, pageable)
-                    .map(crateAlbumMapper::map);
-        }
-        return crateService.getPublicAlbums(crate.getId(), pageable)
-                .map(crateAlbumMapper::map);
-    }
-
-    @GetMapping("/user/{username}/stats")
-    public SocialStats getPublicUserSocialStats(@PathVariable String username) {
-        log.info("Request received for public social stats for user: {}", username);
-        page.crates.entity.SpotifyUser user = userService.findByHandleOrSpotifyId(username);
-        
-        if (user.isPrivateProfile()) {
-            throw new UnauthorizedAccessException();
-        }
-        
-        // For public stats, we don't filter private profiles since this is anonymous access
-        // The profile owner already checked above
-        Long followingCount = followService.getFollowingCount(user);
-        Long followerCount = followService.getFollowerCount(user);
-        
-        return new SocialStats(followingCount, followerCount);
-    }
-
     @PostMapping("/crate/{crateId}/view")
     public void recordCrateView(@PathVariable Long crateId, @RequestBody(required = false) ViewRequest viewRequest, HttpServletRequest request) {
         log.info("Request received to record view for crate: {}", crateId);
@@ -266,6 +167,5 @@ public class PublicController {
     }
 
     // DTO classes
-    public record SocialStats(Long followingCount, Long followerCount) {}
     public record ViewRequest(String ipAddress, String userAgent, String referrer) {}
 }

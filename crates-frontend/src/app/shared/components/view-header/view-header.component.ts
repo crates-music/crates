@@ -19,10 +19,6 @@ export class ViewHeaderComponent {
   @Input() showFilters: boolean = false;
   @Input() showSettings: boolean = false;
   @Input() showShare: boolean = false;
-  @Input() showCollection: boolean = false;
-  @Input() crateId?: number;
-  @Input() collectorCount?: number;
-  @Input() showStats: boolean = false;
   @Input() showAuthor: boolean = false;
   @Input() authorName?: string;
   @Input() authorId?: number;

@@ -252,9 +252,7 @@ func setupRoutes(r *gin.Engine) {
 	api := r.Group("/api")
 	{
 		api.GET("/:username/crates", handleUserCratesAPI)
-		api.GET("/:username/collection", handleUserCollectionAPI)
 		api.GET("/:username/:handle/albums", handleCrateAlbumsAPI)
-		api.GET("/:username/collection/:handle/albums", handleCollectionCrateAlbumsAPI)
 	}
 
 	// Profile page - /{username}
@@ -265,18 +263,6 @@ func setupRoutes(r *gin.Engine) {
 			"username": username,
 		}).Debug("Profile route hit")
 		handleProfilePage(c)
-	})
-
-	// Collection crate page - /{username}/collection/{handle}
-	r.GET("/:username/collection/:handle", func(c *gin.Context) {
-		username := c.Param("username")
-		handle := c.Param("handle")
-		logrus.WithFields(logrus.Fields{
-			"route":    "collection_crate",
-			"username": username,
-			"handle":   handle,
-		}).Debug("Collection crate route hit")
-		handleCollectionCratePage(c)
 	})
 
 	// Crate page - /{username}/{handle}
@@ -329,38 +315,15 @@ func handleProfilePage(c *gin.Context) {
 		crates = &Page[Crate]{Content: []Crate{}}
 	}
 
-	// Fetch initial collection (first page)
-	collection, err := backendClient.GetUserCollection(username, 0, 12, "", "createdAt,desc")
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"username": username,
-			"action":   "fetch_user_collection_profile",
-		}).WithError(err).Warn("Failed to fetch user collection for profile, using empty list")
-		collection = &Page[Crate]{Content: []Crate{}}
-	}
-
-	// Fetch user social stats
-	socialStats, err := backendClient.GetUserSocialStats(username)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"username": username,
-			"action":   "fetch_user_social_stats",
-		}).WithError(err).Warn("Failed to fetch user social stats, using zero values")
-		socialStats = &SocialStats{FollowingCount: 0, FollowerCount: 0}
-	}
-
 	c.HTML(http.StatusOK, "profile.html", gin.H{
-		"title":             user.DisplayName + " - Crates",
-		"user":              user,
-		"crates":            crates.Content,
-		"hasMoreCrates":     !crates.Last,
-		"collection":        collection.Content,
-		"hasMoreCollection": !collection.Last,
-		"socialStats":       socialStats,
-		"ogTitle":           user.DisplayName + " - Crates",
-		"ogDesc":            "Check out " + user.DisplayName + "'s music crates and collection",
-		"ogImage":           getFirstImage(user.Images),
-		"ogURL":             getFullURL(c),
+		"title":         user.DisplayName + " - Crates",
+		"user":          user,
+		"crates":        crates.Content,
+		"hasMoreCrates": !crates.Last,
+		"ogTitle":       user.DisplayName + " - Crates",
+		"ogDesc":        "Check out " + user.DisplayName + "'s music crates",
+		"ogImage":       getFirstImage(user.Images),
+		"ogURL":         getFullURL(c),
 	})
 }
 
@@ -525,7 +488,6 @@ func handleHomePage(c *gin.Context) {
 				"ownerSpotifyId": ownerSpotifyId,
 				"imageUri":       crate.ImageURI,
 				"createdAt":      crate.CreatedAt,
-				"followerCount":  crate.FollowerCount,
 			}
 			featuredCrates = append(featuredCrates, featuredCrate)
 		}
@@ -546,121 +508,6 @@ func handleHomePage(c *gin.Context) {
 	}).Debug("Rendering home template with data")
 	c.HTML(http.StatusOK, "home.html", data)
 	logrus.WithField("action", "render_home_page").Debug("Finished rendering home template")
-}
-
-func handleCollectionCratePage(c *gin.Context) {
-	username := c.Param("username")
-	handle := c.Param("handle")
-
-	// Fetch user and collection crate data from backend
-	user, err := backendClient.GetUser(username)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"username": username,
-			"action":   "fetch_user_for_collection_crate",
-		}).WithError(err).Error("Failed to fetch user for collection crate page")
-		c.HTML(http.StatusNotFound, "error.html", gin.H{
-			"title":   "Not Found",
-			"message": "The page you're looking for doesn't exist or isn't available.",
-			"ogTitle": "Not Found - Crates",
-			"ogDesc":  "The page you're looking for doesn't exist or isn't available.",
-		})
-		return
-	}
-
-	crate, err := backendClient.GetCollectionCrate(username, handle)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"username": username,
-			"handle":   handle,
-			"action":   "fetch_collection_crate",
-		}).WithError(err).Error("Failed to fetch collection crate")
-		c.HTML(http.StatusNotFound, "error.html", gin.H{
-			"title":   "Not Found",
-			"message": "The page you're looking for doesn't exist or isn't available.",
-			"ogTitle": "Not Found - Crates",
-			"ogDesc":  "The page you're looking for doesn't exist or isn't available.",
-		})
-		return
-	}
-
-	// Record the view for analytics (async, don't block page load)
-	go func() {
-		err := backendClient.RecordCrateView(crate.ID, c.ClientIP(), c.Request.UserAgent(), c.Request.Referer())
-		if err != nil {
-			logrus.WithFields(logrus.Fields{
-				"crateID": crate.ID,
-				"action":  "record_collection_crate_view",
-			}).WithError(err).Debug("Failed to record collection crate view")
-		}
-	}()
-
-	// Fetch initial albums (first page)
-	albums, err := backendClient.GetCollectionCrateAlbums(username, handle, 0, 20, "", "createdAt,desc")
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"handle": handle,
-			"action": "fetch_collection_crate_albums",
-		}).WithError(err).Error("Failed to fetch collection crate albums")
-		albums = &Page[CrateAlbum]{Content: []CrateAlbum{}}
-	}
-
-	firstAlbumImage := ""
-	if len(albums.Content) > 0 && len(albums.Content[0].Album.Images) > 0 {
-		firstAlbumImage = albums.Content[0].Album.Images[0].URL
-	}
-
-	c.HTML(http.StatusOK, "crate.html", gin.H{
-		"title":        crate.Name + " (collected by " + user.DisplayName + ")",
-		"user":         user,
-		"crate":        crate,
-		"albums":       albums.Content,
-		"hasMore":      !albums.Last,
-		"isCollection": true,
-		"ogTitle":      crate.Name + " (collected by " + user.DisplayName + ")",
-		"ogDesc":       "A music crate with " + strconv.Itoa(albums.TotalElements) + " albums, collected by " + user.DisplayName,
-		"ogImage":      firstAlbumImage,
-		"ogURL":        getFullURL(c),
-	})
-}
-
-func handleUserCollectionAPI(c *gin.Context) {
-	username := c.Param("username")
-	page := getPageFromQuery(c.Query("page"))
-	size := getSizeFromQuery(c.Query("size"))
-	search := c.Query("search")
-
-	collection, err := backendClient.GetUserCollection(username, page, size, search, "createdAt,desc")
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"username": username,
-			"action":   "fetch_user_collection_api",
-		}).WithError(err).Error("Failed to fetch user collection")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch collection"})
-		return
-	}
-
-	c.JSON(http.StatusOK, collection)
-}
-
-func handleCollectionCrateAlbumsAPI(c *gin.Context) {
-	username := c.Param("username")
-	handle := c.Param("handle")
-	page := getPageFromQuery(c.Query("page"))
-	size := getSizeFromQuery(c.Query("size"))
-	search := c.Query("search")
-
-	albums, err := backendClient.GetCollectionCrateAlbums(username, handle, page, size, search, "createdAt,desc")
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"handle": handle,
-			"action": "fetch_collection_crate_albums",
-		}).WithError(err).Error("Failed to fetch collection crate albums")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch albums"})
-		return
-	}
-
-	c.JSON(http.StatusOK, albums)
 }
 
 func getFirstImage(images []Image) string {

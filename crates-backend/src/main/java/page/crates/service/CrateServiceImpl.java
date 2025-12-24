@@ -43,8 +43,6 @@ public class CrateServiceImpl implements CrateService {
     private HandleService handleService;
     @Resource
     private LibraryAlbumService libraryAlbumService;
-    @Resource
-    private CrateEventService crateEventService;
 
 
     @Override
@@ -64,14 +62,7 @@ public class CrateServiceImpl implements CrateService {
 
         log.info("added album {} to crate: {} -- {}", album.getId(), crate.getId(), crateAlbum);
         crate.setUpdatedAt(systemTimeFacade.now());
-        Crate savedCrate = crateRepository.save(crate);
-        
-        // Fire event if crate is public
-        if (crate.isPublicCrate()) {
-            crateEventService.recordAlbumsAdded(crate.getUser(), crate, List.of(album.getId()));
-        }
-        
-        return savedCrate;
+        return crateRepository.save(crate);
     }
 
     @Override
@@ -95,14 +86,7 @@ public class CrateServiceImpl implements CrateService {
         }).collect(Collectors.toList());
         
         crate.setUpdatedAt(systemTimeFacade.now());
-        Crate savedCrate = crateRepository.save(crate);
-        
-        // Fire event if crate is public and albums were added
-        if (crate.isPublicCrate() && !addedAlbumIds.isEmpty()) {
-            crateEventService.recordAlbumsAdded(crate.getUser(), crate, addedAlbumIds);
-        }
-        
-        return savedCrate;
+        return crateRepository.save(crate);
     }
 
     @Override
@@ -125,7 +109,6 @@ public class CrateServiceImpl implements CrateService {
         crate.setHandle(handleService.handelize(crate.getName()));
         crate.setState(CrateState.ACTIVE);
         crate.setPublicCrate(true);
-        crate.setFollowerCount(0);
         crate.setTrendingScore(BigDecimal.ZERO);
         crate.setLastTrendingUpdate(systemTimeFacade.now());
         return crateRepository.save(crate);
@@ -189,10 +172,7 @@ public class CrateServiceImpl implements CrateService {
         final Crate crate = crateRepository.findById(crateId)
                 .orElseThrow(() -> new CrateNotFoundException(crateId));
         accessService.assertAccess(crate);
-        
-        // Track if crate is becoming public
-        boolean wasPrivate = !crate.isPublicCrate();
-        
+
         if (crateUpdate.getName() != null) {
             crate.setName(crateUpdate.getName());
             crate.setHandle(handleService.handelize(crateUpdate.getName()));
@@ -202,12 +182,6 @@ public class CrateServiceImpl implements CrateService {
         
         crate.setUpdatedAt(systemTimeFacade.now());
         final Crate saved = crateRepository.save(crate);
-        
-        // Fire event if crate is becoming public
-        if (wasPrivate && crateUpdate.isPublicCrate()) {
-            crateEventService.recordCrateReleased(crate.getUser(), saved);
-        }
-        
         log.info("Saved crate with description: {}", saved.getDescription());
         return saved;
     }

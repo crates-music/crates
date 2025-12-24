@@ -2,41 +2,28 @@ import { emptyLoadable, Loadable } from '../../../shared/model/loadable.model';
 import { User } from '../../shared/model/user.model';
 import { Crate } from '../../../crate/shared/model/crate.model';
 import { Action, createReducer, on } from '@ngrx/store';
-import { 
-  loadUser, 
-  loadUserResult, 
+import {
+  loadUser,
+  loadUserResult,
   loadUserById,
   loadUserByIdResult,
   loadUserPublicCrates,
   loadUserPublicCratesResult,
-  loadUserPublicCollection,
-  loadUserPublicCollectionResult,
-  updateUserProfile, 
+  updateUserProfile,
   updateUserProfileResult,
   clearUserProfile
 } from '../actions/load-user.actions';
-import { 
-  addCrateToCollectionResult,
-  removeCrateFromCollectionResult
-} from '../../../shared/store/actions/collection.actions';
-import { 
-  loadUserSocialStatsResult,
-  followUserResult,
-  unfollowUserResult
-} from '../../../shared/store/actions/social.actions';
 
 export interface UserState {
   user: Loadable<User>;
   viewedUser: Loadable<User>;
   viewedUserCrates: Loadable<Crate[]>;
-  viewedUserCollection: Loadable<Crate[]>;
 }
 
 export const initialState: UserState = {
   user: emptyLoadable(),
   viewedUser: emptyLoadable(),
-  viewedUserCrates: emptyLoadable(),
-  viewedUserCollection: emptyLoadable()
+  viewedUserCrates: emptyLoadable()
 }
 
 const userReducer = createReducer(initialState,
@@ -123,143 +110,12 @@ const userReducer = createReducer(initialState,
       }
     };
   }),
-  on(loadUserPublicCollection, (state): UserState => {
-    return {
-      ...state,
-      viewedUserCollection: {
-        ...state.viewedUserCollection,
-        loaded: false,
-        loading: true,
-      }
-    };
-  }),
-  on(loadUserPublicCollectionResult, (state, action): UserState => {
-    return {
-      ...state,
-      viewedUserCollection: {
-        loading: false,
-        loaded: !!action.response.success,
-        value: action.response.success ? action.response.data?.content || [] : [],
-        error: action.response.error,
-      }
-    };
-  }),
   on(clearUserProfile, (state): UserState => {
     return {
       ...state,
       user: emptyLoadable(),
       viewedUser: emptyLoadable(),
-      viewedUserCrates: emptyLoadable(),
-      viewedUserCollection: emptyLoadable()
-    };
-  }),
-  
-  // Collection actions - update crate.collected field and follower count in viewedUserCrates
-  on(addCrateToCollectionResult, (state, action): UserState => {
-    if (!action.response.success || !state.viewedUserCrates.value) {
-      return state;
-    }
-    
-    // Find and update the crate in viewedUserCrates
-    const updatedCrates = state.viewedUserCrates.value.map(crate => 
-      crate.id === action.crateId 
-        ? { 
-            ...crate, 
-            collected: true,
-            followerCount: (crate.followerCount || 0) + 1
-          }
-        : crate
-    );
-    
-    return {
-      ...state,
-      viewedUserCrates: {
-        ...state.viewedUserCrates,
-        value: updatedCrates
-      }
-    };
-  }),
-  
-  on(removeCrateFromCollectionResult, (state, action): UserState => {
-    if (!action.response.success || !state.viewedUserCrates.value) {
-      return state;
-    }
-    
-    // Find and update the crate in viewedUserCrates
-    const updatedCrates = state.viewedUserCrates.value.map(crate => 
-      crate.id === action.crateId 
-        ? { 
-            ...crate, 
-            collected: false,
-            followerCount: Math.max(0, (crate.followerCount || 0) - 1)
-          }
-        : crate
-    );
-    
-    return {
-      ...state,
-      viewedUserCrates: {
-        ...state.viewedUserCrates,
-        value: updatedCrates
-      }
-    };
-  }),
-  
-  // Update viewed user with social stats
-  on(loadUserSocialStatsResult, (state, action): UserState => {
-    if (!action.response.success || !state.viewedUser.value || state.viewedUser.value.id !== action.userId) {
-      return state;
-    }
-    
-    const updatedUser = Object.assign(Object.create(Object.getPrototypeOf(state.viewedUser.value)), state.viewedUser.value, {
-      followerCount: action.response.data?.followerCount,
-      followingCount: action.response.data?.followingCount
-    });
-    
-    return {
-      ...state,
-      viewedUser: {
-        ...state.viewedUser,
-        value: updatedUser
-      }
-    };
-  }),
-  
-  // Update viewed user follower count optimistically on follow actions
-  on(followUserResult, (state, action): UserState => {
-    if (!action.response.success || !state.viewedUser.value || state.viewedUser.value.id !== action.userId) {
-      return state;
-    }
-    
-    const updatedUser = Object.assign(Object.create(Object.getPrototypeOf(state.viewedUser.value)), state.viewedUser.value, {
-      followerCount: (state.viewedUser.value.followerCount || 0) + 1
-    });
-    
-    return {
-      ...state,
-      viewedUser: {
-        ...state.viewedUser,
-        value: updatedUser
-      }
-    };
-  }),
-  
-  // Update viewed user follower count optimistically on unfollow actions
-  on(unfollowUserResult, (state, action): UserState => {
-    if (!action.response.success || !state.viewedUser.value || state.viewedUser.value.id !== action.userId) {
-      return state;
-    }
-    
-    const updatedUser = Object.assign(Object.create(Object.getPrototypeOf(state.viewedUser.value)), state.viewedUser.value, {
-      followerCount: Math.max(0, (state.viewedUser.value.followerCount || 0) - 1)
-    });
-    
-    return {
-      ...state,
-      viewedUser: {
-        ...state.viewedUser,
-        value: updatedUser
-      }
+      viewedUserCrates: emptyLoadable()
     };
   }));
 
@@ -281,8 +137,3 @@ export const getViewedUserCrates = (state: UserState) => state.viewedUserCrates.
 export const getViewedUserCratesLoading = (state: UserState) => state.viewedUserCrates.loading;
 export const getViewedUserCratesLoaded = (state: UserState) => state.viewedUserCrates.loaded;
 export const getViewedUserCratesError = (state: UserState) => state.viewedUserCrates.error;
-
-export const getViewedUserCollection = (state: UserState) => state.viewedUserCollection.value;
-export const getViewedUserCollectionLoading = (state: UserState) => state.viewedUserCollection.loading;
-export const getViewedUserCollectionLoaded = (state: UserState) => state.viewedUserCollection.loaded;
-export const getViewedUserCollectionError = (state: UserState) => state.viewedUserCollection.error;
