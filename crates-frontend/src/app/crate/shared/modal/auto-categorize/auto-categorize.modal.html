@@ -7,6 +7,25 @@
 </div>
 
 <div class="modal-body">
+  <!-- Library Syncing State -->
+  <div *ngIf="state === 'waiting-for-library'" class="waiting-state">
+    <div class="spinner-border" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Syncing library...</span>
+    </div>
+    <h5>Syncing Your Library</h5>
+    <p>Please wait while we sync your Spotify library...</p>
+    <p class="text-muted small">This usually takes 10-30 seconds for the first page of albums.</p>
+  </div>
+
+  <!-- Analyzing State -->
+  <div *ngIf="state === 'analyzing'" class="analyzing-state">
+    <div class="spinner-border" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Analyzing library...</span>
+    </div>
+    <h5>Analyzing Your Library</h5>
+    <p>Discovering patterns in your music taste...</p>
+  </div>
+
   <!-- Preview State -->
   <div *ngIf="state === 'preview' && (preview$ | async) as preview" class="preview-state">
     <!-- All Albums Already Organized -->
@@ -125,6 +144,13 @@
 </div>
 
 <div class="modal-footer">
+  <!-- Waiting/Analyzing State Footer -->
+  <ng-container *ngIf="state === 'waiting-for-library' || state === 'analyzing'">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">
+      Cancel
+    </button>
+  </ng-container>
+
   <!-- Preview State Footer -->
   <ng-container *ngIf="state === 'preview'">
     <button type="button" class="btn btn-secondary" (click)="cancel()">

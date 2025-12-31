@@ -426,3 +426,27 @@
     }
   }
 }
+
+// Waiting and analyzing states
+.waiting-state,
+.analyzing-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+
+  .spinner-border {
+    color: var(--bs-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  h5 {
+    margin-bottom: 0.5rem;
+  }
+
+  p.small {
+    font-size: 0.875rem;
+  }
+}

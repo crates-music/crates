@@ -140,6 +140,7 @@ public class GenreEnrichmentServiceImpl implements GenreEnrichmentService {
                 if (spotifyArtist != null && spotifyArtist.getGenres() != null && !spotifyArtist.getGenres().isEmpty()) {
                     // Has genres - add them
                     Set<Genre> genres = spotifyArtist.getGenres().stream()
+                            .distinct()  // Defensive deduplication of genre names from Spotify
                             .map(name -> Genre.builder().name(name).build())
                             .map(genreService::findOrCreate)
                             .collect(Collectors.toSet());

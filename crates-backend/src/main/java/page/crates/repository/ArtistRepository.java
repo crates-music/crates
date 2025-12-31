@@ -12,6 +12,7 @@ public interface ArtistRepository extends JpaRepository<Artist, Long> {
     @EntityGraph(attributePaths = {"genres"})
     Artist findOneBySpotifyId(String spotifyId);
 
-    @Query("SELECT a.genresFetched FROM Artist a WHERE a.spotifyId = :spotifyId")
+    @Query("SELECT CASE WHEN (a.genresFetched = true OR SIZE(a.genres) > 0) THEN true ELSE false END " +
+           "FROM Artist a WHERE a.spotifyId = :spotifyId")
     Boolean hasGenresFetched(@Param("spotifyId") String spotifyId);
 }
