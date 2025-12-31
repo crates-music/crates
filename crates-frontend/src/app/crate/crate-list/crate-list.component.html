@@ -8,38 +8,44 @@
              class="empty-crate-image"
              alt="Crates icon">
         <h4 class="mb-4 text-primary">You don't have any Crates yet. Let's get you started!</h4>
-        <p><strong>Crates</strong> allows you to organize your albums into custom categories, making it easier to
+        <p class="mb-4"><strong>Crates</strong> allows you to organize your albums into custom categories, making it easier to
           rediscover and enjoy your music.</p>
-        <ol class="text-left d-inline-block mb-4 px-4">
-          <li><strong class="text-primary">Search Your Library:</strong> Select albums from your library to add
-            them to crates.
-          </li>
-          <li><strong class="text-primary">Create Crates:</strong> Categorize your albums by genre, mood, era, or
-            any other theme you like.
-          </li>
-          <li><strong class="text-primary">Enjoy Your Music:</strong> Come back to this tab to easily access and
-            listen to your curated Crates.
-          </li>
-        </ol>
 
-        <!-- Magic Button for Auto-Categorization -->
+        <!-- Magic Button for Auto-Categorization - Primary CTA -->
         <div class="magic-button-container mb-3">
           <button class="btn btn-lg btn-primary magic-button"
                   (click)="openAutoCategorizeModal()">
             <i class="bi bi-stars me-2"></i>
-            Auto-Organize My Library
+            Organize for Me
           </button>
           <p class="text-muted mt-2 small">
             Let Crates intelligently organize your albums into themed collections
           </p>
         </div>
 
-        <div class="divider my-3">
+        <div class="divider my-4">
           <span class="divider-text">OR</span>
         </div>
 
-        <a class="btn btn-lg btn-light library-button big-ol-button"
-           [routerLink]="['/library']">Organize Manually</a>
+        <!-- Manual Organization Option -->
+        <div class="manual-option">
+          <h5 class="mb-3">Organize Manually</h5>
+          <ol class="text-left d-inline-block mb-4 px-4">
+            <li><strong class="text-primary">Search Your Library:</strong> Select albums from your library to add
+              them to crates.
+            </li>
+            <li><strong class="text-primary">Create Crates:</strong> Categorize your albums by genre, mood, era, or
+              any other theme you like.
+            </li>
+            <li><strong class="text-primary">Enjoy Your Music:</strong> Come back to this tab to easily access and
+              listen to your curated Crates.
+            </li>
+          </ol>
+          <div>
+            <a class="btn btn-lg btn-light library-button big-ol-button"
+               [routerLink]="['/library']">Go to Library</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
