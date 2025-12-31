@@ -14,6 +14,7 @@ import page.crates.entity.CrateAlbum;
 import page.crates.entity.SpotifyUser;
 import page.crates.entity.enums.CrateState;
 import page.crates.exception.CrateNotFoundException;
+import page.crates.repository.AlbumRepository;
 import page.crates.repository.CrateAlbumRepository;
 import page.crates.repository.CrateRepository;
 import page.crates.util.SystemTimeFacade;
@@ -31,6 +32,8 @@ public class CrateServiceImpl implements CrateService {
     private CrateRepository crateRepository;
     @Resource
     private CrateAlbumRepository crateAlbumRepository;
+    @Resource
+    private AlbumRepository albumRepository;
     @Resource
     private AlbumService albumService;
     @Resource
@@ -53,6 +56,12 @@ public class CrateServiceImpl implements CrateService {
         accessService.assertAccess(crate);
         final Album album = albumService.findOrCreate(spotifyAlbumId);
 
+        // Check if album already exists in crate to prevent constraint violation
+        if (crateAlbumRepository.existsByCrateIdAndAlbumId(crateId, album.getId())) {
+            log.info("Album {} already exists in crate {}, skipping", album.getId(), crateId);
+            return crate;
+        }
+
         final CrateAlbum crateAlbum = crateAlbumRepository.save(
                 CrateAlbum.builder()
                         .album(album)
@@ -71,7 +80,7 @@ public class CrateServiceImpl implements CrateService {
         final Crate crate = crateRepository.findById(crateId)
                 .orElseThrow(() -> new CrateNotFoundException(crateId));
         accessService.assertAccess(crate);
-        
+
         List<Long> addedAlbumIds = albumList.albums().stream().map(incomingAlbum -> {
             final Album album = albumService.findOrCreate(albumMapper.map(incomingAlbum));
             final CrateAlbum crateAlbum = crateAlbumRepository.save(
@@ -84,9 +93,61 @@ public class CrateServiceImpl implements CrateService {
             libraryAlbumService.markCrated(album, crate.getUser());
             return album.getId();
         }).collect(Collectors.toList());
-        
+
         crate.setUpdatedAt(systemTimeFacade.now());
         return crateRepository.save(crate);
+    }
+
+    @Override
+    @Transactional
+    public int addAlbumsBatch(Long crateId, List<Long> albumIds) {
+        final Crate crate = crateRepository.findById(crateId)
+                .orElseThrow(() -> new CrateNotFoundException(crateId));
+        accessService.assertAccess(crate);
+
+        if (albumIds == null || albumIds.isEmpty()) {
+            return 0;
+        }
+
+        // Bulk check which albums already exist in the crate
+        List<Long> existingAlbumIds = crateAlbumRepository.findExistingAlbumIds(crateId, albumIds);
+
+        // Filter out albums that already exist
+        List<Long> albumIdsToAdd = albumIds.stream()
+                .filter(albumId -> !existingAlbumIds.contains(albumId))
+                .collect(Collectors.toList());
+
+        if (albumIdsToAdd.isEmpty()) {
+            log.info("All {} albums already exist in crate {}, skipping", albumIds.size(), crateId);
+            return 0;
+        }
+
+        // Load fresh Album entities from database (ensures they're in persistence context)
+        List<Album> albumsToAdd = albumIdsToAdd.stream()
+                .map(albumId -> albumRepository.findById(albumId)
+                        .orElseThrow(() -> new RuntimeException("Album not found: " + albumId)))
+                .collect(Collectors.toList());
+
+        // Batch create CrateAlbum entities
+        List<CrateAlbum> crateAlbums = albumsToAdd.stream()
+                .map(album -> CrateAlbum.builder()
+                        .album(album)
+                        .crate(crate)
+                        .createdAt(systemTimeFacade.now())
+                        .build())
+                .collect(Collectors.toList());
+
+        // Save all at once
+        crateAlbumRepository.saveAll(crateAlbums);
+
+        // Update crate timestamp once
+        crate.setUpdatedAt(systemTimeFacade.now());
+        crateRepository.save(crate);
+
+        log.info("Batch added {} albums to crate {} (skipped {} duplicates)",
+                albumsToAdd.size(), crateId, existingAlbumIds.size());
+
+        return albumsToAdd.size();
     }
 
     @Override

@@ -114,6 +114,82 @@
   margin-bottom: 2rem;
 }
 
+/* Magic Button Styling */
+.magic-button-container {
+  text-align: center;
+
+  .magic-button {
+    font-size: 1.1rem;
+    padding: 14px 28px;
+    font-weight: 600;
+    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+      background: #1a1a1a;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    i {
+      color: white;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+  }
+
+  .small {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+}
+
+/* Divider Styling */
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 1.5rem 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+
+  .divider-text {
+    position: relative;
+    display: inline-block;
+    padding: 0 1rem;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
+/* Sparkle animation for star icon */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
 /* Crate-specific styling for templates */
 .crate-card {
   background: var(--bg-card) !important;

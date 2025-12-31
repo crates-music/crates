@@ -22,13 +22,15 @@ export class ViewLayoutComponent {
   // Filter inputs
   @Input() hideCrated: boolean = false;
   @Input() hideCratedLabel: string = 'Hide albums already in crates';
-  
+  @Input() showAutoCategorize: boolean = false;
+
   // Events
   @Output() search = new EventEmitter<string>();
   @Output() listTypeToggle = new EventEmitter<ListType>();
   @Output() sync = new EventEmitter<void>();
   @Output() settingsClick = new EventEmitter<void>();
   @Output() filterChange = new EventEmitter<boolean>();
+  @Output() autoCategorize = new EventEmitter<void>();
 
   // Expose ListType enum to template
   ListType = ListType;
@@ -51,5 +53,9 @@ export class ViewLayoutComponent {
 
   onFilterChange(checked: boolean): void {
     this.filterChange.emit(checked);
+  }
+
+  onAutoCategorize(): void {
+    this.autoCategorize.emit();
   }
 }

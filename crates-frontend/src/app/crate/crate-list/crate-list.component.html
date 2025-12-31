@@ -21,8 +21,25 @@
             listen to your curated Crates.
           </li>
         </ol>
+
+        <!-- Magic Button for Auto-Categorization -->
+        <div class="magic-button-container mb-3">
+          <button class="btn btn-lg btn-primary magic-button"
+                  (click)="openAutoCategorizeModal()">
+            <i class="bi bi-stars me-2"></i>
+            Auto-Organize My Library
+          </button>
+          <p class="text-muted mt-2 small">
+            Let Crates intelligently organize your albums into themed collections
+          </p>
+        </div>
+
+        <div class="divider my-3">
+          <span class="divider-text">OR</span>
+        </div>
+
         <a class="btn btn-lg btn-light library-button big-ol-button"
-           [routerLink]="['/library']">Go to Library</a>
+           [routerLink]="['/library']">Organize Manually</a>
       </div>
     </div>
   </div>
@@ -39,9 +56,11 @@
       [showSearch]="true"
       searchPlaceholder="What you feelin?"
       [showListToggle]="true"
+      [showAutoCategorize]="true"
       [listType]="cratesListType"
       (search)="handleSearch($event)"
-      (listTypeToggle)="toggleCratesListType($event)">
+      (listTypeToggle)="toggleCratesListType($event)"
+      (autoCategorize)="openAutoCategorizeModal()">
     </crates-view-header>
   </div>
 

@@ -3,12 +3,23 @@ package page.crates.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import page.crates.controller.AlbumList;
+import page.crates.entity.Album;
 import page.crates.entity.Crate;
 import page.crates.entity.CrateAlbum;
 import page.crates.entity.SpotifyUser;
 
+import java.util.List;
+
 public interface CrateService {
     Crate addAlbum(Long crateId, String spotifyAlbumId);
+
+    /**
+     * Batch add albums to a crate, skipping duplicates
+     * @param crateId the crate ID
+     * @param albumIds list of Album IDs to add
+     * @return number of albums actually added (excluding duplicates)
+     */
+    int addAlbumsBatch(Long crateId, List<Long> albumIds);
 
     Crate addAlbums(Long crateId, AlbumList albumList);
 

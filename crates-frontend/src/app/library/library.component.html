@@ -21,12 +21,14 @@
     [syncDisabled]="library.state === LibraryState.Importing || library.state === LibraryState.Updating"
     [syncLoading]="library.state === LibraryState.Importing || library.state === LibraryState.Updating"
     [showFilters]="true"
+    [showAutoCategorize]="true"
     [hideCrated]="hideCrated"
     hideCratedLabel="Hide albums already in crates"
     (search)="handleSearch($event)"
     (listTypeToggle)="toggleLibraryListType($event)"
     (sync)="syncLibrary()"
-    (filterChange)="onFilterChange($event)">
+    (filterChange)="onFilterChange($event)"
+    (autoCategorize)="openAutoCategorizeModal()">
     
     <crates-list-content
       [items]="albums$ | async"

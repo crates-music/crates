@@ -41,6 +41,9 @@ public class Artist {
     private String name;
     @Column(name = "popularity", nullable = false)
     private int popularity;
+    @Column(name = "genres_fetched", nullable = false)
+    @Builder.Default
+    private boolean genresFetched = false;
     @ManyToMany
     @JoinTable(name = "artist_to_genre",
             joinColumns = @JoinColumn(name = "artist_id", nullable = false),

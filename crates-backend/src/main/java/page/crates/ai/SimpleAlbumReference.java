@@ -16,4 +16,6 @@ import lombok.NoArgsConstructor;
 public class SimpleAlbumReference {
     private String title;
     private String artist;
+    private Long albumId; // Optional: if we already know which album (for auto-categorization)
+    private String artworkUrl; // Optional: album artwork URL for display
 }

@@ -9,11 +9,14 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { CrateComponent } from './crate/crate.component';
 import { StoreModule } from '@ngrx/store';
 import * as fromCrate from './store/reducers/crate.reducer';
+import { autoCategorizeReducer } from './store/reducers/auto-categorize.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { CrateEffects } from './store/effects/crate.effects';
 import { CrateStorageEffects } from './store/effects/crate-storage.effects';
+import { AutoCategorizeEffects } from './store/effects/auto-categorize.effects';
 import { SharedModule } from '../shared/shared.module';
 import { RemoveAlbumModalComponent } from './shared/modal/remove-album/remove-album-modal.component';
+import { AutoCategorizeModal } from './shared/modal/auto-categorize/auto-categorize.modal';
 import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap';
 import { CrateSettingsComponent } from './crate-settings/crate-settings.component';
 
@@ -24,7 +27,8 @@ import { CrateSettingsComponent } from './crate-settings/crate-settings.componen
     CrateSelectionModal,
     CrateComponent,
     RemoveAlbumModalComponent,
-    CrateSettingsComponent
+    CrateSettingsComponent,
+    AutoCategorizeModal
   ],
   imports: [
     CommonModule,
@@ -33,7 +37,8 @@ import { CrateSettingsComponent } from './crate-settings/crate-settings.componen
     ReactiveFormsModule,
     InfiniteScrollModule,
     StoreModule.forFeature('crate', fromCrate.reducer),
-    EffectsModule.forFeature([CrateEffects, CrateStorageEffects]),
+    StoreModule.forFeature('autoCategorize', autoCategorizeReducer),
+    EffectsModule.forFeature([CrateEffects, CrateStorageEffects, AutoCategorizeEffects]),
     SharedModule,
     NgOptimizedImage,
     NgbDropdown,

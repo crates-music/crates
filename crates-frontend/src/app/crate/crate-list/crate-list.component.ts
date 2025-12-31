@@ -14,6 +14,8 @@ import {
 import { loadCrates, toggleCratesListType, reloadCrates } from '../store/actions/load-crates.actions';
 import { ListType } from '../../shared/model/list-type.model';
 import * as NavigationActions from '../../shared/store/actions/navigation.actions';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { AutoCategorizeModal } from '../shared/modal/auto-categorize/auto-categorize.modal';
 
 @Component({
   selector: 'crate-crate-list',
@@ -33,7 +35,8 @@ export class CrateListComponent implements OnDestroy {
   search: string;
 
   constructor(private router: Router,
-              private store: Store) {
+              private store: Store,
+              private modal: NgbModal) {
     // Set navigation context to 'crates' since this is the user's own crates list
     this.store.dispatch(NavigationActions.setNavigationContext({ context: 'crates' }));
 
@@ -91,5 +94,22 @@ export class CrateListComponent implements OnDestroy {
 
   trackByCrateId(index: number, crate: Crate): string {
     return String(crate.id);
+  }
+
+  openAutoCategorizeModal() {
+    const modalRef = this.modal.open(AutoCategorizeModal, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static'
+    });
+
+    modalRef.closed.subscribe(() => {
+      // Modal closed successfully (crates created)
+      // Crates are already reloaded by the effect, no need to do it again
+    });
+
+    modalRef.dismissed.subscribe(() => {
+      // Modal was cancelled or dismissed
+    });
   }
 }

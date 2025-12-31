@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 
-export type NavigationContext = 'discover' | 'profile' | 'crates' | 'library' | 'activity';
+export type NavigationContext = 'discover' | 'profile' | 'crates' | 'library';
 
 // Navigation Context Actions
 export const setNavigationContext = createAction(

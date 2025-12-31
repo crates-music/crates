@@ -1,0 +1,168 @@
+<div class="modal-header border-0">
+  <h4 class="modal-title">
+    <i class="bi bi-stars me-2"></i>
+    Auto-Organize Your Library
+  </h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="cancel()" [disabled]="state === 'processing'"></button>
+</div>
+
+<div class="modal-body">
+  <!-- Preview State -->
+  <div *ngIf="state === 'preview' && (preview$ | async) as preview" class="preview-state">
+    <!-- All Albums Already Organized -->
+    <div *ngIf="preview.albumsWillBeCategorized === 0" class="all-organized-state text-center">
+      <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+      <h5 class="mt-3">All Albums Already Organized</h5>
+      <p class="text-muted">
+        All <strong>{{ preview.totalLibraryAlbums }}</strong> albums in your library are already organized into crates.
+        <br>
+        Auto-organize only processes albums that aren't in any crate yet.
+      </p>
+    </div>
+
+    <!-- Some Albums Can Be Organized -->
+    <div *ngIf="preview.albumsWillBeCategorized > 0" class="has-proposals">
+      <div class="intro-section">
+        <p class="intro-text">
+          We'll organize <strong>{{ preview.albumsWillBeCategorized }}</strong> uncategorized albums into <strong>{{ preview.proposedCrates }}</strong> curated crates based on genre, era, and style.
+        </p>
+        <p class="text-muted small" *ngIf="preview.albumsWillBeCategorized < preview.totalLibraryAlbums">
+          ({{ preview.totalLibraryAlbums - preview.albumsWillBeCategorized }} albums are already in crates)
+        </p>
+      </div>
+
+      <div class="coverage-stats">
+        <div class="stat-card">
+          <i class="bi bi-collection-fill"></i>
+          <div class="stat-content">
+            <div class="stat-value">{{ preview.albumsWillBeCategorized }}</div>
+            <div class="stat-label">Albums To Organize</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <i class="bi bi-graph-up"></i>
+          <div class="stat-content">
+            <div class="stat-value">{{ preview.coveragePercent | number:'1.0-0' }}%</div>
+            <div class="stat-label">Library Coverage</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proposals-container">
+        <div class="proposals-header">
+          <h6 class="mb-0">Preview of Crates</h6>
+          <span class="text-muted small">{{ preview.proposedCrates }} total</span>
+        </div>
+        <ul class="proposal-list">
+          <li *ngFor="let proposal of preview.proposals" class="proposal-item">
+            <div class="proposal-content">
+              <div class="proposal-header">
+                <strong>{{ proposal.name }}</strong>
+                <span class="badge">{{ proposal.albumCount }}</span>
+              </div>
+              <small class="proposal-description">{{ proposal.description }}</small>
+              <div class="album-artwork-preview" *ngIf="proposal.albums && proposal.albums.length > 0">
+                <img *ngFor="let album of proposal.albums.slice(0, 5)"
+                     [src]="album.artworkUrl"
+                     [alt]="album.title + ' by ' + album.artist"
+                     class="album-artwork">
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview Loading State -->
+  <div *ngIf="state === 'preview' && (loading$ | async)" class="loading-state">
+    <div class="spinner-border" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Loading preview...</span>
+    </div>
+    <h5>Analyzing Your Library</h5>
+    <p>Discovering patterns in your music taste...</p>
+  </div>
+
+  <!-- Processing State -->
+  <div *ngIf="state === 'processing'" class="processing-state">
+    <div class="spinner-border" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Processing...</span>
+    </div>
+    <h5>Creating Your Crates</h5>
+    <p>This typically takes 30-60 seconds</p>
+  </div>
+
+  <!-- Success State -->
+  <div *ngIf="state === 'success' && (result$ | async) as result" class="success-state text-center">
+    <i class="bi bi-check-circle-fill" style="font-size: 4rem;"></i>
+    <h5 class="mt-3">Your Library Is Organized!</h5>
+
+    <div class="success-stats">
+      <div class="stat-box">
+        <div class="stat-value">{{ result.cratesCreated }}</div>
+        <div class="stat-label">Crates Created</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">{{ result.albumsCategorized }}</div>
+        <div class="stat-label">Albums Organized</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">{{ result.coveragePercent | number:'1.0-0' }}%</div>
+        <div class="stat-label">Coverage</div>
+      </div>
+    </div>
+
+    <p>Completed in {{ result.processingTimeMs / 1000 | number:'1.1-1' }}s</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="state === 'error'" class="error-state text-center">
+    <i class="bi bi-exclamation-triangle-fill" style="font-size: 4rem;"></i>
+    <h5 class="mt-3">Unable to Organize Library</h5>
+    <p *ngIf="error$ | async as error">{{ error }}</p>
+    <p *ngIf="!(error$ | async)">An unexpected error occurred. Please try again.</p>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <!-- Preview State Footer -->
+  <ng-container *ngIf="state === 'preview'">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">
+      {{ (preview$ | async)?.albumsWillBeCategorized === 0 ? 'Close' : 'Cancel' }}
+    </button>
+    <button
+      *ngIf="(preview$ | async)?.albumsWillBeCategorized > 0"
+      type="button"
+      class="btn btn-primary"
+      (click)="confirm()"
+      [disabled]="!(preview$ | async)">
+      <i class="bi bi-stars me-2"></i>
+      Create Crates
+    </button>
+  </ng-container>
+
+  <!-- Processing State Footer -->
+  <ng-container *ngIf="state === 'processing'">
+    <button type="button" class="btn btn-secondary" disabled>
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      Processing...
+    </button>
+  </ng-container>
+
+  <!-- Success State Footer -->
+  <ng-container *ngIf="state === 'success'">
+    <button type="button" class="btn btn-primary" (click)="close()">
+      <i class="bi bi-collection me-2"></i>
+      View My Crates
+    </button>
+  </ng-container>
+
+  <!-- Error State Footer -->
+  <ng-container *ngIf="state === 'error'">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">Close</button>
+    <button type="button" class="btn btn-primary" (click)="retry()">
+      <i class="bi bi-arrow-clockwise me-2"></i>
+      Retry
+    </button>
+  </ng-container>
+</div>

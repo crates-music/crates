@@ -22,9 +22,19 @@
         </button>
       </div>
 
-      <!-- Sync button (for library) -->
-      <div class="sync-section" *ngIf="showSyncButton">
+      <!-- Auto-Categorize button (for crates) -->
+      <div class="action-buttons" *ngIf="showAutoCategorize || showSyncButton">
+        <button class="btn btn-sm btn-primary auto-categorize-button me-2"
+                *ngIf="showAutoCategorize"
+                (click)="onAutoCategorize()"
+                title="Auto-Organize Library">
+          <i class="bi-stars me-1"></i>
+          <span>Auto-Organize</span>
+        </button>
+
+        <!-- Sync button (for library) -->
         <button class="btn sync-button"
+                *ngIf="showSyncButton"
                 [class.syncing]="syncLoading"
                 [disabled]="syncDisabled || syncLoading"
                 (click)="onSync()"

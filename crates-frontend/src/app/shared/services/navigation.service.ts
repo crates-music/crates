@@ -10,7 +10,6 @@ import * as NavigationActions from '../store/actions/navigation.actions';
 export enum Tab {
   Crates = 'CRATES',
   Library = 'LIBRARY',
-  Activity = 'ACTIVITY',
   Discover = 'DISCOVER',
   Profile = 'PROFILE'
 }
@@ -52,15 +51,6 @@ export class NavigationService implements OnDestroy {
       route: '/library',
       icon: 'bi-disc',
       context: 'library',
-      showOnMobile: true,
-      showOnDesktop: true
-    },
-    {
-      id: Tab.Activity,
-      label: 'Activity',
-      route: '/activity',
-      icon: 'bi-activity',
-      context: 'activity',
       showOnMobile: true,
       showOnDesktop: true
     },
@@ -216,13 +206,11 @@ export class NavigationService implements OnDestroy {
   private updateCurrentTabFromUrl(): void {
     const segments = this.router.routerState.snapshot.url.split('/');
     const url = this.router.routerState.snapshot.url;
-    
+
     if (segments.includes('crate')) {
       this.currentTab$.next(Tab.Crates);
     } else if (segments.includes('library')) {
       this.currentTab$.next(Tab.Library);
-    } else if (segments.includes('activity')) {
-      this.currentTab$.next(Tab.Activity);
     } else if (segments.includes('discover')) {
       this.currentTab$.next(Tab.Discover);
     } else if (url.includes('/user/profile/settings')) {

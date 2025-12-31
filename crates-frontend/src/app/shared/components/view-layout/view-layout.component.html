@@ -13,13 +13,15 @@
       [syncLoading]="syncLoading"
       [showFilters]="showFilters"
       [showSettings]="showSettings"
+      [showAutoCategorize]="showAutoCategorize"
       [hideCrated]="hideCrated"
       [hideCratedLabel]="hideCratedLabel"
       (search)="onSearch($event)"
       (listTypeToggle)="onListTypeToggle($event)"
       (sync)="onSync()"
       (settingsClick)="onSettings()"
-      (filterChange)="onFilterChange($event)">
+      (filterChange)="onFilterChange($event)"
+      (autoCategorize)="onAutoCategorize()">
     </crates-view-header>
   </div>
 

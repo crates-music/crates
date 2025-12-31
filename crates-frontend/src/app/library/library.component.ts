@@ -5,6 +5,7 @@ import { Observable, Subject, takeUntil, tap, withLatestFrom } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, Pageable } from '../shared/model/pageable.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CrateSelectionModal } from '../crate/shared/modal/crate-selection/crate-selection.modal';
+import { AutoCategorizeModal } from '../crate/shared/modal/auto-categorize/auto-categorize.modal';
 import { CrateService } from '../crate/shared/crate.service';
 import { Store } from '@ngrx/store';
 import { loadAlbums, reloadAlbums } from './store/actions/load-albums.actions';
@@ -293,19 +294,36 @@ export class LibraryComponent implements OnInit, OnDestroy, AfterViewInit {
   resetPullToRefresh() {
     this.isPulling = false;
     this.pullDistance = 0;
-    
+
     if (this.libraryContainer) {
       const libraryContainer = this.libraryContainer.nativeElement;
       const pullIndicator = libraryContainer.querySelector('.pull-refresh-indicator') as HTMLElement;
-      
+
       if (libraryContainer && pullIndicator) {
         // Reset library container position
         libraryContainer.style.transform = 'translateY(0)';
-        
+
         // Hide pull indicator
         pullIndicator.style.transform = 'translateY(-100%)';
         pullIndicator.style.opacity = '0';
       }
     }
+  }
+
+  openAutoCategorizeModal() {
+    const modalRef = this.modal.open(AutoCategorizeModal, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static'
+    });
+
+    modalRef.closed.subscribe(() => {
+      // Modal closed successfully (crates created)
+      // Crates are already reloaded by the effect, no need to do it again
+    });
+
+    modalRef.dismissed.subscribe(() => {
+      // Modal was cancelled or dismissed
+    });
   }
 }

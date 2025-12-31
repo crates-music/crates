@@ -22,11 +22,12 @@ export class ViewHeaderComponent {
   @Input() showAuthor: boolean = false;
   @Input() authorName?: string;
   @Input() authorId?: number;
-  
+  @Input() showAutoCategorize: boolean = false;
+
   // Filter inputs
   @Input() hideCrated: boolean = false;
   @Input() hideCratedLabel: string = 'Hide albums already in crates';
-  
+
   // Events
   @Output() search = new EventEmitter<string>();
   @Output() listTypeToggle = new EventEmitter<ListType>();
@@ -35,6 +36,7 @@ export class ViewHeaderComponent {
   @Output() shareClick = new EventEmitter<void>();
   @Output() filterChange = new EventEmitter<boolean>();
   @Output() authorClick = new EventEmitter<number>();
+  @Output() autoCategorize = new EventEmitter<void>();
 
   // Expose ListType enum to template
   ListType = ListType;
@@ -70,5 +72,9 @@ export class ViewHeaderComponent {
     if (this.authorId) {
       this.authorClick.emit(this.authorId);
     }
+  }
+
+  onAutoCategorize(): void {
+    this.autoCategorize.emit();
   }
 }

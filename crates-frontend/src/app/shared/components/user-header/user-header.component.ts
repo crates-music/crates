@@ -66,10 +66,6 @@ export class UserHeaderComponent implements OnDestroy {
     this.navigateToTab(Tab.Discover);
   }
 
-  navigateToActivity(): void {
-    this.navigateToTab(Tab.Activity);
-  }
-
   navigateToSettings(): void {
     this.router.navigate(['/user/profile/settings']);
   }

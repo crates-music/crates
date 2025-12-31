@@ -17,6 +17,7 @@ import page.crates.repository.AlbumRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -322,20 +323,59 @@ public class CrateActionServiceImpl implements CrateActionService {
     }
     
     private List<AlbumMatchResult> addAlbumsToCreatedCrate(String crateId, List<SimpleAlbumReference> albumRefs) {
-        return albumRefs.stream()
-                .map(albumRef -> matchAndAddAlbum(crateId, albumRef))
-                .collect(Collectors.toList());
+        List<AlbumMatchResult> matchResults = new ArrayList<>();
+        List<Long> albumIdsToAdd = new ArrayList<>();
+
+        for (SimpleAlbumReference albumRef : albumRefs) {
+            // If albumId is already provided (from auto-categorization), use it directly
+            if (albumRef.getAlbumId() != null) {
+                albumIdsToAdd.add(albumRef.getAlbumId());
+                // Create a successful match result for tracking
+                matchResults.add(AlbumMatchResult.builder()
+                        .requestedTitle(albumRef.getTitle())
+                        .requestedArtist(albumRef.getArtist())
+                        .matched(true)
+                        .actualTitle(albumRef.getTitle())
+                        .actualArtist(albumRef.getArtist())
+                        .message("Using existing album from library")
+                        .build());
+            } else {
+                // Otherwise, search and match (AI-driven crate creation)
+                AlbumMatchResult matchResult = matchAlbum(albumRef);
+                matchResults.add(matchResult);
+
+                if (matchResult.isMatched() && matchResult.getMatchedAlbum() != null) {
+                    Album matched = matchResult.getMatchedAlbum();
+                    if (matched.getSpotifyId() != null) {
+                        // Ensure album exists in database (might be fresh from Spotify search)
+                        Album dbAlbum = albumService.findOrCreate(matched.getSpotifyId());
+                        albumIdsToAdd.add(dbAlbum.getId());
+                    }
+                }
+            }
+        }
+
+        // Batch add all matched albums at once (single transaction, bulk operations)
+        if (!albumIdsToAdd.isEmpty()) {
+            crateService.addAlbumsBatch(Long.valueOf(crateId), albumIdsToAdd);
+        }
+
+        return matchResults;
     }
     
-    private AlbumMatchResult matchAndAddAlbum(String crateId, SimpleAlbumReference albumRef) {
+    /**
+     * Match an album reference to an actual Album entity (search and find best match)
+     * Does NOT add to crate - use for batch operations
+     */
+    private AlbumMatchResult matchAlbum(SimpleAlbumReference albumRef) {
         try {
             // Create search query combining artist and album
             String searchQuery = albumRef.getArtist() + " " + albumRef.getTitle();
             log.debug("Searching for album: '{}'", searchQuery);
-            
+
             // Search for albums
             Page<Album> searchResults = albumService.search(searchQuery, SearchType.GLOBAL, PageRequest.of(0, 5));
-            
+
             if (searchResults.isEmpty()) {
                 return AlbumMatchResult.builder()
                         .requestedTitle(albumRef.getTitle())
@@ -344,10 +384,10 @@ public class CrateActionServiceImpl implements CrateActionService {
                         .message("No albums found matching: " + albumRef.getArtist() + " - " + albumRef.getTitle())
                         .build();
             }
-            
+
             // Find best match - prioritize exact matches
             Album bestMatch = findBestAlbumMatch(albumRef, searchResults.getContent());
-            
+
             if (bestMatch == null) {
                 return AlbumMatchResult.builder()
                         .requestedTitle(albumRef.getTitle())
@@ -356,24 +396,85 @@ public class CrateActionServiceImpl implements CrateActionService {
                         .message("No good matches found for: " + albumRef.getArtist() + " - " + albumRef.getTitle())
                         .build();
             }
-            
-            // Add album to crate
-            crateService.addAlbum(Long.valueOf(crateId), bestMatch.getSpotifyId());
-            
+
             String actualArtist = bestMatch.getArtists().stream()
                     .findFirst()
                     .map(Artist::getName)
                     .orElse("Unknown Artist");
-            
+
             return AlbumMatchResult.builder()
                     .requestedTitle(albumRef.getTitle())
                     .requestedArtist(albumRef.getArtist())
                     .matched(true)
                     .actualTitle(bestMatch.getName())
                     .actualArtist(actualArtist)
+                    .matchedAlbum(bestMatch) // Store the album entity for batch operations
+                    .message("Successfully matched: " + actualArtist + " - " + bestMatch.getName())
+                    .build();
+
+        } catch (Exception e) {
+            log.warn("Error matching album: {} - {}", albumRef.getArtist(), albumRef.getTitle(), e);
+            return AlbumMatchResult.builder()
+                    .requestedTitle(albumRef.getTitle())
+                    .requestedArtist(albumRef.getArtist())
+                    .matched(false)
+                    .message("Error matching album: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    /**
+     * Legacy method: Match and add album individually
+     * Prefer using matchAlbum() + addAlbumsBatch() for better performance
+     */
+    private AlbumMatchResult matchAndAddAlbum(String crateId, SimpleAlbumReference albumRef) {
+        try {
+            // Create search query combining artist and album
+            String searchQuery = albumRef.getArtist() + " " + albumRef.getTitle();
+            log.debug("Searching for album: '{}'", searchQuery);
+
+            // Search for albums
+            Page<Album> searchResults = albumService.search(searchQuery, SearchType.GLOBAL, PageRequest.of(0, 5));
+
+            if (searchResults.isEmpty()) {
+                return AlbumMatchResult.builder()
+                        .requestedTitle(albumRef.getTitle())
+                        .requestedArtist(albumRef.getArtist())
+                        .matched(false)
+                        .message("No albums found matching: " + albumRef.getArtist() + " - " + albumRef.getTitle())
+                        .build();
+            }
+
+            // Find best match - prioritize exact matches
+            Album bestMatch = findBestAlbumMatch(albumRef, searchResults.getContent());
+
+            if (bestMatch == null) {
+                return AlbumMatchResult.builder()
+                        .requestedTitle(albumRef.getTitle())
+                        .requestedArtist(albumRef.getArtist())
+                        .matched(false)
+                        .message("No good matches found for: " + albumRef.getArtist() + " - " + albumRef.getTitle())
+                        .build();
+            }
+
+            // Add album to crate
+            crateService.addAlbum(Long.valueOf(crateId), bestMatch.getSpotifyId());
+
+            String actualArtist = bestMatch.getArtists().stream()
+                    .findFirst()
+                    .map(Artist::getName)
+                    .orElse("Unknown Artist");
+
+            return AlbumMatchResult.builder()
+                    .requestedTitle(albumRef.getTitle())
+                    .requestedArtist(albumRef.getArtist())
+                    .matched(true)
+                    .actualTitle(bestMatch.getName())
+                    .actualArtist(actualArtist)
+                    .matchedAlbum(bestMatch)
                     .message("Successfully added: " + actualArtist + " - " + bestMatch.getName())
                     .build();
-                    
+
         } catch (Exception e) {
             log.warn("Error matching album: {} - {}", albumRef.getArtist(), albumRef.getTitle(), e);
             return AlbumMatchResult.builder()

@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import page.crates.entity.Crate;
 import page.crates.entity.CrateAlbum;
+import page.crates.entity.SpotifyUser;
+
+import java.util.List;
 
 @Repository
 public interface CrateAlbumRepository extends JpaRepository<CrateAlbum, Long> {
@@ -37,4 +40,20 @@ public interface CrateAlbumRepository extends JpaRepository<CrateAlbum, Long> {
            "FROM CrateAlbum a " +
            "WHERE a.crate.id = :crateId")
     long countActiveByCrateId(Long crateId);
+
+    @Query("SELECT CASE WHEN COUNT(ca) > 0 THEN true ELSE false END " +
+           "FROM CrateAlbum ca " +
+           "WHERE ca.crate.id = :crateId AND ca.album.id = :albumId")
+    boolean existsByCrateIdAndAlbumId(Long crateId, Long albumId);
+
+    @Query("SELECT ca.album.id " +
+           "FROM CrateAlbum ca " +
+           "WHERE ca.crate.id = :crateId AND ca.album.id IN :albumIds")
+    List<Long> findExistingAlbumIds(Long crateId, List<Long> albumIds);
+
+    @Query("SELECT DISTINCT ca.album.id " +
+           "FROM CrateAlbum ca " +
+           "JOIN ca.crate c " +
+           "WHERE c.user = :user AND ca.album.id IN :albumIds")
+    List<Long> findAlbumIdsInAnyCrate(SpotifyUser user, List<Long> albumIds);
 }

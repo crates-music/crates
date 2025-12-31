@@ -27,6 +27,9 @@ public class SpotifyAuthImpl implements SpotifyAuth {
     @Value("${spotify.redirect-uri}")
     private String redirectUri;
 
+    // Cached service token
+    private TokenResponse cachedServiceToken;
+    private long tokenExpiresAt = 0;
 
     private SpotifyAuthClient getAuthClient() {
         return spotifyAuthClientProvider.get();
@@ -53,10 +56,22 @@ public class SpotifyAuthImpl implements SpotifyAuth {
     }
 
     @Override
-    public TokenResponse getServiceToken() {
+    public synchronized TokenResponse getServiceToken() {
+        // Check if we have a cached token that's still valid
+        long now = System.currentTimeMillis();
+        if (cachedServiceToken != null && now < tokenExpiresAt) {
+            return cachedServiceToken;
+        }
+
+        // Get new token from Spotify
         final Map<String, String> params = Maps.newHashMap();
         params.put(TokenRequestParam.GRANT_TYPE.param(), "client_credentials");
-        return getAuthClient().getToken(params);
+        cachedServiceToken = getAuthClient().getToken(params);
+
+        // Cache expires 5 minutes before actual expiration for safety
+        tokenExpiresAt = now + ((cachedServiceToken.getExpiresIn() - 300) * 1000L);
+
+        return cachedServiceToken;
     }
 
     @Override
