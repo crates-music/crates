@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Observable, Subject, takeUntil, tap, of, map } from 'rxjs';
+import { Observable, Subject, takeUntil, tap } from 'rxjs';
 import { Crate } from '../shared/model/crate.model';
 import { DEFAULT_PAGE_SIZE, Pageable } from '../../shared/model/pageable.model';
 import { Router } from '@angular/router';
@@ -23,9 +23,6 @@ import { AutoCategorizeModal } from '../shared/modal/auto-categorize/auto-catego
   styleUrls: ['./crate-list.component.scss']
 })
 export class CrateListComponent implements OnDestroy {
-  // TEMPORARY: Set to true to see empty state
-  SHOW_EMPTY_STATE = true;
-
   page: Pageable;
   crates$: Observable<Crate[]>;
   cratesLoading$: Observable<boolean>;
@@ -45,13 +42,8 @@ export class CrateListComponent implements OnDestroy {
 
     this.loadCrates();
 
-    // TEMPORARY: Override to show empty state
-    this.crates$ = this.SHOW_EMPTY_STATE
-      ? of([])
-      : this.store.select(selectAllCrates);
-    this.cratesLoading$ = this.SHOW_EMPTY_STATE
-      ? of(false)
-      : this.store.select(selectCratesLoading);
+    this.crates$ = this.store.select(selectAllCrates);
+    this.cratesLoading$ = this.store.select(selectCratesLoading);
     this.hasNextPage$ = this.store.select(selectCratesHasNextPage);
     this.search$ = this.store.select(selectCratesSearch);
 
