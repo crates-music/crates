@@ -137,8 +137,28 @@
                             <p class="lead text-white-50">Experience music the way artists intended - as complete, cohesive works of art.</p>
                         </div>
                     </div>
+
+                    <!-- Auto-Categorization Highlight -->
+                    <div class="row mb-5">
+                        <div class="col-lg-10 mx-auto">
+                            <div class="feature-card-highlight text-center p-4 p-md-5">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi-magic display-3 text-primary"></i>
+                                </div>
+                                <h3 class="text-white mb-3">One-Click Auto-Categorization</h3>
+                                <p class="text-white-50 lead mb-4">
+                                    Don't want to organize manually? No problem. Hit one button and we'll automatically
+                                    sort your entire library into smart crates based on genre, decade, and more.
+                                </p>
+                                <a href="https://app.crates.music" class="btn btn-primary btn-lg">
+                                    <i class="bi-magic me-2"></i>Try Auto-Categorize
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row g-4">
-                        <div class="col-md-3">
+                        <div class="col-md-6 col-lg-3">
                             <div class="feature-card text-center h-100 p-4">
                                 <div class="feature-icon mb-3">
                                     <i class="bi-collection display-4 text-primary"></i>
@@ -147,7 +167,7 @@
                                 <p class="text-white-50">Create custom crates to organize your albums by genre, mood, era, or any way that makes sense to you.</p>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-6 col-lg-3">
                             <div class="feature-card text-center h-100 p-4">
                                 <div class="feature-icon mb-3">
                                     <i class="bi-robot display-4 text-primary"></i>
@@ -156,7 +176,7 @@
                                 <p class="text-white-50">Let CratesGPT analyze your taste and intelligently create themed collections based on your listening habits.</p>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-6 col-lg-3">
                             <div class="feature-card text-center h-100 p-4">
                                 <div class="feature-icon mb-3">
                                     <i class="bi-share display-4 text-primary"></i>
@@ -165,7 +185,7 @@
                                 <p class="text-white-50">Make your crates public and share your curated music collections with friends and fellow music lovers.</p>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-6 col-lg-3">
                             <div class="feature-card text-center h-100 p-4">
                                 <div class="feature-icon mb-3">
                                     <i class="bi-lightning display-4 text-primary"></i>
@@ -391,6 +411,18 @@
         transform: translateY(-4px);
         box-shadow: var(--shadow-lg);
         border-color: var(--primary);
+    }
+
+    .feature-card-highlight {
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.1) 0%, rgba(29, 185, 84, 0.05) 100%);
+        border-radius: var(--radius-lg);
+        border: 2px solid var(--primary);
+        transition: var(--transition);
+    }
+
+    .feature-card-highlight:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(29, 185, 84, 0.3);
     }
 
     .crate-preview-card {
