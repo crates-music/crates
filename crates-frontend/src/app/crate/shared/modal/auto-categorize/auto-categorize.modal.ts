@@ -15,8 +15,8 @@ import {
   selectAutoCategorizeError
 } from '../../../store/selectors/auto-categorize.selectors';
 import { AutoCategorizePreview, AutoCategorizeResult } from '../../model/auto-categorize.model';
-import { Library, LibraryState } from '../../../library/shared/model/library.model';
-import { LibraryService } from '../../../library/shared/services/library.service';
+import { Library, LibraryState } from '../../../../library/shared/model/library.model';
+import { LibraryService } from '../../../../library/shared/services/library.service';
 
 type ModalState = 'waiting-for-library' | 'analyzing' | 'preview' | 'processing' | 'success' | 'error';
 
