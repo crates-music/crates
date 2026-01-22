@@ -44,13 +44,6 @@ public class LibraryAnalyzer {
             return new ArrayList<>();
         }
 
-        if (libraryAlbums.size() < 20) {
-            log.warn("Library has only {} albums (minimum 20 required)", libraryAlbums.size());
-            throw new IllegalArgumentException(
-                    String.format("Need at least 20 albums to auto-categorize. You have %d albums.",
-                            libraryAlbums.size()));
-        }
-
         // Run all strategies in parallel
         List<CrateProposal> allProposals = new ArrayList<>();
 

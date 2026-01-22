@@ -55,6 +55,12 @@ public class SpotifyAlbumMapper {
                     .atStartOfDay(ZoneId.systemDefault())
                     .toInstant();
         }
+        if ("month".equalsIgnoreCase(precision)) {
+            return java.time.YearMonth.parse(releaseDate)
+                    .atDay(1)
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant();
+        }
         return LocalDate.parse(releaseDate)
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant();
