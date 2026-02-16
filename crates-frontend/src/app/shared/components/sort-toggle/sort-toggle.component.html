@@ -1,0 +1,20 @@
+<div class="sort-toggle-wrapper">
+  <button type="button"
+          class="btn btn-outline-primary sort-button"
+          [class.active]="dropdownOpen"
+          (click)="toggleDropdown()"
+          title="Sort albums">
+    <i class="bi" [ngClass]="isAsc ? 'bi-sort-up' : 'bi-sort-down'"></i>
+  </button>
+  <div class="sort-dropdown" *ngIf="dropdownOpen">
+    <button *ngFor="let option of sortOptions"
+            class="sort-option"
+            [class.active]="sort?.option === option"
+            (click)="selectOption(option)">
+      <span class="option-label">{{ labels[option] }}</span>
+      <i *ngIf="sort?.option === option"
+         class="bi direction-icon"
+         [ngClass]="getDirectionIcon(option)"></i>
+    </button>
+  </div>
+</div>

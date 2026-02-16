@@ -19,11 +19,14 @@ import {
   reloadCrateAlbums,
   reloadCrateAlbumsResult,
   removeAlbumFromCrate,
-  removeAlbumFromCrateResult, toggleCrateAlbumListType
+  removeAlbumFromCrateResult,
+  toggleCrateAlbumListType,
+  setCrateAlbumSort
 } from '../actions/crate-album.actions';
 import { updateCrate, updateCrateResult } from '../actions/update-crate.actions';
 import { CrateAlbum } from '../../shared/model/crate-album.model';
 import { ListType } from '../../../shared/model/list-type.model';
+import { AlbumSort, loadSortFromStorage, saveSortToStorage } from '../../../shared/model/album-sort.model';
 
 export interface CrateEntityState extends EntityState<Crate> {
 }
@@ -45,6 +48,7 @@ export interface CrateState {
   crateAlbums: Loadable<CrateAlbumEntityState>;
   crateAlbumSearch?: string;
   crateAlbumListType: ListType;
+  crateAlbumSort: AlbumSort;
   addingAlbums: Loadable<void>;
   removingAlbum: Loadable<void>;
   search?: string;
@@ -66,6 +70,7 @@ export const initialState: CrateState = {
     hasNextPage: false,
   },
   crateAlbumListType: ListType.List,
+  crateAlbumSort: loadSortFromStorage(),
   addingAlbums: emptyLoadable(),
   removingAlbum: emptyLoadable(),
   search: undefined,
@@ -285,6 +290,13 @@ const crateReducer = createReducer(initialState,
     return {
       ...state,
       crateAlbumListType: action.listType,
+    };
+  }),
+  on(setCrateAlbumSort, (state, action) => {
+    saveSortToStorage(action.sort);
+    return {
+      ...state,
+      crateAlbumSort: action.sort,
     };
   }),
   on(updateCrate, (state) => {

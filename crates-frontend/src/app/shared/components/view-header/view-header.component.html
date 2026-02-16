@@ -70,9 +70,15 @@
           (search)="onSearch($event)">
         </crates-searchbar>
       </div>
-      <div class="toggle-section" *ngIf="showListToggle">
-        <div class="d-flex align-items-center justify-content-end">
+      <div class="toggle-section" *ngIf="showSort || showListToggle">
+        <div class="d-flex align-items-center justify-content-end gap-1">
+          <crates-sort-toggle
+            *ngIf="showSort"
+            [sort]="sort"
+            (sortChange)="onSortChange($event)">
+          </crates-sort-toggle>
           <crates-list-type-toggle
+            *ngIf="showListToggle"
             [listType]="listType"
             (toggle)="onListTypeToggle($event)">
           </crates-list-type-toggle>

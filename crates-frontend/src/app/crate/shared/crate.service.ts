@@ -73,11 +73,11 @@ export class CrateService {
         map(response => Object.assign(new Crate(), response)));
   }
 
-  getCrateAlbums(crate: Crate, pageable: Pageable, search?: string): Observable<Page<CrateAlbum>> {
+  getCrateAlbums(crate: Crate, pageable: Pageable, search?: string, sort?: string): Observable<Page<CrateAlbum>> {
     let params: any = {
       page: pageable.pageNumber.toString(),
       size: pageable.pageSize.toString(),
-      sort: 'createdAt,desc',
+      sort: sort || 'createdAt,desc',
     }
     if (search) {
       params = {

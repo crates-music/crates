@@ -6,6 +6,7 @@ import { Pageable } from '../../../shared/model/pageable.model';
 import { Page } from '../../../shared/model/page.model';
 import { CrateAlbum } from '../../shared/model/crate-album.model';
 import { ListType } from '../../../shared/model/list-type.model';
+import { AlbumSort } from '../../../shared/model/album-sort.model';
 
 export const addAlbumsToCrate = createAction(
   '[Crate] Add Albums to Crate',
@@ -41,7 +42,8 @@ export const loadCrateAlbums = createAction(
   props<{
     crate: Crate,
     pageable: Pageable,
-    search?: string
+    search?: string,
+    sort?: string
   }>()
 );
 
@@ -57,7 +59,8 @@ export const reloadCrateAlbums = createAction(
   props<{
     crate: Crate,
     pageable: Pageable,
-    search?: string
+    search?: string,
+    sort?: string
   }>()
 );
 
@@ -72,5 +75,12 @@ export const toggleCrateAlbumListType = createAction(
   '[Crates] Toggle Crate Album List Type',
   props<{
     listType: ListType
+  }>()
+);
+
+export const setCrateAlbumSort = createAction(
+  '[Crate] Set Crate Album Sort',
+  props<{
+    sort: AlbumSort
   }>()
 );

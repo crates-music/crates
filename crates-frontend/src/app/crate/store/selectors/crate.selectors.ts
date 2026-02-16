@@ -23,3 +23,4 @@ export const selectCrateAlbumsLoading = createSelector(selectCrateState, state =
 export const selectCrateAlbumsLoaded = createSelector(selectCrateState, state => state.crateAlbums.loaded);
 export const selectCrateAlbumsHasNextPage = createSelector(selectCrateState, state => state.crateAlbums.hasNextPage);
 export const selectCrateAlbumListType = createSelector(selectCrateState, state => state.crateAlbumListType);
+export const selectCrateAlbumSort = createSelector(selectCrateState, state => state.crateAlbumSort);

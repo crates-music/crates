@@ -11,9 +11,11 @@ import {
   selectCrate, selectCrateAlbumListType,
   selectCrateAlbumsHasNextPage,
   selectCrateAlbumsLoading,
+  selectCrateAlbumSort,
   selectCratesListType
 } from '../store/selectors/crate.selectors';
-import { loadCrateAlbums, reloadCrateAlbums, toggleCrateAlbumListType } from '../store/actions/crate-album.actions';
+import { loadCrateAlbums, reloadCrateAlbums, setCrateAlbumSort, toggleCrateAlbumListType } from '../store/actions/crate-album.actions';
+import { AlbumSort, toSortParam } from '../../shared/model/album-sort.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { RemoveAlbumModalComponent } from '../shared/modal/remove-album/remove-album-modal.component';
 import { ListType } from '../../shared/model/list-type.model';
@@ -39,8 +41,9 @@ export class CrateComponent implements OnInit, OnDestroy {
   user: User;
 
   crateListType: ListType;
+  crateAlbumSort: AlbumSort;
   search: string;
-  
+
 
 
   constructor(private activatedRoute: ActivatedRoute,
@@ -50,6 +53,12 @@ export class CrateComponent implements OnInit, OnDestroy {
               private publicLinkService: PublicLinkService) {
     this.loadCrate();
     this.page = Pageable.of(0, DEFAULT_PAGE_SIZE);
+
+    this.store.select(selectCrateAlbumSort).pipe(
+      tap(sort => this.crateAlbumSort = sort),
+      takeUntil(this.destroy$),
+    ).subscribe();
+
     this.store.select(selectCrate).pipe(
       tap(crate => {
         this.crate = crate;
@@ -58,6 +67,7 @@ export class CrateComponent implements OnInit, OnDestroy {
           this.store.dispatch(loadCrateAlbums({
             crate: this.crate,
             pageable: this.page,
+            sort: toSortParam(this.crateAlbumSort),
           }));
         }
       }),
@@ -124,7 +134,11 @@ export class CrateComponent implements OnInit, OnDestroy {
 
   loadMore() {
     this.page = this.page.nextPageable();
-    this.store.dispatch(loadCrateAlbums({ crate: this.crate, pageable: this.page }));
+    this.store.dispatch(loadCrateAlbums({
+      crate: this.crate,
+      pageable: this.page,
+      sort: toSortParam(this.crateAlbumSort),
+    }));
   }
 
   getArtistNames(album: Album) {
@@ -152,10 +166,24 @@ export class CrateComponent implements OnInit, OnDestroy {
   }
 
   handleSearch(search: string) {
+    this.search = search;
+    this.page = Pageable.of(0, DEFAULT_PAGE_SIZE);
     this.store.dispatch(reloadCrateAlbums({
       crate: this.crate,
       pageable: this.page,
       search,
+      sort: toSortParam(this.crateAlbumSort),
+    }));
+  }
+
+  handleSortChange(sort: AlbumSort) {
+    this.store.dispatch(setCrateAlbumSort({ sort }));
+    this.page = Pageable.of(0, DEFAULT_PAGE_SIZE);
+    this.store.dispatch(reloadCrateAlbums({
+      crate: this.crate,
+      pageable: this.page,
+      search: this.search,
+      sort: toSortParam(sort),
     }));
   }
 

@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { ListType } from '../../model/list-type.model';
+import { AlbumSort } from '../../model/album-sort.model';
 
 @Component({
   selector: 'crates-view-header',
@@ -23,6 +24,8 @@ export class ViewHeaderComponent {
   @Input() authorName?: string;
   @Input() authorId?: number;
   @Input() showAutoCategorize: boolean = false;
+  @Input() showSort: boolean = false;
+  @Input() sort: AlbumSort;
 
   // Filter inputs
   @Input() hideCrated: boolean = false;
@@ -37,6 +40,7 @@ export class ViewHeaderComponent {
   @Output() filterChange = new EventEmitter<boolean>();
   @Output() authorClick = new EventEmitter<number>();
   @Output() autoCategorize = new EventEmitter<void>();
+  @Output() sortChange = new EventEmitter<AlbumSort>();
 
   // Expose ListType enum to template
   ListType = ListType;
@@ -76,5 +80,9 @@ export class ViewHeaderComponent {
 
   onAutoCategorize(): void {
     this.autoCategorize.emit();
+  }
+
+  onSortChange(sort: AlbumSort): void {
+    this.sortChange.emit(sort);
   }
 }

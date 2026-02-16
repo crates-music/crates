@@ -3,7 +3,9 @@ package page.crates.service;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import page.crates.controller.AlbumList;
@@ -185,6 +187,13 @@ public class CrateServiceImpl implements CrateService {
         final Crate crate = crateRepository.findById(crateId)
                 .orElseThrow(() -> new CrateNotFoundException(crateId));
         accessService.assertAccess(crate);
+        if (isArtistNameSort(pageable)) {
+            Pageable unsorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+            boolean asc = isAscending(pageable);
+            return asc
+                    ? crateAlbumRepository.findByCrateIdOrderByArtistNameAsc(crateId, unsorted)
+                    : crateAlbumRepository.findByCrateIdOrderByArtistNameDesc(crateId, unsorted);
+        }
         return crateAlbumRepository.findActiveByCrate(crate, pageable);
     }
 
@@ -221,6 +230,13 @@ public class CrateServiceImpl implements CrateService {
         final Crate crate = crateRepository.findById(crateId)
                 .orElseThrow(() -> new CrateNotFoundException(crateId));
         accessService.assertAccess(crate);
+        if (isArtistNameSort(pageable)) {
+            Pageable unsorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+            boolean asc = isAscending(pageable);
+            return asc
+                    ? crateAlbumRepository.findByCrateIdAndSearchOrderByArtistNameAsc(crateId, search, unsorted)
+                    : crateAlbumRepository.findByCrateIdAndSearchOrderByArtistNameDesc(crateId, search, unsorted);
+        }
         return crateAlbumRepository.findActiveByCrateAndSearch(crate, search, pageable);
     }
 
@@ -279,6 +295,13 @@ public class CrateServiceImpl implements CrateService {
         final Crate crate = crateRepository.findById(crateId)
                 .orElseThrow(() -> new CrateNotFoundException(crateId));
         // No access check for public albums - the caller should verify it's public
+        if (isArtistNameSort(pageable)) {
+            Pageable unsorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+            boolean asc = isAscending(pageable);
+            return asc
+                    ? crateAlbumRepository.findByCrateIdOrderByArtistNameAsc(crateId, unsorted)
+                    : crateAlbumRepository.findByCrateIdOrderByArtistNameDesc(crateId, unsorted);
+        }
         return crateAlbumRepository.findActiveByCrate(crate, pageable);
     }
 
@@ -288,6 +311,13 @@ public class CrateServiceImpl implements CrateService {
         final Crate crate = crateRepository.findById(crateId)
                 .orElseThrow(() -> new CrateNotFoundException(crateId));
         // No access check for public albums - the caller should verify it's public
+        if (isArtistNameSort(pageable)) {
+            Pageable unsorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+            boolean asc = isAscending(pageable);
+            return asc
+                    ? crateAlbumRepository.findByCrateIdAndSearchOrderByArtistNameAsc(crateId, search, unsorted)
+                    : crateAlbumRepository.findByCrateIdAndSearchOrderByArtistNameDesc(crateId, search, unsorted);
+        }
         return crateAlbumRepository.findActiveByCrateAndSearch(crate, search, pageable);
     }
 
@@ -338,5 +368,18 @@ public class CrateServiceImpl implements CrateService {
     public Crate findById(Long id) {
         return crateRepository.findById(id)
                 .orElseThrow(() -> new CrateNotFoundException(id));
+    }
+
+    private boolean isArtistNameSort(Pageable pageable) {
+        return pageable.getSort().stream()
+                .anyMatch(order -> "artistName".equals(order.getProperty()));
+    }
+
+    private boolean isAscending(Pageable pageable) {
+        return pageable.getSort().stream()
+                .filter(order -> "artistName".equals(order.getProperty()))
+                .findFirst()
+                .map(order -> order.getDirection() == Sort.Direction.ASC)
+                .orElse(true);
     }
 }

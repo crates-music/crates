@@ -56,4 +56,64 @@ public interface CrateAlbumRepository extends JpaRepository<CrateAlbum, Long> {
            "JOIN ca.crate c " +
            "WHERE c.user = :user AND ca.album.id IN :albumIds")
     List<Long> findAlbumIdsInAnyCrate(SpotifyUser user, List<Long> albumIds);
+
+    @Query(value = "SELECT ca.* FROM crate_album ca " +
+           "JOIN album a ON ca.album_id = a.id " +
+           "LEFT JOIN album_to_artist ata ON a.id = ata.album_id " +
+           "LEFT JOIN artist ar ON ata.artist_id = ar.id " +
+           "WHERE ca.crate_id = :crateId " +
+           "GROUP BY ca.id " +
+           "ORDER BY MIN(ar.name) ASC",
+           countQuery = "SELECT COUNT(*) FROM crate_album ca WHERE ca.crate_id = :crateId",
+           nativeQuery = true)
+    Page<CrateAlbum> findByCrateIdOrderByArtistNameAsc(Long crateId, Pageable pageable);
+
+    @Query(value = "SELECT ca.* FROM crate_album ca " +
+           "JOIN album a ON ca.album_id = a.id " +
+           "LEFT JOIN album_to_artist ata ON a.id = ata.album_id " +
+           "LEFT JOIN artist ar ON ata.artist_id = ar.id " +
+           "WHERE ca.crate_id = :crateId " +
+           "GROUP BY ca.id " +
+           "ORDER BY MIN(ar.name) DESC",
+           countQuery = "SELECT COUNT(*) FROM crate_album ca WHERE ca.crate_id = :crateId",
+           nativeQuery = true)
+    Page<CrateAlbum> findByCrateIdOrderByArtistNameDesc(Long crateId, Pageable pageable);
+
+    @Query(value = "SELECT DISTINCT ca.* FROM crate_album ca " +
+           "JOIN album a ON ca.album_id = a.id " +
+           "LEFT JOIN album_to_artist ata ON a.id = ata.album_id " +
+           "LEFT JOIN artist ar ON ata.artist_id = ar.id " +
+           "WHERE ca.crate_id = :crateId " +
+           "  AND (LOWER(a.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "   OR LOWER(ar.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "GROUP BY ca.id " +
+           "ORDER BY MIN(ar.name) ASC",
+           countQuery = "SELECT COUNT(DISTINCT ca.id) FROM crate_album ca " +
+           "JOIN album a ON ca.album_id = a.id " +
+           "LEFT JOIN album_to_artist ata ON a.id = ata.album_id " +
+           "LEFT JOIN artist ar ON ata.artist_id = ar.id " +
+           "WHERE ca.crate_id = :crateId " +
+           "  AND (LOWER(a.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "   OR LOWER(ar.name) LIKE LOWER(CONCAT('%', :search, '%')))",
+           nativeQuery = true)
+    Page<CrateAlbum> findByCrateIdAndSearchOrderByArtistNameAsc(Long crateId, String search, Pageable pageable);
+
+    @Query(value = "SELECT DISTINCT ca.* FROM crate_album ca " +
+           "JOIN album a ON ca.album_id = a.id " +
+           "LEFT JOIN album_to_artist ata ON a.id = ata.album_id " +
+           "LEFT JOIN artist ar ON ata.artist_id = ar.id " +
+           "WHERE ca.crate_id = :crateId " +
+           "  AND (LOWER(a.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "   OR LOWER(ar.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "GROUP BY ca.id " +
+           "ORDER BY MIN(ar.name) DESC",
+           countQuery = "SELECT COUNT(DISTINCT ca.id) FROM crate_album ca " +
+           "JOIN album a ON ca.album_id = a.id " +
+           "LEFT JOIN album_to_artist ata ON a.id = ata.album_id " +
+           "LEFT JOIN artist ar ON ata.artist_id = ar.id " +
+           "WHERE ca.crate_id = :crateId " +
+           "  AND (LOWER(a.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "   OR LOWER(ar.name) LIKE LOWER(CONCAT('%', :search, '%')))",
+           nativeQuery = true)
+    Page<CrateAlbum> findByCrateIdAndSearchOrderByArtistNameDesc(Long crateId, String search, Pageable pageable);
 }

@@ -160,7 +160,7 @@ export class CrateEffects {
     this.actions$.pipe(
       ofType(loadCrateAlbums),
       exhaustMap(action =>
-        this.crateService.getCrateAlbums(action.crate, action.pageable).pipe(
+        this.crateService.getCrateAlbums(action.crate, action.pageable, undefined, action.sort).pipe(
           map(crateAlbums => loadCrateAlbumsResult({
               response: {
                 data: crateAlbums,
@@ -183,7 +183,7 @@ export class CrateEffects {
     this.actions$.pipe(
       ofType(reloadCrateAlbums),
       exhaustMap(action =>
-        this.crateService.getCrateAlbums(action.crate, action.pageable, action.search).pipe(
+        this.crateService.getCrateAlbums(action.crate, action.pageable, action.search, action.sort).pipe(
           map(crateAlbums => reloadCrateAlbumsResult({
               response: {
                 data: crateAlbums,

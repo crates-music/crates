@@ -14,12 +14,14 @@ import { UserHeaderComponent } from './components/user-header/user-header.compon
 import { ViewHeaderComponent } from './components/view-header/view-header.component';
 import { ViewLayoutComponent } from './components/view-layout/view-layout.component';
 import { ListContentComponent } from './components/list-content/list-content.component';
+import { SortToggleComponent } from './components/sort-toggle/sort-toggle.component';
 
 @NgModule({
   declarations: [
     LongPressDirective,
     SearchbarComponent,
     ListTypeToggleComponent,
+    SortToggleComponent,
     WelcomeComponent,
     UserMenuComponent,
     UserHeaderComponent,
@@ -34,6 +36,7 @@ import { ListContentComponent } from './components/list-content/list-content.com
     LongPressDirective,
     SearchbarComponent,
     ListTypeToggleComponent,
+    SortToggleComponent,
     WelcomeComponent,
     UserMenuComponent,
     UserHeaderComponent,

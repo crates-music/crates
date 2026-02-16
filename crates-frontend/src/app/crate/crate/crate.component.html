@@ -10,6 +10,8 @@
         searchPlaceholder="Search albums..."
         [showListToggle]="true"
         [listType]="crateListType"
+        [showSort]="true"
+        [sort]="crateAlbumSort"
         [showShare]="shouldShowShareButton()"
         [showSettings]="isCurrentUserCrate()"
         [showAuthor]="shouldShowAuthor()"
@@ -17,6 +19,7 @@
         [authorId]="getAuthorId()"
         (search)="handleSearch($event)"
         (listTypeToggle)="toggleCrateListType($event)"
+        (sortChange)="handleSortChange($event)"
         (shareClick)="shareCrate()"
         (settingsClick)="openSettings()"
         (authorClick)="navigateToAuthor($event)">
