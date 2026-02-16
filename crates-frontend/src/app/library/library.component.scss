@@ -25,6 +25,14 @@
   }
 }
 
+.selection-active {
+  padding-bottom: 100px;
+
+  @media (max-width: 767px) {
+    padding-bottom: 120px;
+  }
+}
+
 .selection-actions {
   padding: 1rem;
   text-align: center;

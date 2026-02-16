@@ -10,7 +10,7 @@
 </div>
 
 <!-- Main Library Layout -->
-<div *ngIf="library$ | async as library">
+<div *ngIf="library$ | async as library" [class.selection-active]="albumsSelected$ | async">
   <crates-view-layout
     title="LIBRARY"
     [showSearch]="true"

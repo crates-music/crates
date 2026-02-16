@@ -219,9 +219,10 @@ const crateReducer = createReducer(initialState,
     return {
       ...state,
       crateAlbums: {
-        ...state.crateAlbums,
+        value: action.pageable.pageNumber === 0 ? crateAlbumAdapter.getInitialState() : state.crateAlbums.value,
         loading: true,
-        loaded: false
+        loaded: false,
+        hasNextPage: state.crateAlbums.hasNextPage,
       }
     }
   }),
@@ -241,7 +242,7 @@ const crateReducer = createReducer(initialState,
       return {
         ...state,
         crateAlbums: {
-          value: crateAlbumAdapter.addMany(action.response.data.content, crateAlbumAdapter.getInitialState()),
+          value: crateAlbumAdapter.addMany(action.response.data.content, state.crateAlbums.value),
           loaded: true,
           loading: false,
           hasNextPage: !action.response.data.last,
