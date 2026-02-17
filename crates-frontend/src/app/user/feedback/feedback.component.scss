@@ -1,0 +1,133 @@
+@import "../../../overrides";
+
+.feedback-content {
+    padding: 2rem 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    animation: fadeInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+    }
+}
+
+.success-state {
+    text-align: center;
+    padding: 3rem 1rem;
+
+    .success-icon {
+        font-size: 3rem;
+        color: #28a745;
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    h5 {
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Form Styling */
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    letter-spacing: -0.01em;
+}
+
+.form-help {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+}
+
+.character-count {
+    font-size: 0.875rem;
+    color: var(--text-dim);
+    font-weight: 500;
+
+    &.text-warning {
+        color: #ffc107;
+        font-weight: 600;
+    }
+}
+
+/* Form Actions */
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+
+    @media (max-width: 576px) {
+        flex-direction: column;
+    }
+}
+
+.form-actions .btn {
+    @media (max-width: 576px) {
+        width: 100%;
+    }
+}
+
+/* Toast Messages */
+.toast-message {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1060;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    font-weight: 500;
+    animation: toastSlideDown 0.3s ease-out;
+
+    &.toast-error {
+        background-color: #2a1e1e;
+        border: 1px solid #dc3545;
+        color: #f5a3a3;
+    }
+}
+
+/* Textarea Specific */
+textarea.form-control {
+    resize: vertical;
+    min-height: 150px;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toastSlideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}

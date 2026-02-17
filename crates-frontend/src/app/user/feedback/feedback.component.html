@@ -1,0 +1,62 @@
+<crates-view-layout
+  title="FEEDBACK"
+  [showSearch]="false"
+  [showListToggle]="false">
+  <div class="feedback-content">
+
+    <!-- Success State -->
+    <div *ngIf="submitted" class="success-state">
+      <i class="bi-check-circle-fill success-icon"></i>
+      <h5>Thank you for your feedback!</h5>
+      <p class="text-muted">Your message has been received. We appreciate you taking the time to help improve Crates.</p>
+      <a routerLink="/user/profile/settings" class="btn btn-outline-secondary mt-3">
+        <i class="bi-arrow-left me-2"></i>
+        Back to Settings
+      </a>
+    </div>
+
+    <!-- Feedback Form -->
+    <div *ngIf="!submitted">
+      <p class="text-muted mb-4">
+        Have a feature request, bug report, or general feedback? Let us know below.
+      </p>
+
+      <!-- Error Message -->
+      <div *ngIf="error" class="toast-message toast-error" role="alert">
+        <i class="bi-exclamation-triangle me-2"></i>
+        {{ error }}
+      </div>
+
+      <form (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="message" class="form-label">Message</label>
+          <textarea
+            id="message"
+            class="form-control"
+            [(ngModel)]="message"
+            name="message"
+            rows="6"
+            placeholder="What's on your mind?"
+            maxlength="2000"></textarea>
+          <div class="form-help">
+            <span></span>
+            <span class="character-count" [class.text-warning]="characterCount > 1800">
+              {{ characterCount }}/2000
+            </span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!message.trim() || submitting">
+            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <i *ngIf="!submitting" class="bi-send me-2"></i>
+            {{ submitting ? 'Sending...' : 'Send Feedback' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</crates-view-layout>
