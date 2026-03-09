@@ -111,4 +111,8 @@ export class CrateService {
         map(response => Object.assign(new Crate(), response))
       );
   }
+
+  deleteCrate(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.baseUri}/v1/crate/${id}`);
+  }
 }

@@ -16,6 +16,7 @@ import { CrateStorageEffects } from './store/effects/crate-storage.effects';
 import { AutoCategorizeEffects } from './store/effects/auto-categorize.effects';
 import { SharedModule } from '../shared/shared.module';
 import { RemoveAlbumModalComponent } from './shared/modal/remove-album/remove-album-modal.component';
+import { DeleteCrateModalComponent } from './shared/modal/delete-crate/delete-crate-modal.component';
 import { AutoCategorizeModal } from './shared/modal/auto-categorize/auto-categorize.modal';
 import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap';
 import { CrateSettingsComponent } from './crate-settings/crate-settings.component';
@@ -27,6 +28,7 @@ import { CrateSettingsComponent } from './crate-settings/crate-settings.componen
     CrateSelectionModal,
     CrateComponent,
     RemoveAlbumModalComponent,
+    DeleteCrateModalComponent,
     CrateSettingsComponent,
     AutoCategorizeModal
   ],

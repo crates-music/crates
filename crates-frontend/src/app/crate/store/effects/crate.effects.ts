@@ -20,6 +20,7 @@ import {
   removeAlbumFromCrateResult
 } from '../actions/crate-album.actions';
 import { updateCrate, updateCrateResult } from '../actions/update-crate.actions';
+import { deleteCrate, deleteCrateResult } from '../actions/delete-crate.actions';
 
 @Injectable({
   providedIn: 'root'
@@ -235,6 +236,30 @@ export class CrateEffects {
           data: action.response.data
         }
       }))
+    ));
+
+  deleteCrate$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(deleteCrate),
+      exhaustMap(action =>
+        this.crateService.deleteCrate(action.id).pipe(
+          map(() => deleteCrateResult({
+            id: action.id,
+            response: {
+              success: true
+            }
+          })),
+          catchError(error => {
+            console.error(deleteCrate.type, error.error);
+            return of(deleteCrateResult({
+              id: action.id,
+              response: {
+                success: false,
+                error: Object.assign(new ApiError(), error.error)
+              }
+            }))
+          })
+        ))
     ));
 
   constructor(private actions$: Actions,

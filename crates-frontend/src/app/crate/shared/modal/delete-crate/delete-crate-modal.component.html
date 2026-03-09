@@ -1,0 +1,17 @@
+<div class="delete-crate-modal text-center bg-dark">
+  <h1 class="delete-crate-modal-header">Delete Crate</h1>
+  <h5>Delete <span class="text-primary">{{ crate.name }}</span>?</h5>
+  <p class="text-muted">This will permanently remove this crate and all its album associations.</p>
+  <div class="container w-100 h-100">
+    <div class="row py-4">
+      <div class="col">
+        <button class="btn btn-danger px-1"
+                (click)="confirm()">Delete</button>
+      </div>
+      <div class="col">
+        <button class="btn btn-outline-secondary"
+                (click)="cancel()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

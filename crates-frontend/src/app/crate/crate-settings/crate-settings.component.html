@@ -106,5 +106,25 @@
         </button>
       </div>
     </form>
+
+    <!-- Danger Zone -->
+    <div class="danger-zone">
+      <label class="form-label text-danger">
+        Danger Zone
+      </label>
+      <div class="danger-zone-content">
+        <div class="danger-zone-info">
+          <strong>Delete this crate</strong>
+          <span class="form-help mb-0">Once deleted, this crate cannot be recovered.</span>
+        </div>
+        <button
+          type="button"
+          class="btn btn-outline-danger"
+          (click)="onDelete()">
+          <i class="bi-trash me-2"></i>
+          Delete Crate
+        </button>
+      </div>
+    </div>
   </div>
 </crates-view-layout>

@@ -7,8 +7,11 @@ import { Crate } from '../shared/model/crate.model';
 import { selectCrate, selectCrateLoading, selectCrateError } from '../store/selectors/crate.selectors';
 import { loadCrate } from '../store/actions/load-crates.actions';
 import { updateCrate, updateCrateResult } from '../store/actions/update-crate.actions';
+import { deleteCrateResult } from '../store/actions/delete-crate.actions';
 import { ApiError } from '../../shared/model/api-error.model';
 import { Actions, ofType } from '@ngrx/effects';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DeleteCrateModalComponent } from '../shared/modal/delete-crate/delete-crate-modal.component';
 
 @Component({
   selector: 'crates-crate-settings',
@@ -28,7 +31,8 @@ export class CrateSettingsComponent implements OnInit, OnDestroy {
     private router: Router,
     private formBuilder: FormBuilder,
     private store: Store,
-    private actions$: Actions
+    private actions$: Actions,
+    private modal: NgbModal
   ) {
     this.settingsForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.maxLength(255)]],
@@ -69,6 +73,16 @@ export class CrateSettingsComponent implements OnInit, OnDestroy {
         setTimeout(() => this.router.navigate(['/crate', this.crate.id]), 1000);
       }
     });
+
+    // Listen for successful crate deletion
+    this.actions$.pipe(
+      ofType(deleteCrateResult),
+      takeUntil(this.destroy$)
+    ).subscribe(action => {
+      if (action.response.success) {
+        this.router.navigate(['/crate/list']);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -98,6 +112,11 @@ export class CrateSettingsComponent implements OnInit, OnDestroy {
 
   onCancel(): void {
     this.router.navigate(['/crate', this.crate.id]);
+  }
+
+  onDelete(): void {
+    const modalRef = this.modal.open(DeleteCrateModalComponent, { centered: true });
+    modalRef.componentInstance.crate = this.crate;
   }
 
   get nameErrors() {

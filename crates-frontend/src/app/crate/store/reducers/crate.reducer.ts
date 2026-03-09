@@ -24,6 +24,7 @@ import {
   setCrateAlbumSort
 } from '../actions/crate-album.actions';
 import { updateCrate, updateCrateResult } from '../actions/update-crate.actions';
+import { deleteCrate, deleteCrateResult } from '../actions/delete-crate.actions';
 import { CrateAlbum } from '../../shared/model/crate-album.model';
 import { ListType } from '../../../shared/model/list-type.model';
 import { AlbumSort, loadSortFromStorage, saveSortToStorage } from '../../../shared/model/album-sort.model';
@@ -357,6 +358,35 @@ const crateReducer = createReducer(initialState,
       crate: {
         loading: false,
         loaded: false,
+        error: action.response.error,
+      }
+    };
+  }),
+  on(deleteCrate, (state) => {
+    return {
+      ...state,
+      crate: {
+        ...state.crate,
+        loading: true,
+      }
+    };
+  }),
+  on(deleteCrateResult, (state, action) => {
+    if (action.response.success) {
+      return {
+        ...state,
+        crate: emptyLoadable(),
+        crates: {
+          ...state.crates,
+          value: crateAdapter.removeOne(action.id, state.crates.value)
+        }
+      };
+    }
+    return {
+      ...state,
+      crate: {
+        ...state.crate,
+        loading: false,
         error: action.response.error,
       }
     };
