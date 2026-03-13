@@ -36,8 +36,10 @@ public interface LibraryAlbumRepository extends JpaRepository<LibraryAlbum, Long
                    "WHERE l.state = 'ACTIVE' " +
                    "  AND l.spotify_user_id = :spotifyUserId " +
                    "  AND NOT EXISTS (SELECT * " +
-                   "    FROM crate_album c " +
-                   "    WHERE c.album_id = l.album_id) " +
+                   "    FROM crate_album ca " +
+                   "    JOIN crate cr ON ca.crate_id = cr.id " +
+                   "    WHERE ca.album_id = l.album_id " +
+                   "      AND cr.state = 'ACTIVE') " +
                    "ORDER BY l.added_at DESC", nativeQuery = true)
     Page<LibraryAlbum> findActiveUncratedBySpotifyUser(Long spotifyUserId, Pageable pageable);
 
@@ -49,8 +51,10 @@ public interface LibraryAlbumRepository extends JpaRepository<LibraryAlbum, Long
                    "WHERE l.state = 'ACTIVE' " +
                    "  AND l.spotify_user_id = :spotifyUserId " +
                    "  AND NOT EXISTS (SELECT * " +
-                   "    FROM crate_album c " +
-                   "    WHERE c.album_id = l.album_id) " +
+                   "    FROM crate_album ca " +
+                   "    JOIN crate cr ON ca.crate_id = cr.id " +
+                   "    WHERE ca.album_id = l.album_id " +
+                   "      AND cr.state = 'ACTIVE') " +
                    "  AND (a.name ILIKE CONCAT('%', :search, '%') " +
                    "    OR a2.name ILIKE CONCAT('%', :search, '%')) " +
                    "ORDER BY l.added_at DESC", nativeQuery = true)
