@@ -70,6 +70,6 @@ public class AuthController {
 
     @GetMapping("/login")
     public void login(HttpServletResponse response) throws IOException {
-        response.sendRedirect(spotifyAuth.getAuthUrl(""));
+        response.sendRedirect(spotifyAuth.getAuthUrl(java.util.UUID.randomUUID().toString()));
     }
 }
