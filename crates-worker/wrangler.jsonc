@@ -24,7 +24,7 @@
       "database_name": "crates",
       // Placeholder for local dev. Before first deploy: `wrangler d1 create crates`
       // and paste the real id here.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "64a5d963-e269-4977-b064-66eb44f89c43",
       "migrations_dir": "migrations"
     }
   ],
@@ -34,9 +34,19 @@
       "binding": "KV",
       // Placeholder for local dev. Before first deploy: `wrangler kv namespace create KV`
       // and paste the real id here.
-      "id": "00000000000000000000000000000000"
+      "id": "cae8644b7e7f42dead23b5dad24ec504"
     }
   ],
+
+  // Secrets (wrangler secret put / .dev.vars): SPOTIFY_CLIENT_ID,
+  // SPOTIFY_CLIENT_SECRET, CRATES_ENCRYPTION_KEY.
+  // Prod values for these two:
+  //   SPOTIFY_REDIRECT_URI = https://app.crates.music/api/v1/auth/callback
+  //   CRATES_AUTH_CALLBACK_URI = https://app.crates.music/auth/callback
+  "vars": {
+    "SPOTIFY_REDIRECT_URI": "http://localhost:8787/v1/auth/callback",
+    "CRATES_AUTH_CALLBACK_URI": "http://localhost:4311/auth/callback"
+  },
 
   "triggers": {
     // Hourly: trending recompute + MCP key cleanup (phase 4)

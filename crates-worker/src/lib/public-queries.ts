@@ -218,7 +218,7 @@ export async function crateAlbums(
 }
 
 /** Hydrate artists (with genres) for a page of albums — two IN queries, no N+1. */
-async function artistsForAlbums(db: D1Database, albumIds: number[]): Promise<Map<number, ArtistDto[]>> {
+export async function artistsForAlbums(db: D1Database, albumIds: number[]): Promise<Map<number, ArtistDto[]>> {
   const map = new Map<number, ArtistDto[]>();
   if (albumIds.length === 0) return map;
   const ph = albumIds.map(() => '?').join(',');
