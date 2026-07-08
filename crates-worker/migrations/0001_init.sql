@@ -3,7 +3,8 @@
 -- per docs/cloudflare-migration/01-schema-and-data.md.
 -- Conventions: INTEGER PRIMARY KEY (ids preserved from Postgres on import),
 -- timestamps = epoch milliseconds (INTEGER), booleans = INTEGER 0/1,
--- images denormalized to a JSON TEXT column [{"url","width","height"}] (width desc).
+-- images denormalized to a JSON TEXT column [{"id","url","width","height"}]
+-- ordered width desc (id preserved from the legacy image table for DTO parity).
 
 CREATE TABLE token (
     id            INTEGER PRIMARY KEY,

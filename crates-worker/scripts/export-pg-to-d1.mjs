@@ -132,14 +132,15 @@ async function main() {
   // Image maps: entity id -> JSON array ordered by width desc.
   async function imageMap(joinTable, ownerCol) {
     const rows = await q(
-      `SELECT j.${ownerCol} AS owner_id, i.url, i.width, i.height
+      `SELECT j.${ownerCol} AS owner_id, i.id, i.url, i.width, i.height
          FROM ${joinTable} j JOIN image i ON i.id = j.image_id
         ORDER BY j.${ownerCol}, i.width DESC NULLS LAST`,
     );
     const map = new Map();
     for (const r of rows) {
       if (!map.has(r.owner_id)) map.set(r.owner_id, []);
-      map.get(r.owner_id).push({ url: r.url, width: r.width, height: r.height });
+      // id preserved because the DTOs expose it (images[].id in API responses)
+      map.get(r.owner_id).push({ id: r.id, url: r.url, width: r.width, height: r.height });
     }
     return map;
   }

@@ -16,8 +16,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.use('*', async (c, next) => {
   const url = new URL(c.req.url);
   if (url.hostname === 'crates.page') {
-    url.hostname = 'crates.music';
-    return c.redirect(url.toString(), 301);
+    return c.redirect(`https://crates.music${url.pathname}${url.search}`, 301);
   }
   await next();
 });

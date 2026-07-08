@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "build:assets": "rm -rf .assets && mkdir -p .assets && cp -R ../crates-frontend/dist/crates-frontend-v2/. .assets/ && cp -R ../crates-public/static .assets/static",
+    "dev": "npm run build:assets && wrangler dev",
+    "deploy": "npm run build:assets && wrangler deploy",
     "typecheck": "tsc --noEmit",
     "db:migrate:local": "wrangler d1 migrations apply crates --local",
     "db:migrate:remote": "wrangler d1 migrations apply crates --remote",
