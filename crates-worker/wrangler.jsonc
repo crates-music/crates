@@ -1,0 +1,57 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "crates",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // One Worker, two hostnames:
+  //   app.crates.music -> Angular SPA (static assets) + JSON API under /api/v1/* and /v1/*
+  //   crates.music     -> server-rendered public pages (replaces crates-public Go service)
+  // run_worker_first is true because asset serving would otherwise shadow the SSR site's
+  // routes on crates.music; the worker decides by hostname and calls env.ASSETS itself.
+  "assets": {
+    "directory": "../crates-frontend/dist/crates-frontend-v2",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "crates",
+      // Placeholder for local dev. Before first deploy: `wrangler d1 create crates`
+      // and paste the real id here.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      // Placeholder for local dev. Before first deploy: `wrangler kv namespace create KV`
+      // and paste the real id here.
+      "id": "00000000000000000000000000000000"
+    }
+  ],
+
+  "triggers": {
+    // Hourly: trending recompute + MCP key cleanup (phase 4)
+    "crons": ["0 * * * *"]
+  },
+
+  "observability": {
+    "enabled": true
+  }
+
+  // Phase 4 additions:
+  // "workflows": [{ "name": "library-sync", "binding": "LIBRARY_SYNC", "class_name": "LibrarySyncWorkflow" }]
+  // Phase 5 additions (zone must be on the Cloudflare account):
+  // "routes": [
+  //   { "pattern": "app.crates.music", "custom_domain": true },
+  //   { "pattern": "crates.music", "custom_domain": true },
+  //   { "pattern": "crates.page", "custom_domain": true }
+  // ]
+}
