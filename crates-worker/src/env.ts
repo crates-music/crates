@@ -1,7 +1,10 @@
+import type { LibrarySyncParams } from './workflows/library-sync';
+
 export interface Env {
   DB: D1Database;
   KV: KVNamespace;
   ASSETS: Fetcher;
+  LIBRARY_SYNC: Workflow<LibrarySyncParams>;
 
   // Vars (wrangler.jsonc "vars", overridable per environment)
   SPOTIFY_REDIRECT_URI: string; // where Spotify redirects back (this Worker's /v1/auth/callback)

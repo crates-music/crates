@@ -53,16 +53,21 @@
   },
 
   "triggers": {
-    // Hourly: trending recompute + MCP key cleanup (phase 4)
+    // Hourly: trending recompute + MCP key cleanup
     "crons": ["0 * * * *"]
   },
+
+  "workflows": [
+    {
+      "name": "crates-library-sync",
+      "binding": "LIBRARY_SYNC",
+      "class_name": "LibrarySyncWorkflow"
+    }
+  ],
 
   "observability": {
     "enabled": true
   }
-
-  // Phase 4 additions:
-  // "workflows": [{ "name": "library-sync", "binding": "LIBRARY_SYNC", "class_name": "LibrarySyncWorkflow" }]
   // Phase 5 additions (zone must be on the Cloudflare account):
   // "routes": [
   //   { "pattern": "app.crates.music", "custom_domain": true },

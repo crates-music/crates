@@ -108,11 +108,43 @@ export interface AlbumRow {
   images: string | null;
 }
 
+/**
+ * Shallow artist create for bulk sync: no per-artist Spotify call; the sync
+ * Workflow's enrichment pass backfills genres/images via batched
+ * GET /artists?ids= (genres_fetched = 0 marks the backlog).
+ */
+export async function createArtistShallow(
+  db: D1Database,
+  simple: { id: string; uri?: string; name?: string },
+): Promise<number> {
+  const row = await db
+    .prepare(
+      `INSERT INTO artist (spotify_id, spotify_uri, name, popularity, genres_fetched, images)
+       VALUES (?, ?, ?, 0, 0, NULL)
+       ON CONFLICT (spotify_id) DO UPDATE SET name = excluded.name
+       RETURNING id`,
+    )
+    .bind(simple.id, simple.uri ?? `spotify:artist:${simple.id}`, simple.name ?? simple.id)
+    .first<{ id: number }>();
+  return row!.id;
+}
+
 /** Insert an album (from a Spotify payload) plus its artist/genre joins. */
-export async function insertAlbumFromSpotify(env: Env, album: SpotifyAlbum): Promise<AlbumRow> {
+export async function insertAlbumFromSpotify(
+  env: Env,
+  album: SpotifyAlbum,
+  opts: { shallowArtists?: boolean } = {},
+): Promise<AlbumRow> {
   const artistIds: number[] = [];
   for (const artist of album.artists ?? []) {
-    artistIds.push(await findOrCreateArtist(env, artist));
+    if (opts.shallowArtists) {
+      const existing = await env.DB.prepare('SELECT id FROM artist WHERE spotify_id = ?')
+        .bind(artist.id)
+        .first<{ id: number }>();
+      artistIds.push(existing ? existing.id : await createArtistShallow(env.DB, artist));
+    } else {
+      artistIds.push(await findOrCreateArtist(env, artist));
+    }
   }
   const row = await env.DB.prepare(
     `INSERT INTO album (spotify_id, upc, href, name, popularity, release_date, images)

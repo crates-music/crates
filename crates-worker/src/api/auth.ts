@@ -28,12 +28,13 @@ authRoutes.get('/callback', async (c) => {
 
   const { authToken, created, userId } = await createOrUpdateUserForCode(c.env, code);
 
-  if (created) {
-    console.log(JSON.stringify({ event: 'first_sync_needed', userId }));
-    // Library starts in IMPORTING; the sync Workflow (phase 4) picks it up.
-    await findOrCreateLibrary(c.env.DB, userId);
-  }
-  // TODO(phase 4): trigger LIBRARY_SYNC workflow (FIRST_SYNC on created, resync otherwise).
+  // AuthController kicks off a sync on every login: FIRST_SYNC for new users,
+  // a resync otherwise. The Workflow replaces the raw Thread.
+  await findOrCreateLibrary(c.env.DB, userId);
+  await c.env.LIBRARY_SYNC.create({
+    id: `sync-${userId}-${crypto.randomUUID()}`,
+    params: { userId, firstSync: created },
+  });
 
   const callback = new URL(c.env.CRATES_AUTH_CALLBACK_URI);
   callback.searchParams.set('token', authToken);

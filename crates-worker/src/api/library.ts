@@ -62,14 +62,16 @@ libraryRoutes.get('/albums/search', async (c) => {
   return c.json(springPage(combined, page, size, combined.length));
 });
 
-// POST /v1/library/sync
+// POST /v1/library/sync — mark in progress and start the sync Workflow
 libraryRoutes.post('/sync', async (c) => {
   const user = currentUser(c);
   const library = await findOrCreateLibrary(c.env.DB, user.id);
-  const inProgress = library.state === 'IMPORTING' ? 'IMPORTING' : 'UPDATING';
   await c.env.DB.prepare('UPDATE library SET state = ?, updated_at = ? WHERE id = ?')
-    .bind(inProgress, Date.now(), library.id)
+    .bind('UPDATING', Date.now(), library.id)
     .run();
-  // TODO(phase 4): start LIBRARY_SYNC workflow instance for this user.
+  await c.env.LIBRARY_SYNC.create({
+    id: `sync-${user.id}-${crypto.randomUUID()}`,
+    params: { userId: user.id, firstSync: false },
+  });
   return c.body(null, 200);
 });
