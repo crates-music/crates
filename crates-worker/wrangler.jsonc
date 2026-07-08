@@ -43,8 +43,12 @@
   // Prod values for these two:
   //   SPOTIFY_REDIRECT_URI = https://app.crates.music/api/v1/auth/callback
   //   CRATES_AUTH_CALLBACK_URI = https://app.crates.music/auth/callback
+  // Spotify only allows loopback redirect URIs as IP literals (127.0.0.1, not
+  // localhost) or HTTPS. For dev, register http://127.0.0.1:8787/v1/auth/callback
+  // in the Spotify app, or override SPOTIFY_REDIRECT_URI in .dev.vars with an
+  // ngrok domain pointed at port 8787.
   "vars": {
-    "SPOTIFY_REDIRECT_URI": "http://localhost:8787/v1/auth/callback",
+    "SPOTIFY_REDIRECT_URI": "http://127.0.0.1:8787/v1/auth/callback",
     "CRATES_AUTH_CALLBACK_URI": "http://localhost:4311/auth/callback"
   },
 
