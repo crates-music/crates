@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import type { Env } from '../env';
 import { SpotifyApiError } from '../lib/spotify';
 import { authRoutes } from './auth';
+import { autoCategorizeRoutes } from './auto-categorize';
 import { crateRoutes } from './crates';
 import { libraryRoutes } from './library';
 import { albumRoutes, feedbackRoutes, searchRoutes } from './misc';
@@ -21,6 +22,7 @@ api.route('/user', userRoutes);
 api.route('/search', searchRoutes);
 api.route('/album', albumRoutes);
 api.route('/feedback', feedbackRoutes);
+api.route('/auto-categorize', autoCategorizeRoutes);
 
 api.get('/health', async (c) => {
   const row = await c.env.DB.prepare('SELECT count(*) AS crates FROM crate').first<{ crates: number }>();

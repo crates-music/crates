@@ -11,10 +11,9 @@
 
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from 'cloudflare:workers';
 import type { Env } from '../env';
-import { findOrCreateGenre, insertAlbumFromSpotify } from '../lib/catalog';
+import { insertAlbumFromSpotify } from '../lib/catalog';
+import { ARTIST_BATCH, enrichArtistGenres } from '../lib/genres';
 import {
-  getServiceToken,
-  spGetArtists,
   spGetSavedAlbums,
   spLibraryContains,
   withUserToken,
@@ -35,7 +34,6 @@ const CONTAINS_BATCH = 20; // Spotify max for /me/albums/contains
 const SAVED_PAGE_SIZE = 50; // Spotify max for /me/albums
 const PAGES_PER_STEP = 10;
 const REMOVALS_PER_STEP = 2000;
-const ARTIST_BATCH = 50; // Spotify max for /artists?ids=
 const ARTIST_BATCHES_PER_STEP = 20;
 
 export class LibrarySyncWorkflow extends WorkflowEntrypoint<Env, LibrarySyncParams> {
@@ -163,49 +161,9 @@ export class LibrarySyncWorkflow extends WorkflowEntrypoint<Env, LibrarySyncPara
    * Returns true if there may be more to enrich.
    */
   private async enrichArtists(): Promise<boolean> {
-    const serviceToken = await getServiceToken(this.env);
     for (let batch = 0; batch < ARTIST_BATCHES_PER_STEP; batch++) {
-      const rows = await this.env.DB.prepare(
-        'SELECT id, spotify_id FROM artist WHERE genres_fetched = 0 LIMIT ?',
-      )
-        .bind(ARTIST_BATCH)
-        .all<{ id: number; spotify_id: string }>();
-      const artists = rows.results ?? [];
-      if (artists.length === 0) return false;
-
-      const byId = new Map(artists.map((a) => [a.spotify_id, a.id]));
-      const res = await spGetArtists(serviceToken, artists.map((a) => a.spotify_id));
-      const seen = new Set<string>();
-      for (const full of res.artists) {
-        if (!full) continue;
-        seen.add(full.id);
-        const artistId = byId.get(full.id)!;
-        const images =
-          full.images && full.images.length > 0
-            ? JSON.stringify(
-                [...full.images]
-                  .sort((a, b) => (b.width ?? 0) - (a.width ?? 0))
-                  .map((i) => ({ id: null, url: i.url, width: i.width, height: i.height })),
-              )
-            : null;
-        await this.env.DB.prepare(
-          'UPDATE artist SET name = ?, popularity = ?, images = ?, genres_fetched = 1 WHERE id = ?',
-        )
-          .bind(full.name, full.popularity ?? 0, images, artistId)
-          .run();
-        for (const genreName of full.genres ?? []) {
-          const genreId = await findOrCreateGenre(this.env.DB, genreName);
-          await this.env.DB.prepare('INSERT OR IGNORE INTO artist_to_genre (artist_id, genre_id) VALUES (?, ?)')
-            .bind(artistId, genreId)
-            .run();
-        }
-      }
-      // Artists Spotify no longer returns: mark fetched so we don't loop forever.
-      for (const a of artists) {
-        if (!seen.has(a.spotify_id)) {
-          await this.env.DB.prepare('UPDATE artist SET genres_fetched = 1 WHERE id = ?').bind(a.id).run();
-        }
-      }
+      const processed = await enrichArtistGenres(this.env, { limit: ARTIST_BATCH });
+      if (processed === 0) return false;
     }
     return true;
   }

@@ -47,9 +47,15 @@
   // localhost) or HTTPS. For dev, register http://127.0.0.1:8787/v1/auth/callback
   // in the Spotify app, or override SPOTIFY_REDIRECT_URI in .dev.vars with an
   // ngrok domain pointed at port 8787.
+  // Prod values for the MCP pair:
+  //   CRATES_MCP_BASE_URL     = https://app.crates.music
+  //   CRATES_MCP_REDIRECT_URI = https://app.crates.music/mcp/auth/callback
+  // (the redirect must also be registered in the Spotify app)
   "vars": {
     "SPOTIFY_REDIRECT_URI": "http://127.0.0.1:8787/v1/auth/callback",
-    "CRATES_AUTH_CALLBACK_URI": "http://localhost:4311/auth/callback"
+    "CRATES_AUTH_CALLBACK_URI": "http://localhost:4311/auth/callback",
+    "CRATES_MCP_BASE_URL": "http://127.0.0.1:8787",
+    "CRATES_MCP_REDIRECT_URI": "http://127.0.0.1:8787/mcp/auth/callback"
   },
 
   "triggers": {

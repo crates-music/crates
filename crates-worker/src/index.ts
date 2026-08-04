@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import type { Env } from './env';
 import { api } from './api/routes';
+import { mcpCors, mcpManifest, mcpRoutes } from './api/mcp';
 import { publicSite } from './public/site';
 
 // Hostnames served by the SSR public site; everything else (app.crates.music,
@@ -35,6 +36,10 @@ app.all('*', (c) => {
 const appHost = new Hono<{ Bindings: Env }>();
 appHost.route('/api/v1', api);
 appHost.route('/v1', api);
+// MCP lives at the host root, not under /v1 (MCPManifestController + /mcp/**).
+appHost.route('/mcp', mcpRoutes);
+appHost.get('/.well-known/mcp', mcpCors, (c) => c.json(mcpManifest(c.env)));
+appHost.options('/.well-known/mcp', mcpCors, (c) => c.body(null, 204));
 // Unmatched API paths must 404 as JSON, not fall through to the SPA's index.html.
 appHost.all('/api/*', (c) => c.json({ error: 'not found' }, 404));
 appHost.all('/v1/*', (c) => c.json({ error: 'not found' }, 404));
