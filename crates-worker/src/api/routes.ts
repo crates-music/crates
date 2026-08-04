@@ -11,7 +11,7 @@ import { userRoutes } from './users';
 
 // JSON API for app.crates.music. Route-for-route port of the Spring
 // controllers (crates-backend/src/main/java/page/crates/controller/).
-// Still to port: MCP endpoints and auto-categorize (phase 3b).
+// The MCP endpoints sit at the host root rather than under /v1 — see index.ts.
 export const api = new Hono<{ Bindings: Env }>();
 
 api.route('/public', publicApi);

@@ -55,9 +55,35 @@ From the audit of `controller/`:
 - Last.fm / MusicBrainz clients (unreferenced)
 - `PUT /me/albums`, follow endpoints on the Spotify client (scopes disabled today)
 
+## Port notes (auto-categorize + MCP)
+
+Both are done. Two things worth knowing:
+
+- **Determinism.** The categorization strategies grouped into `HashMap`s, so proposal
+  order — and therefore which crates won ties during selection — followed hash order.
+  The port uses insertion-ordered `Map`s, so the same library now always produces the
+  same crates. Decade labels used `ZoneId.systemDefault()`; Workers only have UTC.
+- **Quirks kept on purpose.** `CrateSelector` compares against `maxAlbumsPerCrate` but
+  truncates to `IDEAL_ALBUMS_PER_CRATE`; `DecadeStrategy.CURRENT_YEAR` is hardcoded to
+  2025; the duplicate-crate check derives a handle as
+  `name.toLowerCase().replace(" ", "-")` rather than the `handelize()` that actually
+  builds it, so `R&B/Soul` is looked up as `r&b/soul` but stored as `rbsoul`; and
+  `findBestAlbumMatch` returns the first search result when nothing matches, so a
+  nonsense MCP request still comes back `matched: true`.
+
+PKCE verifiers now live in KV under a 10-minute TTL rather than a `ConcurrentHashMap`
+(an isolate cannot hold state across requests), and the state is hashed for the KV key
+because it carries the caller's redirect URI.
+
 ## Testing
 
 Comparison harness: replay a recorded set of real requests (with a test user's token)
 against both stacks and diff JSON. The backend has ~no tests, so this harness is the
 safety net. Add Vitest + Miniflare unit tests for auth middleware, crypto round-trip,
 and pagination math.
+
+Auto-categorize and MCP were exercised locally against the prod D1 copy by rewriting one
+user's `auth_token` in the local database to a known fixture value (and inserting an
+`mcp_api_key` row whose hash matches a known key) — no prod-valid credential is needed,
+and the local copy is disposable. Neither surface can be diffed against production
+without a real token; see the phase-3 harness note below.
