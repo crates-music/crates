@@ -89,13 +89,18 @@ difference shows up as a failure:
 | `createdAt`/`updatedAt` lose microseconds (`.341151Z` → `.341Z`) | Inherent to the epoch-ms decision; truncation only |
 | `images`, `genres`, `artists` ordering | Prod maps these as `Set<Image>`/`Set<Genre>` with **no `@OrderBy`** — Hibernate hash order, arbitrary and unstable. The Worker's order (width-desc) is deterministic where prod isn't |
 | Crate list order, and therefore which crates land on page 0 | The JPQL has no `ORDER BY` and no sort is sent, so prod's order is unspecified. `public-queries.ts` uses `c.id ASC` as a deterministic stand-in |
-| og:image / twitter:image / rendered artwork | Follows `images[0]`, above. The Worker picks the largest, which is what a social card wants |
+| og:image / twitter:image / rendered artwork | Follows `images[0]`, above. **This one is a fix, not just a deviation:** on 2 of 4 sampled crate pages prod's og:image was the 64px or 300px CDN variant of the right artwork (`ab67616d00004851…` / `…00001e02…`), because the `Set` iteration order happened to surface a small image. The Worker's width-desc ordering serves the 640px variant (`…0000b273…`) every time. `twitter:card` is `summary_large_image`, which wants ≥600px — prod has been emitting undersized social cards |
 | Crate cover `imageUri` | `CrateDecoratorImpl` takes the newest `crate_album` by `createdAt` with **no tiebreaker**, and bulk-added albums share a timestamp *to the microsecond* — prod picks arbitrarily and can disagree with its own albums-list query for the same crate. The Worker breaks the tie on `id DESC` |
 | SSR `/api/*` returns full DTOs where Go returned narrow structs (`addedAt` zero-time, artist `href: ""`, extra keys) | Superset; only the Worker's own inline Alpine code reads these, and it uses `content`/`last` plus a handful of album fields |
 
-### Still unverified
+### Crate detail pages
 
-Crate detail pages (`/{username}/{handle}`) and their JSON endpoint — the two routes that
-write a `crate_view` row on prod. They need a run with `--include-view-recording`, which
-inserts at most one view per crate per IP per hour. That is also where og:image matters
-most, so it should happen before cutover.
+Verified with `--include-view-recording` (58/58 clean over 4 crates). That flag records a
+view on prod for each crate page hit — one per crate per IP per hour, so re-runs inside
+the hour are free.
+
+One harness correction came out of it: the HTML signature counted every `i.scdn.co`
+occurrence, including the JSON the page embeds for Alpine, where the Worker carries full
+artist DTOs and Go carried narrow structs. That read as "the Worker renders 88 images vs
+prod's 63" when both render exactly 4 `<img>` tags. The signature now looks only inside
+`<img>` tags — what the page actually renders.

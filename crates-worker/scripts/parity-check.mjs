@@ -229,7 +229,12 @@ function htmlSignature(body) {
     twitterImage: metaTag(body, 'name', 'twitter:image'),
     canonical: body.match(/<link[^>]*rel=["']canonical["'][^>]*>/i)?.[0]?.match(/href=["']([^"']*)["']/i)?.[1] ?? null,
     albums: [...body.matchAll(/open\.spotify\.com\/album\/([A-Za-z0-9]+)/g)].map((m) => m[1]),
-    artwork: [...body.matchAll(/i\.scdn\.co\/image\/([A-Za-z0-9]+)/g)].map((m) => m[1]),
+    // Only artwork inside <img> tags — i.e. what the page actually renders. Counting
+    // every i.scdn.co occurrence also picks up the JSON the page embeds for Alpine,
+    // where the Worker carries full artist DTOs (with their images) and the Go service
+    // carried narrow structs. That is a payload-size difference, not a visible one.
+    artwork: [...body.matchAll(/<img[^>]*>/g)]
+      .flatMap((tag) => [...tag[0].matchAll(/i\.scdn\.co\/image\/([A-Za-z0-9]+)/g)].map((m) => m[1])),
   };
 }
 
