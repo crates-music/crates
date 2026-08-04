@@ -68,11 +68,25 @@
 
   "observability": {
     "enabled": true
-  }
-  // Phase 5 additions (zone must be on the Cloudflare account):
-  // "routes": [
-  //   { "pattern": "app.crates.music", "custom_domain": true },
-  //   { "pattern": "crates.music", "custom_domain": true },
-  //   { "pattern": "crates.page", "custom_domain": true }
-  // ]
+  },
+
+  // Keep the *.workers.dev URL alive alongside the custom domains — it is how the
+  // parity harness and the login test reach the Worker without touching DNS.
+  "workers_dev": true,
+
+  // Cutover, staged one hostname at a time. crates.music is the SSR public site:
+  // read-only, no auth, and the one surface that could not be rehearsed on
+  // workers.dev (Cloudflare 403s a Host header that doesn't match the hostname).
+  //
+  // Attaching a custom domain REPLACES the existing DNS record for that hostname,
+  // so this is the real flip for crates.music. Rollback: remove the custom domain
+  // and restore the A/AAAA records to DigitalOcean's App Platform edge
+  // (162.159.140.98, 172.66.0.96 / 2606:4700:7::60, 2a06:98c1:58::60).
+  //
+  // Still on DigitalOcean until explicitly added here:
+  //   { "pattern": "app.crates.music", "custom_domain": true }  <- the API + SPA
+  //   { "pattern": "crates.page", "custom_domain": true }       <- zone not on CF yet
+  "routes": [
+    { "pattern": "crates.music", "custom_domain": true }
+  ]
 }
