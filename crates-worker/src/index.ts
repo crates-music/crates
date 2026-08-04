@@ -12,12 +12,24 @@ const PUBLIC_SITE_HOSTS = new Set(['crates.music', 'crates.page', 'crates.localh
 
 const app = new Hono<{ Bindings: Env }>();
 
-// Legacy crates.page host: permanent redirect to crates.music (port of
-// RedirectMiddleware in crates-public/main.go).
+// crates.page is the legacy domain — every hostname on it redirects to its
+// crates.music counterpart, preserving path and query (this generalizes
+// RedirectMiddleware in crates-public/main.go, which only handled the apex).
+//
+// app.crates.page must redirect rather than serve: the Angular build hardcodes
+// https://app.crates.music/api as its API base, so serving the SPA from a second
+// origin would make every API call cross-origin against an API that sends no CORS
+// headers.
+const LEGACY_HOST_REDIRECTS: Record<string, string> = {
+  'crates.page': 'https://crates.music',
+  'app.crates.page': 'https://app.crates.music',
+};
+
 app.use('*', async (c, next) => {
   const url = new URL(c.req.url);
-  if (url.hostname === 'crates.page') {
-    return c.redirect(`https://crates.music${url.pathname}${url.search}`, 301);
+  const target = LEGACY_HOST_REDIRECTS[url.hostname];
+  if (target) {
+    return c.redirect(`${target}${url.pathname}${url.search}`, 301);
   }
   await next();
 });

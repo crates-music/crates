@@ -86,10 +86,10 @@
   // crates.page is handled by the redirect middleware in src/index.ts, which 301s
   // the whole hostname to https://crates.music.
   //
-  // Still on DigitalOcean until explicitly added here:
-  //   { "pattern": "app.crates.music", "custom_domain": true }  <- the API + SPA
   "routes": [
     { "pattern": "crates.music", "custom_domain": true },
-    { "pattern": "crates.page", "custom_domain": true }
+    { "pattern": "app.crates.music", "custom_domain": true },
+    { "pattern": "crates.page", "custom_domain": true },
+    { "pattern": "app.crates.page", "custom_domain": true }
   ]
 }
