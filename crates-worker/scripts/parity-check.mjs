@@ -33,6 +33,10 @@ const WORKER = flag('--worker', 'http://127.0.0.1:8787').replace(/\/$/, '');
 const WORKER_SITE = WORKER.replace(/\/\/[^:/]+/, '//crates.localhost');
 const CRATE_SAMPLES = Number(flag('--crates', '6'));
 const INCLUDE_VIEW_RECORDING = args.includes('--include-view-recording');
+// The SSR site is selected by hostname, and Cloudflare's edge rejects a Host header
+// that doesn't match the hostname it was reached on (403). So a *.workers.dev
+// rehearsal can only exercise the app host until the real domain is attached.
+const SKIP_SITE = args.includes('--skip-site');
 const OUT = flag('--out', null);
 
 const PROD_APP = 'https://app.crates.music';
@@ -107,8 +111,10 @@ function buildCases({ crates, users }) {
   const cases = [];
   const json = (name, path, opts = {}) =>
     cases.push({ name, kind: 'json', prod: PROD_APP + '/api' + path, worker: WORKER + '/api' + path, ...opts });
-  const html = (name, path, opts = {}) =>
+  const html = (name, path, opts = {}) => {
+    if (SKIP_SITE) return;
     cases.push({ name, kind: 'html', prod: PROD_SITE + path, worker: WORKER_SITE + path, ...opts });
+  };
 
   json('crates:page0', '/v1/public/crates?page=0&size=10');
   json('crates:page1', '/v1/public/crates?page=1&size=10');

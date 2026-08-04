@@ -14,9 +14,28 @@ Prereqs: phases 1–4 done; `crates.music` / `app.crates.music` DNS zone on Clou
 
 **There is no `wrangler d1 import`** — it does not exist in wrangler 4.x, so
 `d1 execute --file` is the only path, and it is why the export caps statements at
-60 KB. The largest chunk is ~24 MB; whether remote `execute --file` accepts that is
-the one thing still unverified, and the first remote import will settle it. If it
-balks, re-export with a smaller `ROWS_PER_FILE` in `export-pg-to-d1.mjs`.
+60 KB. Remote `execute --file` **does** accept the ~24 MB chunks; no re-chunking
+needed.
+
+## Rehearsal (done)
+
+Imported into the real D1 and deployed to `*.workers.dev`:
+
+- All 15 table counts match the export manifest; `PRAGMA foreign_key_check` clean;
+  D1 reports 142 MB.
+- Parity harness run against the **deployed** Worker on the **remote** D1, diffed
+  against live production: **51/51 clean, 0 unexpected diffs**
+  (`--worker https://<name>.<subdomain>.workers.dev --skip-site`).
+- Workflow `crates-library-sync` and the hourly cron are registered; all three
+  secrets are set.
+
+**The SSR site cannot be rehearsed on `*.workers.dev`.** This plan originally assumed
+a `Host: crates.music` override would work — it does not. Cloudflare's edge returns
+**403** for a Host header that doesn't match the hostname it was reached on, so the
+`crates.music` half of the Worker is unreachable until the domain is attached. Hence
+`--skip-site` on the harness. The SSR code is otherwise identical to what passed 130
+local cases against prod, so the residual risk is environmental (assets binding, KV),
+not logical — verify it immediately after attaching the domain, while DO is still up.
 
 ## Remote sequence
 
