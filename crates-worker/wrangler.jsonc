@@ -22,8 +22,7 @@
     {
       "binding": "DB",
       "database_name": "crates",
-      // Placeholder for local dev. Before first deploy: `wrangler d1 create crates`
-      // and paste the real id here.
+      // Live database on the account (wrangler d1 info crates).
       "database_id": "64a5d963-e269-4977-b064-66eb44f89c43",
       "migrations_dir": "migrations"
     }
@@ -32,30 +31,26 @@
   "kv_namespaces": [
     {
       "binding": "KV",
-      // Placeholder for local dev. Before first deploy: `wrangler kv namespace create KV`
-      // and paste the real id here.
+      // Live namespace on the account (wrangler kv namespace list).
       "id": "cae8644b7e7f42dead23b5dad24ec504"
     }
   ],
 
   // Secrets (wrangler secret put / .dev.vars): SPOTIFY_CLIENT_ID,
   // SPOTIFY_CLIENT_SECRET, CRATES_ENCRYPTION_KEY.
-  // Prod values for these two:
-  //   SPOTIFY_REDIRECT_URI = https://app.crates.music/api/v1/auth/callback
-  //   CRATES_AUTH_CALLBACK_URI = https://app.crates.music/auth/callback
+  //
   // Spotify only allows loopback redirect URIs as IP literals (127.0.0.1, not
-  // localhost) or HTTPS. For dev, register http://127.0.0.1:8787/v1/auth/callback
-  // in the Spotify app, or override SPOTIFY_REDIRECT_URI in .dev.vars with an
-  // ngrok domain pointed at port 8787.
-  // Prod values for the MCP pair:
-  //   CRATES_MCP_BASE_URL     = https://app.crates.music
-  //   CRATES_MCP_REDIRECT_URI = https://app.crates.music/mcp/auth/callback
-  // (the redirect must also be registered in the Spotify app)
+  // localhost) or HTTPS, which is why the dev override in .dev.vars uses 127.0.0.1.
+  //
+  // These are the PRODUCTION values — they are what `wrangler deploy` ships.
+  // Local dev overrides them from .dev.vars, so nothing here points at localhost;
+  // a deploy that accidentally shipped a loopback redirect URI would break login.
+  // Every redirect URI here must also be registered in the Spotify app.
   "vars": {
-    "SPOTIFY_REDIRECT_URI": "http://127.0.0.1:8787/v1/auth/callback",
-    "CRATES_AUTH_CALLBACK_URI": "http://localhost:4311/auth/callback",
-    "CRATES_MCP_BASE_URL": "http://127.0.0.1:8787",
-    "CRATES_MCP_REDIRECT_URI": "http://127.0.0.1:8787/mcp/auth/callback"
+    "SPOTIFY_REDIRECT_URI": "https://app.crates.music/api/v1/auth/callback",
+    "CRATES_AUTH_CALLBACK_URI": "https://app.crates.music/auth/callback",
+    "CRATES_MCP_BASE_URL": "https://app.crates.music",
+    "CRATES_MCP_REDIRECT_URI": "https://app.crates.music/mcp/auth/callback"
   },
 
   "triggers": {
