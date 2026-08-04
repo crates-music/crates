@@ -189,3 +189,6 @@ node_modules/
 
 # Auto Claude data directory
 .auto-claude/
+
+# Wrangler local state (miniflare D1/KV/cache) — contains a full copy of prod data
+.wrangler/
