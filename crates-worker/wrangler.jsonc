@@ -83,10 +83,13 @@
   // and restore the A/AAAA records to DigitalOcean's App Platform edge
   // (162.159.140.98, 172.66.0.96 / 2606:4700:7::60, 2a06:98c1:58::60).
   //
+  // crates.page is handled by the redirect middleware in src/index.ts, which 301s
+  // the whole hostname to https://crates.music.
+  //
   // Still on DigitalOcean until explicitly added here:
   //   { "pattern": "app.crates.music", "custom_domain": true }  <- the API + SPA
-  //   { "pattern": "crates.page", "custom_domain": true }       <- zone not on CF yet
   "routes": [
-    { "pattern": "crates.music", "custom_domain": true }
+    { "pattern": "crates.music", "custom_domain": true },
+    { "pattern": "crates.page", "custom_domain": true }
   ]
 }
