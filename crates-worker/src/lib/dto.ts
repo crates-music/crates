@@ -71,8 +71,14 @@ export interface CrateAlbumDto {
 }
 
 /** Epoch ms -> ISO-8601. (Java emits microsecond precision; millis is equivalent.) */
-export const iso = (ms: number | null | undefined): string | null =>
-  ms == null ? null : new Date(ms).toISOString();
+// Jackson's Instant serialization omits the fractional part when it is zero
+// (`2013-05-28T00:00:00Z`), where toISOString always writes three decimals. Every
+// release date in every payload hits this, so match Jackson rather than the default.
+export const iso = (ms: number | null | undefined): string | null => {
+  if (ms == null) return null;
+  const s = new Date(ms).toISOString();
+  return s.endsWith('.000Z') ? `${s.slice(0, -5)}Z` : s;
+};
 
 /** Parse the denormalized `images` JSON column (ordered width desc at export). */
 export function parseImages(json: string | null | undefined): ImageDto[] {

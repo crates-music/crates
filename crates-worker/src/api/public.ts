@@ -5,7 +5,7 @@
 import { Hono } from 'hono';
 import type { Env } from '../env';
 import { userDto } from '../lib/dto';
-import { pageParams, springPage } from '../lib/page';
+import { echoedSort, pageParams, springPage } from '../lib/page';
 import {
   allPublicCrates,
   crateAlbums,
@@ -45,7 +45,7 @@ publicApi.get('/user/:username/crates', async (c) => {
   const { page, size, sort } = pageParams(c.req.query());
   const search = c.req.query('search')?.trim() || undefined;
   const { crates, total } = await publicCratesByUser(c.env.DB, user.id, { page, size, sort, search });
-  return c.json(springPage(crates, page, size, total));
+  return c.json(springPage(crates, page, size, total, sort));
 });
 
 publicApi.get('/user/:username/crate/:handle', async (c) => {
@@ -75,14 +75,14 @@ publicApi.get('/user/:username/crate/:handle/albums', async (c) => {
   const { page, size, sort } = pageParams(c.req.query());
   const search = c.req.query('search')?.trim() || undefined;
   const { albums, total } = await crateAlbums(c.env.DB, crate.id, { page, size, sort, search });
-  return c.json(springPage(albums, page, size, total));
+  return c.json(springPage(albums, page, size, total, echoedSort(sort)));
 });
 
 publicApi.get('/crates', async (c) => {
   // PublicController caps page size at 10 for the global listings.
   const { page, size, sort } = pageParams(c.req.query(), { maxSize: 10 });
   const { crates, total } = await allPublicCrates(c.env.DB, { page, size, sort });
-  return c.json(springPage(crates, page, size, total));
+  return c.json(springPage(crates, page, size, total, sort));
 });
 
 publicApi.get('/crates/trending', async (c) => {

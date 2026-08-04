@@ -135,5 +135,5 @@ userRoutes.get('/:userId{[0-9]+}/crates', async (c) => {
   const { page, size, sort } = pageParams(c.req.query());
   const search = c.req.query('search')?.trim() || undefined;
   const { crates, total } = await publicCratesByUser(c.env.DB, user!.id, { page, size, sort, search });
-  return c.json(springPage(crates, page, size, total));
+  return c.json(springPage(crates, page, size, total, sort));
 });

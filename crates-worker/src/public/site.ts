@@ -5,7 +5,7 @@ import { Hono } from 'hono';
 import type { Env } from '../env';
 import { clientIp } from '../api/public';
 import { userDto } from '../lib/dto';
-import { springPage } from '../lib/page';
+import { goPage } from '../lib/page';
 import {
   allPublicCrates,
   crateAlbums,
@@ -126,7 +126,7 @@ publicSite.get('/api/:username/crates', async (c) => {
       sort: { prop: 'updatedAt', desc: true },
       search,
     });
-    return c.json(springPage(crates, page, size, total));
+    return c.json(goPage(crates, page, size, total));
   } catch (e) {
     console.error('user crates api failed', String(e));
     return c.json({ error: 'Failed to fetch crates' }, 500);
@@ -148,7 +148,7 @@ publicSite.get('/api/:username/:handle/albums', async (c) => {
       sort: { prop: 'createdAt', desc: true },
       search,
     });
-    return c.json(springPage(albums, page, size, total));
+    return c.json(goPage(albums, page, size, total));
   } catch (e) {
     console.error('crate albums api failed', String(e));
     return c.json({ error: 'Failed to fetch albums' }, 500);

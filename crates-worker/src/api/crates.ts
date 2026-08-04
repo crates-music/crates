@@ -7,7 +7,7 @@ import { currentUser, requireAuth, type AuthVars } from '../lib/auth';
 import { findOrCreateAlbumBySpotifyId } from '../lib/catalog';
 import { crateDto, type CrateDto } from '../lib/dto';
 import { handelize } from '../lib/handle';
-import { pageParams, springPage } from '../lib/page';
+import { echoedSort, pageParams, springPage } from '../lib/page';
 import { crateAlbums } from '../lib/public-queries';
 import { activeCratesByUser, findCrateRowById } from '../lib/user-queries';
 
@@ -30,7 +30,7 @@ crateRoutes.get('/', async (c) => {
   const { page, size, sort } = pageParams(c.req.query());
   const search = c.req.query('search')?.trim() || undefined;
   const { crates, total } = await activeCratesByUser(c.env.DB, currentUser(c).id, { page, size, sort, search });
-  return c.json(springPage(crates, page, size, total));
+  return c.json(springPage(crates, page, size, total, sort));
 });
 
 // POST /v1/crate
@@ -94,7 +94,7 @@ crateRoutes.get('/:id/albums', async (c) => {
   const { page, size, sort } = pageParams(c.req.query());
   const search = c.req.query('search')?.trim() || undefined;
   const { albums, total } = await crateAlbums(c.env.DB, crate.id, { page, size, sort, search });
-  return c.json(springPage(albums, page, size, total));
+  return c.json(springPage(albums, page, size, total, echoedSort(sort)));
 });
 
 async function addAlbumsToCrate(

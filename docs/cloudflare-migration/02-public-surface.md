@@ -46,9 +46,56 @@ Behavior to preserve from `main.go`:
 
 ## Parity check
 
-With a prod data copy in local D1 (phase 1 import `--local`):
+`scripts/parity-check.mjs`, run against a local `wrangler dev` with the phase-1 prod copy
+in local D1:
 
-1. Crawl N real URLs on https://crates.music (home, top profiles, top crates) and the
-   same paths on the Worker; diff rendered titles/meta tags/album lists.
-2. Diff JSON responses for the public API endpoints against
-   `https://app.crates.music/api/v1/public/...` for the same paths + paging params.
+```bash
+npx wrangler dev                                   # separate shell
+node scripts/parity-check.mjs --crates 6 --out report.json
+```
+
+Sample URLs are drawn from local D1 (top crates by view count, including handle-less
+users whose public URLs fall back to spotifyId), so it exercises paths that get real
+traffic. HTML is compared on the signature the SSR service exists to produce — title,
+description, og/twitter tags, canonical, and the sequence of album/artwork ids — because
+Go templates and Hono JSX are never byte-identical. Arrays of identified objects are
+matched **by id**, with ordering reported as its own finding; positional diffing turns a
+single ordering difference into thousands of phantom field mismatches.
+
+By default it calls only endpoints that are side-effect-free on prod. Both
+`GET /v1/public/user/{u}/crate/{h}` and the SSR crate page insert a `crate_view` row in
+production, so they sit behind `--include-view-recording`.
+
+### Results
+
+**72/72 cases clean, 0 unexpected diffs** (view-recording endpoints excluded — see below).
+
+Fixed as a result of the first run:
+
+| Was | Fix |
+|---|---|
+| `iso()` always emitted 3 decimals (`...T00:00:00.000Z`); Jackson omits `.000`. Hit every timestamp in every payload | `src/lib/dto.ts` — drop `.000` |
+| Page envelope always sent `sort: []`; Spring echoes the requested sort as an array of `Order` objects | `springPage()` takes the sort; `springOrders()` builds the Spring shape |
+| …except `CrateServiceImpl.getAlbums` swaps in an *unsorted* PageRequest for the `artistName` sort, so prod echoes `[]` there | `echoedSort()` mirrors that one carve-out |
+| SSR `/api/*` returned the full Spring envelope where the Go service returned a narrower object | `goPage()` for those two routes |
+| Harness exercised `sort=name,asc`, which no client sends and which prod 500s on | Now tests the four params the frontend actually emits (`album-sort.model.ts`): `createdAt`, `album.name`, `album.releaseDate`, `artistName` |
+
+The remaining ~2,500 differences are classified as accepted deviations in the harness
+(`ACCEPTED`), each with a reason. They are reported, not hidden — a new kind of
+difference shows up as a failure:
+
+| Accepted deviation | Why it is not a bug |
+|---|---|
+| `createdAt`/`updatedAt` lose microseconds (`.341151Z` → `.341Z`) | Inherent to the epoch-ms decision; truncation only |
+| `images`, `genres`, `artists` ordering | Prod maps these as `Set<Image>`/`Set<Genre>` with **no `@OrderBy`** — Hibernate hash order, arbitrary and unstable. The Worker's order (width-desc) is deterministic where prod isn't |
+| Crate list order, and therefore which crates land on page 0 | The JPQL has no `ORDER BY` and no sort is sent, so prod's order is unspecified. `public-queries.ts` uses `c.id ASC` as a deterministic stand-in |
+| og:image / twitter:image / rendered artwork | Follows `images[0]`, above. The Worker picks the largest, which is what a social card wants |
+| Crate cover `imageUri` | `CrateDecoratorImpl` takes the newest `crate_album` by `createdAt` with **no tiebreaker**, and bulk-added albums share a timestamp *to the microsecond* — prod picks arbitrarily and can disagree with its own albums-list query for the same crate. The Worker breaks the tie on `id DESC` |
+| SSR `/api/*` returns full DTOs where Go returned narrow structs (`addedAt` zero-time, artist `href: ""`, extra keys) | Superset; only the Worker's own inline Alpine code reads these, and it uses `content`/`last` plus a handful of album fields |
+
+### Still unverified
+
+Crate detail pages (`/{username}/{handle}`) and their JSON endpoint — the two routes that
+write a `crate_view` row on prod. They need a run with `--include-view-recording`, which
+inserts at most one view per crate per IP per hour. That is also where og:image matters
+most, so it should happen before cutover.
