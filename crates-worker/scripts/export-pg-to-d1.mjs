@@ -9,10 +9,12 @@
 //   - token.access_token / token.refresh_token: AES-ECB -> AES-GCM re-encryption
 //   - mcp_api_key.api_key (AES-ECB) -> api_key_hash (SHA-256 hex of plaintext)
 //
-// Usage:
-//   PG_URL=postgres://crates:cratesforfun@localhost:5432/crates \
-//   CRATES_ENCRYPTION_KEY=<prod key> \
-//   node scripts/export-pg-to-d1.mjs
+// Usage (PG_URL + CRATES_ENCRYPTION_KEY live in .dev.vars, which is gitignored):
+//   node --env-file=.dev.vars scripts/export-pg-to-d1.mjs
+//
+// Reads one REPEATABLE READ snapshot, so it is safe to run against a live database.
+// For a hosted Postgres with a private CA, set PG_CA_CERT=/path/to/ca.crt, or put
+// ?sslmode=no-verify in PG_URL to skip certificate verification.
 //
 // Import (remote or --local):
 //   wrangler d1 migrations apply crates --remote
@@ -20,7 +22,7 @@
 
 import pg from 'pg';
 import { createCipheriv, createDecipheriv, createHash, randomBytes, webcrypto } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -40,6 +42,8 @@ const BITS = KEY.length * 8;
 
 const ROWS_PER_INSERT = 100;
 const ROWS_PER_FILE = 50_000;
+// D1 rejects any single SQL statement over 100 KB; stay well under it.
+const MAX_STATEMENT_BYTES = 60_000;
 
 // ---------- crypto ----------
 
@@ -59,6 +63,17 @@ function encryptGcm(plaintext) {
 
 const sha256Hex = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
 
+// Names the offending row instead of dying with a bare "bad decrypt" partway through prod.
+function recrypt(b64, id, col) {
+  try {
+    return encryptGcm(decryptEcb(b64));
+  } catch (e) {
+    throw new Error(
+      `token id=${id} ${col}: ECB decrypt failed (wrong CRATES_ENCRYPTION_KEY?) — ${e.message}`,
+    );
+  }
+}
+
 // Prove the Worker will be able to read what we write: decrypt a GCM sample with
 // WebCrypto exactly as src/ will, and round-trip our own ECB to confirm PKCS5/PKCS7
 // compatibility with the Java converter.
@@ -75,6 +90,24 @@ async function cryptoSelfTest() {
   const e = createCipheriv(`aes-${BITS}-ecb`, KEY, null);
   const ecb = Buffer.concat([e.update(sample, 'utf8'), e.final()]).toString('base64');
   if (decryptEcb(ecb) !== sample) throw new Error('ECB self-test failed');
+}
+
+// ---------- timestamps ----------
+
+// Naive TIMESTAMP columns hold UTC in prod. Date.parse covers every real date, but nine
+// album rows carry a `0001-01-01 00:00:00 BC` sentinel it cannot represent — convert
+// those by hand (BC year N is astronomical year 1-N) instead of emitting NaN.
+const BC_TIMESTAMP = /^(\d+)-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.\d+)? BC$/;
+
+function parseUtcTimestamp(v) {
+  const ms = Date.parse(v.replace(' ', 'T') + 'Z');
+  if (Number.isFinite(ms)) return ms;
+  const m = BC_TIMESTAMP.exec(v);
+  if (!m) throw new Error(`unparseable TIMESTAMP: ${JSON.stringify(v)}`);
+  const d = new Date(0);
+  d.setUTCFullYear(1 - Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  d.setUTCHours(Number(m[4]), Number(m[5]), Number(m[6]), 0);
+  return d.getTime();
 }
 
 // ---------- SQL emission ----------
@@ -98,13 +131,38 @@ function emitTable(table, columns, rows) {
     const slice = rows.slice(f * ROWS_PER_FILE, (f + 1) * ROWS_PER_FILE);
     if (rows.length > 0 && slice.length === 0) break;
     const parts = ['PRAGMA defer_foreign_keys = on;'];
-    for (let i = 0; i < slice.length; i += ROWS_PER_INSERT) {
-      const values = slice
-        .slice(i, i + ROWS_PER_INSERT)
-        .map((r) => `(${columns.map((c) => sqlLit(r[c])).join(',')})`)
-        .join(',\n');
-      parts.push(`INSERT INTO ${table} (${columns.join(',')}) VALUES\n${values};`);
+    const prefix = `INSERT INTO ${table} (${columns.join(',')}) VALUES\n`;
+    let batch = [];
+    let bytes = 0;
+    const flush = () => {
+      if (batch.length === 0) return;
+      parts.push(prefix + batch.join(',\n') + ';');
+      batch = [];
+      bytes = 0;
+    };
+    for (const r of slice) {
+      const tuple = `(${columns
+        .map((c) => {
+          try {
+            return sqlLit(r[c]);
+          } catch (e) {
+            // Point at the row, not just the symptom — a bad value 60k rows into
+            // a prod export is otherwise unfindable.
+            const ref = [r.id != null && `id=${r.id}`, r.spotify_id && `spotify_id=${r.spotify_id}`]
+              .filter(Boolean)
+              .join(' ');
+            throw new Error(`${table}.${c} [${ref}]: ${e.message}`);
+          }
+        })
+        .join(',')})`;
+      const size = Buffer.byteLength(tuple) + 2;
+      // Row count alone can't bound this: 100 rows of GCM-encrypted tokens or of albums
+      // carrying an images JSON blob overflow D1's per-statement cap (SQLITE_TOOBIG).
+      if (batch.length >= ROWS_PER_INSERT || bytes + size > MAX_STATEMENT_BYTES) flush();
+      batch.push(tuple);
+      bytes += size;
     }
+    flush();
     const name = `${String(++fileSeq).padStart(3, '0')}_${table}${f > 0 ? `_${f}` : ''}.sql`;
     writeFileSync(join(OUT_DIR, name), parts.join('\n') + '\n');
     console.log(`  ${name}: ${slice.length} rows`);
@@ -120,13 +178,34 @@ async function main() {
   mkdirSync(OUT_DIR, { recursive: true });
 
   // Naive TIMESTAMP columns hold UTC in prod; parse as UTC -> epoch ms.
-  pg.types.setTypeParser(1114, (v) => Date.parse(v.replace(' ', 'T') + 'Z'));
+  pg.types.setTypeParser(1114, parseUtcTimestamp);
   pg.types.setTypeParser(1184, (v) => Date.parse(v)); // timestamptz (unused, but safe)
   pg.types.setTypeParser(20, (v) => Number(v)); // int8
   pg.types.setTypeParser(1700, (v) => Number(v)); // numeric (trending_score)
 
-  const db = new pg.Client({ connectionString: PG_URL });
+  // TLS: a hosted Postgres usually presents a private CA the system store doesn't know.
+  // Point PG_CA_CERT at the CA file to verify properly; `?sslmode=no-verify` in PG_URL
+  // skips verification (pg parses sslmode itself), `?sslmode=disable` turns TLS off.
+  const clientConfig = { connectionString: PG_URL };
+  let sslMode = process.env.PGSSLMODE;
+  try {
+    sslMode ??= new URL(PG_URL).searchParams.get('sslmode') ?? undefined;
+  } catch {
+    /* not URL-shaped (key=value DSN); fall back to PGSSLMODE only */
+  }
+  if (process.env.PG_CA_CERT) {
+    clientConfig.ssl = { ca: readFileSync(process.env.PG_CA_CERT, 'utf8') };
+  } else if (sslMode === 'no-verify') {
+    clientConfig.ssl = { rejectUnauthorized: false };
+  } else if (sslMode && sslMode !== 'disable') {
+    clientConfig.ssl = true;
+  }
+  const db = new pg.Client(clientConfig);
   await db.connect();
+  // One snapshot for the whole export. Without this each table is read at a different
+  // instant, so a row written mid-run (a crate_album whose album we already exported)
+  // lands in the dump as an FK violation on import.
+  await db.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
   const q = async (sql) => (await db.query(sql)).rows;
 
   // Image maps: entity id -> JSON array ordered by width desc.
@@ -168,8 +247,8 @@ async function main() {
     ['id', 'auth_token', 'code', 'access_token', 'refresh_token', 'expiration'],
     (await q('SELECT id, auth_token, code, access_token, refresh_token, expiration FROM token')).map((r) => ({
       ...r,
-      access_token: encryptGcm(decryptEcb(r.access_token)),
-      refresh_token: encryptGcm(decryptEcb(r.refresh_token)),
+      access_token: recrypt(r.access_token, r.id, 'access_token'),
+      refresh_token: recrypt(r.refresh_token, r.id, 'refresh_token'),
     })),
   );
 
@@ -236,6 +315,7 @@ async function main() {
   emitTable('feedback', ['id', 'user_id', 'message', 'created_at'],
     await q('SELECT id, user_id, message, created_at FROM feedback'));
 
+  await db.query('COMMIT');
   await db.end();
   writeFileSync(join(OUT_DIR, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
   console.log('\nrow counts (verify against D1 after import):');

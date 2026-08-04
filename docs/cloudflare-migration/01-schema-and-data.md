@@ -46,10 +46,32 @@ Spotify tokens are only ever decrypted, never looked up by value, so GCM works t
    as UTC (prod stores naive UTC timestamps).
 2. Applies transforms: image denormalization, epoch-ms timestamps, 0/1 booleans,
    ECB→GCM re-encryption, api-key hashing.
-3. Emits chunked SQL files to `scripts/out/` (`NNN_<table>.sql`, ~50k rows per file,
-   multi-row INSERTs of 100), ordered to satisfy FKs:
+3. Emits chunked SQL files to `scripts/out/` (`NNN_<table>.sql`, ~50k rows per file),
+   ordered to satisfy FKs:
    token → spotify_user → genre → artist → album → joins → crate → crate_album →
    library → library_album → crate_view → mcp_api_key → feedback.
+
+Run it with the credentials in `.dev.vars` (gitignored), never on the command line:
+
+```bash
+node --env-file=.dev.vars scripts/export-pg-to-d1.mjs
+```
+
+Prod is DigitalOcean **managed** Postgres (user `doadmin`, database `defaultdb`), not the
+Dockerized Postgres the old dev stack used, so `PG_URL` must carry `?sslmode=no-verify`
+(or set `PG_CA_CERT` to DO's downloaded CA for real verification — preferred for the
+phase-5 run). The whole export runs inside one `REPEATABLE READ READ ONLY` transaction,
+so it is safe against the live database and cannot produce a torn snapshot.
+
+Two data facts the first real run turned up:
+
+- **INSERT batches are bounded by bytes, not rows.** D1 rejects any statement over 100 KB
+  (`SQLITE_TOOBIG`); 100 rows of GCM-encrypted tokens or of albums carrying an images
+  JSON blob exceed that. The script caps statements at 60 KB.
+- **Nine `album` rows hold a `0001-01-01 00:00:00 BC` sentinel release date**, which
+  `Date.parse` cannot represent. These convert to epoch `-62167219200000`
+  (`0000-01-01T00:00:00Z`), preserving sort order. Every other timestamp column across
+  all 15 tables is clean — no `infinity`, no BC, no year > 9999.
 
 Import:
 
@@ -66,7 +88,8 @@ parity testing works.
 ## Verification
 
 - Row counts per table match the source (script prints expected counts; compare with
-  `SELECT count(*)` via `wrangler d1 execute`).
+  `SELECT count(*)` via `wrangler d1 execute`). Note D1 caps compound `SELECT` terms, so
+  count one table per query rather than a 15-way `UNION ALL`.
 - Spot-check GCM round-trip: script self-tests by decrypting a re-encrypted token with
   WebCrypto (`node:crypto.webcrypto`) before writing output.
 - Spot-check FK integrity: `PRAGMA foreign_key_check` after import.
