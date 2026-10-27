@@ -77,21 +77,34 @@ UPDATE crate SET
 WHERE crate.state = 'ACTIVE' AND crate.public = 1
   AND crate.user_id IN (SELECT id FROM spotify_user WHERE private_profile = 0)`;
 
+const STUCK_SYNC_MS = 6 * 3_600_000;
+
 export default {
   fetch: app.fetch,
 
-  // Hourly: trending recompute + expired MCP API key cleanup.
+  // Hourly: trending recompute + expired MCP API key cleanup + stuck-sync sweep.
   async scheduled(_controller: ScheduledController, env: Env, _ctx: ExecutionContext): Promise<void> {
     const now = Date.now();
     const trending = await env.DB.prepare(TRENDING_SQL)
       .bind(now, now - 7 * 86_400_000, now - 30 * 86_400_000)
       .run();
     const cleanup = await env.DB.prepare('DELETE FROM mcp_api_key WHERE expires_at < ?').bind(now).run();
+    // A sync Workflow that dies without reaching its mark-failed step (e.g. the
+    // instance's subrequest budget is spent) leaves the library mid-sync forever,
+    // and IMPORTING/UPDATING disable the sync button. No sync takes hours.
+    const stuck = await env.DB.prepare(
+      `UPDATE library
+          SET state = CASE state WHEN 'UPDATING' THEN 'UPDATE_FAILED' ELSE 'IMPORT_FAILED' END, updated_at = ?
+        WHERE state IN ('IMPORTING', 'IMPORTING_AFTER_FIRST_PAGE', 'UPDATING') AND updated_at < ?`,
+    )
+      .bind(now, now - STUCK_SYNC_MS)
+      .run();
     console.log(
       JSON.stringify({
         event: 'scheduled_run',
         cratesScored: trending.meta.changes,
         expiredKeysDeleted: cleanup.meta.changes,
+        stuckSyncsFailed: stuck.meta.changes,
       }),
     );
   },

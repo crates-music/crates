@@ -3,7 +3,8 @@
 //   1. removals: /me/albums/contains in 20-id batches, archive missing
 //      (skipped on FIRST_SYNC)
 //   2. import: /me/albums pages (50/page — Java used 25), upsert catalog +
-//      library rows; artists created shallow (no per-artist Spotify call)
+//      library rows in one D1 batch per page; artists created shallow (no
+//      per-artist Spotify call)
 //   3. enrichment: batch GET /artists?ids= (50/call) for genres_fetched=0
 //      (Java fetched artists one call each, inline during import)
 // Each step is retried and resumable; failures mark the library
@@ -11,7 +12,7 @@
 
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from 'cloudflare:workers';
 import type { Env } from '../env';
-import { insertAlbumFromSpotify } from '../lib/catalog';
+import { savedAlbumStatements } from '../lib/catalog';
 import { ARTIST_BATCH, enrichArtistGenres } from '../lib/genres';
 import {
   spGetSavedAlbums,
@@ -34,6 +35,7 @@ const CONTAINS_BATCH = 20; // Spotify max for /me/albums/contains
 const SAVED_PAGE_SIZE = 50; // Spotify max for /me/albums
 const PAGES_PER_STEP = 10;
 const REMOVALS_PER_STEP = 2000;
+const ARCHIVE_ID_CHUNK = 99;
 const ARTIST_BATCHES_PER_STEP = 20;
 
 export class LibrarySyncWorkflow extends WorkflowEntrypoint<Env, LibrarySyncParams> {
@@ -112,12 +114,17 @@ export class LibrarySyncWorkflow extends WorkflowEntrypoint<Env, LibrarySyncPara
     });
     if (toArchive.length > 0) {
       const now = Date.now();
-      const ph = toArchive.map(() => '?').join(',');
-      await this.env.DB.prepare(
-        `UPDATE library_album SET state = 'ARCHIVED', archived_at = ? WHERE id IN (${ph})`,
-      )
-        .bind(now, ...toArchive)
-        .run();
+      // D1 allows 100 bound parameters per statement (one goes to archived_at).
+      const stmts: D1PreparedStatement[] = [];
+      for (let i = 0; i < toArchive.length; i += ARCHIVE_ID_CHUNK) {
+        const ids = toArchive.slice(i, i + ARCHIVE_ID_CHUNK);
+        stmts.push(
+          this.env.DB.prepare(
+            `UPDATE library_album SET state = 'ARCHIVED', archived_at = ? WHERE id IN (${ids.map(() => '?').join(',')})`,
+          ).bind(now, ...ids),
+        );
+      }
+      await this.env.DB.batch(stmts);
       console.log(JSON.stringify({ event: 'sync_removals', userId, archived: toArchive.length }));
     }
     return albums.length < REMOVALS_PER_STEP ? -1 : albums[albums.length - 1].id;
@@ -131,18 +138,8 @@ export class LibrarySyncWorkflow extends WorkflowEntrypoint<Env, LibrarySyncPara
       for (let i = 0; i < PAGES_PER_STEP; i++) {
         const offset = (chunk * PAGES_PER_STEP + i) * SAVED_PAGE_SIZE;
         const page = await spGetSavedAlbums(token, offset, SAVED_PAGE_SIZE);
-        for (const saved of page.items) {
-          const album = await insertAlbumFromSpotify(this.env, saved.album, { shallowArtists: true });
-          // Java only refreshed added_at on existing rows; we also reactivate
-          // previously-archived albums the user re-saved (legacy bug fix).
-          await this.env.DB.prepare(
-            `INSERT INTO library_album (album_id, spotify_user_id, state, added_at, created_at, crated)
-             VALUES (?, ?, 'ACTIVE', ?, ?, 0)
-             ON CONFLICT (album_id, spotify_user_id)
-             DO UPDATE SET added_at = excluded.added_at, state = 'ACTIVE', archived_at = NULL`,
-          )
-            .bind(album.id, userId, Date.parse(saved.added_at), now)
-            .run();
+        if (page.items.length > 0) {
+          await this.env.DB.batch(savedAlbumStatements(this.env.DB, userId, page.items, now));
         }
         if (chunk === 0 && i === 0) {
           // Frontend shows partial results as soon as the first page lands.

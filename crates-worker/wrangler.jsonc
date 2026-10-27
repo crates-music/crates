@@ -58,6 +58,13 @@
     "crons": ["0 * * * *"]
   },
 
+  // Every D1 call counts as a subrequest, and a Workflow instance gets one budget
+  // for its whole run (10k by default). The sync batches its writes per page, so
+  // this is headroom for very large libraries rather than the fix itself.
+  "limits": {
+    "subrequests": 100000
+  },
+
   "workflows": [
     {
       "name": "crates-library-sync",

@@ -12,6 +12,7 @@ import {
   type SpotifyAlbum,
   type SpotifyArtistFull,
   type SpotifyImage,
+  type SpotifySavedAlbum,
 } from './spotify';
 
 const imagesJson = (images: SpotifyImage[] | undefined): string | null => {
@@ -109,42 +110,105 @@ export interface AlbumRow {
 }
 
 /**
- * Shallow artist create for bulk sync: no per-artist Spotify call; the sync
+ * Statements that upsert one page of saved albums into the catalog and the
+ * user's library, for a single DB.batch() call. Every D1 call counts against a
+ * Workflow instance's subrequest budget (10k by default), so the sync can't
+ * afford a round trip per row: big libraries ran out partway through and were
+ * left stuck in IMPORTING_AFTER_FIRST_PAGE. Ids are resolved with subselects
+ * on spotify_id instead of RETURNING, so the whole page is one round trip.
+ *
+ * Artists are created shallow (no per-artist Spotify call); the sync
  * Workflow's enrichment pass backfills genres/images via batched
  * GET /artists?ids= (genres_fetched = 0 marks the backlog).
  */
-export async function createArtistShallow(
+export function savedAlbumStatements(
   db: D1Database,
-  simple: { id: string; uri?: string; name?: string },
-): Promise<number> {
-  const row = await db
-    .prepare(
-      `INSERT INTO artist (spotify_id, spotify_uri, name, popularity, genres_fetched, images)
-       VALUES (?, ?, ?, 0, 0, NULL)
-       ON CONFLICT (spotify_id) DO UPDATE SET name = excluded.name
-       RETURNING id`,
-    )
-    .bind(simple.id, simple.uri ?? `spotify:artist:${simple.id}`, simple.name ?? simple.id)
-    .first<{ id: number }>();
-  return row!.id;
+  userId: number,
+  pageItems: (SpotifySavedAlbum | null)[],
+  now: number,
+): D1PreparedStatement[] {
+  // /me/albums returns null entries (and entries with a null album) for albums
+  // that are no longer available on Spotify.
+  const items = pageItems.filter((i): i is SpotifySavedAlbum => !!i?.album);
+  const stmts: D1PreparedStatement[] = [];
+  const artists = new Map<string, { id: string; uri?: string; name?: string }>();
+  for (const { album } of items) for (const a of album.artists ?? []) if (a?.id) artists.set(a.id, a);
+  for (const a of artists.values()) {
+    stmts.push(
+      db
+        .prepare(
+          `INSERT INTO artist (spotify_id, spotify_uri, name, popularity, genres_fetched, images)
+           VALUES (?, ?, ?, 0, 0, NULL)
+           ON CONFLICT (spotify_id) DO NOTHING`,
+        )
+        .bind(a.id, a.uri ?? `spotify:artist:${a.id}`, a.name ?? a.id),
+    );
+  }
+  for (const saved of items) {
+    const album = saved.album;
+    stmts.push(
+      db
+        .prepare(
+          `INSERT INTO album (spotify_id, upc, href, name, popularity, release_date, images)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT (spotify_id) DO UPDATE SET popularity = excluded.popularity`,
+        )
+        .bind(
+          album.id,
+          album.external_ids?.upc ?? null,
+          album.href,
+          album.name,
+          album.popularity ?? 0,
+          parseReleaseDate(album.release_date, album.release_date_precision),
+          imagesJson(album.images),
+        ),
+    );
+    for (const a of album.artists ?? []) {
+      if (!a?.id) continue;
+      stmts.push(
+        db
+          .prepare(
+            `INSERT OR IGNORE INTO album_to_artist (album_id, artist_id)
+             SELECT al.id, ar.id FROM album al, artist ar WHERE al.spotify_id = ? AND ar.spotify_id = ?`,
+          )
+          .bind(album.id, a.id),
+      );
+    }
+    for (const genreName of album.genres ?? []) {
+      stmts.push(db.prepare('INSERT OR IGNORE INTO genre (name) VALUES (?)').bind(genreName));
+      stmts.push(
+        db
+          .prepare(
+            `INSERT OR IGNORE INTO album_to_genre (album_id, genre_id)
+             SELECT al.id, g.id FROM album al, genre g WHERE al.spotify_id = ? AND g.name = ?`,
+          )
+          .bind(album.id, genreName),
+      );
+    }
+    // Java only refreshed added_at on existing rows; we also reactivate
+    // previously-archived albums the user re-saved (legacy bug fix).
+    stmts.push(
+      db
+        .prepare(
+          `INSERT INTO library_album (album_id, spotify_user_id, state, added_at, created_at, crated)
+           SELECT id, ?, 'ACTIVE', ?, ?, 0 FROM album WHERE spotify_id = ?
+           ON CONFLICT (album_id, spotify_user_id)
+           DO UPDATE SET added_at = excluded.added_at, state = 'ACTIVE', archived_at = NULL`,
+        )
+        .bind(userId, Date.parse(saved.added_at), now, album.id),
+    );
+  }
+  return stmts;
 }
 
 /** Insert an album (from a Spotify payload) plus its artist/genre joins. */
 export async function insertAlbumFromSpotify(
   env: Env,
   album: SpotifyAlbum,
-  opts: { shallowArtists?: boolean } = {},
 ): Promise<AlbumRow> {
   const artistIds: number[] = [];
   for (const artist of album.artists ?? []) {
-    if (opts.shallowArtists) {
-      const existing = await env.DB.prepare('SELECT id FROM artist WHERE spotify_id = ?')
-        .bind(artist.id)
-        .first<{ id: number }>();
-      artistIds.push(existing ? existing.id : await createArtistShallow(env.DB, artist));
-    } else {
-      artistIds.push(await findOrCreateArtist(env, artist));
-    }
+    artistIds.push(await findOrCreateArtist(env, artist));
   }
   const row = await env.DB.prepare(
     `INSERT INTO album (spotify_id, upc, href, name, popularity, release_date, images)

@@ -6,7 +6,6 @@
 // (50 per call) here, per decision 10 in the migration plan.
 
 import type { Env } from '../env';
-import { findOrCreateGenre } from './catalog';
 import { getServiceToken, spGetArtists } from './spotify';
 
 /** Spotify's /artists endpoint takes at most 50 ids. */
@@ -59,6 +58,9 @@ export async function enrichArtistGenres(
   const byId = new Map(rows.map((a) => [a.spotify_id, a.id]));
   const res = await spGetArtists(serviceToken, rows.map((a) => a.spotify_id));
   const seen = new Set<string>();
+  // One D1 batch for all the writes: a Workflow instance has a fixed subrequest
+  // budget and every D1 call counts, so per-artist round trips don't scale.
+  const stmts: D1PreparedStatement[] = [];
 
   for (const full of res.artists) {
     if (!full) continue;
@@ -72,23 +74,31 @@ export async function enrichArtistGenres(
               .map((i) => ({ id: null, url: i.url, width: i.width, height: i.height })),
           )
         : null;
-    await env.DB.prepare('UPDATE artist SET name = ?, popularity = ?, images = ?, genres_fetched = 1 WHERE id = ?')
-      .bind(full.name, full.popularity ?? 0, images, artistId)
-      .run();
+    stmts.push(
+      env.DB.prepare('UPDATE artist SET name = ?, popularity = ?, images = ?, genres_fetched = 1 WHERE id = ?').bind(
+        full.name,
+        full.popularity ?? 0,
+        images,
+        artistId,
+      ),
+    );
     for (const genreName of full.genres ?? []) {
-      const genreId = await findOrCreateGenre(env.DB, genreName);
-      await env.DB.prepare('INSERT OR IGNORE INTO artist_to_genre (artist_id, genre_id) VALUES (?, ?)')
-        .bind(artistId, genreId)
-        .run();
+      stmts.push(env.DB.prepare('INSERT OR IGNORE INTO genre (name) VALUES (?)').bind(genreName));
+      stmts.push(
+        env.DB.prepare(
+          'INSERT OR IGNORE INTO artist_to_genre (artist_id, genre_id) SELECT ?, id FROM genre WHERE name = ?',
+        ).bind(artistId, genreName),
+      );
     }
   }
 
   // Artists Spotify no longer returns: mark fetched so we don't loop forever.
   for (const a of rows) {
     if (!seen.has(a.spotify_id)) {
-      await env.DB.prepare('UPDATE artist SET genres_fetched = 1 WHERE id = ?').bind(a.id).run();
+      stmts.push(env.DB.prepare('UPDATE artist SET genres_fetched = 1 WHERE id = ?').bind(a.id));
     }
   }
+  await env.DB.batch(stmts);
 
   return rows.length;
 }
