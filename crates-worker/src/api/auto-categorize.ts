@@ -11,7 +11,7 @@ import { currentUser, requireAuth, type AuthVars } from '../lib/auth';
 import { analyzeLibrary, type CatalogAlbum, type CrateProposal, type Strategy } from '../lib/categorization';
 import { albumIdsInAnyCrate, libraryCatalogAlbums } from '../lib/categorization-queries';
 import { enrichArtistGenres } from '../lib/genres';
-import { handelize } from '../lib/handle';
+import { handelize, uniqueCrateHandle } from '../lib/handle';
 
 export const autoCategorizeRoutes = new Hono<AuthVars>();
 autoCategorizeRoutes.use('*', requireAuth);
@@ -192,13 +192,12 @@ autoCategorizeRoutes.post('/', async (c) => {
       ? proposalsFromPayload(body.proposals, uncategorized)
       : analyzeLibrary(uncategorized);
 
-  // Skip proposals whose crate already exists. Note the Java checks a handle derived as
-  // name.toLowerCase().replace(" ", "-"), which is NOT how the crate handle is actually
-  // built (handelize strips punctuation) — so a crate named "R&B/Soul" is looked up as
-  // "r&b/soul" but stored as "rbsoul". Preserved so the same duplicates get skipped.
+  // Skip proposals whose crate already exists, by the handle the crate is actually stored
+  // under. (Java derived it as name.toLowerCase().replace(" ", "-"), so "R&B/Soul" was
+  // looked up as "r&b/soul" but stored as "rbsoul", and a second run hit the unique index.)
   const newProposals: CrateProposal[] = [];
   for (const p of proposals) {
-    const lookupHandle = p.name.toLowerCase().replaceAll(' ', '-');
+    const lookupHandle = handelize(p.name);
     const existing = await c.env.DB.prepare(
       `SELECT id FROM crate WHERE user_id = ? AND handle = ? AND state = 'ACTIVE'`,
     )
@@ -249,7 +248,7 @@ async function createCrateWithAlbums(
   proposal: CrateProposal,
 ): Promise<CrateSummary> {
   const now = Date.now();
-  const handle = handelize(proposal.name);
+  const handle = await uniqueCrateHandle(env.DB, user.id, proposal.name);
   const row = await env.DB.prepare(
     `INSERT INTO crate (name, handle, user_id, state, public, description, trending_score, last_trending_update, created_at, updated_at)
      VALUES (?, ?, ?, 'ACTIVE', ?, ?, 0, ?, ?, ?) RETURNING id`,

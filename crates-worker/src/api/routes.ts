@@ -35,6 +35,8 @@ api.onError((err, c) => {
   if (err instanceof SpotifyApiError && err.status === 404) {
     return c.json({ error: 'not found on Spotify' }, 404);
   }
-  console.error('api error', c.req.method, c.req.path, String(err));
+  // userId is set by requireAuth; it lets a user's report be matched to the log line.
+  const userId = (c.var as { user?: { id: number } }).user?.id ?? null;
+  console.error('api error', c.req.method, c.req.path, `userId=${userId}`, String(err));
   return c.json({ error: 'internal error' }, 500);
 });

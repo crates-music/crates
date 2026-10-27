@@ -8,7 +8,7 @@ import { cors } from 'hono/cors';
 import type { Env } from '../env';
 import { createOrUpdateUser } from './auth';
 import { findOrCreateAlbumBySpotifyId, spotifyAlbumToDto } from '../lib/catalog';
-import { handelize } from '../lib/handle';
+import { handelize, uniqueCrateHandle } from '../lib/handle';
 import {
   generateApiKey,
   generateCodeChallenge,
@@ -440,7 +440,7 @@ mcpRoutes.post('/web/crates', async (c) => {
     }>();
 
     const now = Date.now();
-    const handle = handelize(body.name ?? '');
+    const handle = await uniqueCrateHandle(c.env.DB, user.id, body.name);
     const isPublic = !!body.isPublic;
     const row = await c.env.DB.prepare(
       `INSERT INTO crate (name, handle, user_id, state, public, description, trending_score, last_trending_update, created_at, updated_at)

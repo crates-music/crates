@@ -6,7 +6,7 @@ import { Hono } from 'hono';
 import { currentUser, requireAuth, type AuthVars } from '../lib/auth';
 import { findOrCreateAlbumBySpotifyId } from '../lib/catalog';
 import { crateDto, type CrateDto } from '../lib/dto';
-import { handelize } from '../lib/handle';
+import { uniqueCrateHandle } from '../lib/handle';
 import { echoedSort, pageParams, springPage } from '../lib/page';
 import { crateAlbums } from '../lib/public-queries';
 import { activeCratesByUser, findCrateRowById } from '../lib/user-queries';
@@ -38,11 +38,12 @@ crateRoutes.post('/', async (c) => {
   const body = await c.req.json<{ name?: string; description?: string }>();
   if (!body.name?.trim()) return c.json({ error: 'name is required' }, 400);
   const now = Date.now();
+  const handle = await uniqueCrateHandle(c.env.DB, currentUser(c).id, body.name);
   const row = await c.env.DB.prepare(
     `INSERT INTO crate (name, handle, user_id, state, public, description, trending_score, last_trending_update, created_at, updated_at)
      VALUES (?, ?, ?, 'ACTIVE', 1, ?, 0, ?, ?, ?) RETURNING id`,
   )
-    .bind(body.name, handelize(body.name), currentUser(c).id, body.description ?? null, now, now, now)
+    .bind(body.name, handle, currentUser(c).id, body.description ?? null, now, now, now)
     .first<{ id: number }>();
   return c.json(await loadCrate(c, row!.id));
 });
@@ -62,6 +63,7 @@ crateRoutes.put('/:id', async (c) => {
   if (!hasAccess(crate, currentUser(c).id)) return unauthorized(c);
   const body = await c.req.json<{ name?: string; description?: string | null; publicCrate?: boolean }>();
   const name = body.name ?? null;
+  const handle = name ? await uniqueCrateHandle(c.env.DB, crate.user.id, name, id) : null;
   await c.env.DB.prepare(
     `UPDATE crate SET
        name = COALESCE(?, name),
@@ -71,7 +73,7 @@ crateRoutes.put('/:id', async (c) => {
        updated_at = ?
      WHERE id = ?`,
   )
-    .bind(name, name ? handelize(name) : null, body.description ?? null, body.publicCrate ? 1 : 0, Date.now(), id)
+    .bind(name, handle, body.description ?? null, body.publicCrate ? 1 : 0, Date.now(), id)
     .run();
   return c.json(await loadCrate(c, id));
 });
@@ -82,7 +84,12 @@ crateRoutes.delete('/:id', async (c) => {
   const crate = await loadCrate(c, id);
   if (!crate) return notFound(c);
   if (!hasAccess(crate, currentUser(c).id)) return unauthorized(c);
-  await c.env.DB.prepare(`UPDATE crate SET state = 'ARCHIVED' WHERE id = ?`).bind(id).run();
+  // Archiving frees the handle (nothing restores archived crates), so the name can be reused.
+  await c.env.DB.prepare(
+    `UPDATE crate SET state = 'ARCHIVED', handle = handle || '--archived-' || id, updated_at = ? WHERE id = ?`,
+  )
+    .bind(Date.now(), id)
+    .run();
   return c.body(null, 200);
 });
 

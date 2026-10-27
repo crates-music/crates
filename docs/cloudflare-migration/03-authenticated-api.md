@@ -65,11 +65,14 @@ Both are done. Two things worth knowing:
   same crates. Decade labels used `ZoneId.systemDefault()`; Workers only have UTC.
 - **Quirks kept on purpose.** `CrateSelector` compares against `maxAlbumsPerCrate` but
   truncates to `IDEAL_ALBUMS_PER_CRATE`; `DecadeStrategy.CURRENT_YEAR` is hardcoded to
-  2025; the duplicate-crate check derives a handle as
-  `name.toLowerCase().replace(" ", "-")` rather than the `handelize()` that actually
-  builds it, so `R&B/Soul` is looked up as `r&b/soul` but stored as `rbsoul`; and
+  2025; and
   `findBestAlbumMatch` returns the first search result when nothing matches, so a
   nonsense MCP request still comes back `matched: true`.
+- **Crate handles (fixed 2026-10-27).** Java let a crate name collide with an existing
+  handle (including archived crates, which kept theirs), and the `UNIQUE (user_id,
+  handle)` insert failed with a 500. Creates and renames now take the first free
+  `-2`, `-3`, ... suffix, archiving moves the handle aside, and auto-categorize's
+  duplicate check uses `handelize()` instead of `name.toLowerCase().replace(" ", "-")`.
 
 PKCE verifiers now live in KV under a 10-minute TTL rather than a `ConcurrentHashMap`
 (an isolate cannot hold state across requests), and the state is hashed for the KV key
