@@ -17,8 +17,14 @@ crateRoutes.use('*', requireAuth);
 const notFound = (c: { json: (o: object, s: 404) => Response }) => c.json({ error: 'not found' }, 404);
 const unauthorized = (c: { json: (o: object, s: 401) => Response }) => c.json({ error: 'unauthorized' }, 401);
 
-/** AccessServiceImpl.assertAccess: owner or public crate. */
+/** AccessServiceImpl.assertAccess: owner or public crate. Reads only. */
 const hasAccess = (crate: CrateDto, userId: number) => crate.user.id === userId || crate.publicCrate;
+
+// Java used assertAccess for mutations too, so any logged-in user could rename, archive
+// or edit anyone's public crate. Mutations are owner-only. 403 rather than 401: the
+// app's interceptor logs the user out on 401.
+const isOwner = (crate: CrateDto, userId: number) => crate.user.id === userId;
+const forbidden = (c: { json: (o: object, s: 403) => Response }) => c.json({ error: 'forbidden' }, 403);
 
 async function loadCrate(c: Parameters<typeof currentUser>[0], id: number) {
   const row = await findCrateRowById(c.env.DB, id);
@@ -60,7 +66,7 @@ crateRoutes.put('/:id', async (c) => {
   const id = Number(c.req.param('id'));
   const crate = await loadCrate(c, id);
   if (!crate) return notFound(c);
-  if (!hasAccess(crate, currentUser(c).id)) return unauthorized(c);
+  if (!isOwner(crate, currentUser(c).id)) return forbidden(c);
   const body = await c.req.json<{ name?: string; description?: string | null; publicCrate?: boolean }>();
   const name = body.name ?? null;
   const handle = name ? await uniqueCrateHandle(c.env.DB, crate.user.id, name, id) : null;
@@ -83,7 +89,7 @@ crateRoutes.delete('/:id', async (c) => {
   const id = Number(c.req.param('id'));
   const crate = await loadCrate(c, id);
   if (!crate) return notFound(c);
-  if (!hasAccess(crate, currentUser(c).id)) return unauthorized(c);
+  if (!isOwner(crate, currentUser(c).id)) return forbidden(c);
   // Archiving frees the handle (nothing restores archived crates), so the name can be reused.
   await c.env.DB.prepare(
     `UPDATE crate SET state = 'ARCHIVED', handle = handle || '--archived-' || id, updated_at = ? WHERE id = ?`,
@@ -111,7 +117,7 @@ async function addAlbumsToCrate(
 ): Promise<Response> {
   const crate = await loadCrate(c, crateId);
   if (!crate) return notFound(c);
-  if (!hasAccess(crate, currentUser(c).id)) return unauthorized(c);
+  if (!isOwner(crate, currentUser(c).id)) return forbidden(c);
   const now = Date.now();
   for (const spotifyId of spotifyIds) {
     const album = await findOrCreateAlbumBySpotifyId(c.env, spotifyId);
@@ -150,7 +156,7 @@ crateRoutes.delete('/:id/album/:albumId', async (c) => {
   const id = Number(c.req.param('id'));
   const crate = await loadCrate(c, id);
   if (!crate) return notFound(c);
-  if (!hasAccess(crate, currentUser(c).id)) return unauthorized(c);
+  if (!isOwner(crate, currentUser(c).id)) return forbidden(c);
   await c.env.DB.prepare('DELETE FROM crate_album WHERE crate_id = ? AND album_id = ?')
     .bind(id, Number(c.req.param('albumId')))
     .run();

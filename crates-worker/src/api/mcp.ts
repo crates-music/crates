@@ -499,8 +499,8 @@ mcpRoutes.put('/web/crates/:crateId/albums', async (c) => {
         user_id: number;
       }>();
     if (!crate) throw new Error(`crate not found: ${crateId}`);
-    // AccessServiceImpl.assertAccess — owner or public crate, same as the Java.
-    if (crate.user_id !== user.id && !crate.public) return c.body(null, 401);
+    // Owner only: Java's assertAccess (owner or public) let anyone add to a public crate.
+    if (crate.user_id !== user.id) return c.body(null, 403);
 
     const body = await c.req.json<{ albums?: AlbumReference[] }>();
     const { matchResults, albumIds } = await resolveAlbums(c.env, body.albums ?? []);
