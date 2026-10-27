@@ -2,6 +2,7 @@
 // LIBRARY album search), and FeedbackController.
 
 import { Hono } from 'hono';
+import { recordEvents, type IncomingEvent } from '../lib/activity';
 import { currentUser, requireAuth, type AuthVars } from '../lib/auth';
 import { spotifyAlbumToDto } from '../lib/catalog';
 import { userDto, type UserRow } from '../lib/dto';
@@ -69,4 +70,21 @@ feedbackRoutes.post('/', async (c) => {
     .bind(currentUser(c).id, message, Date.now())
     .run();
   return c.body(null, 201);
+});
+
+// POST /v1/events — usage events from the app ({ events: [{ type, crateId?, albumId?, props? }] }).
+// Sent with fetch keepalive so album_play survives the navigation to Spotify.
+export const eventRoutes = new Hono<AuthVars>();
+eventRoutes.use('*', requireAuth);
+
+eventRoutes.post('/', async (c) => {
+  let body: { events?: unknown } | null = null;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'invalid JSON' }, 400);
+  }
+  if (!Array.isArray(body?.events)) return c.json({ error: 'events must be an array' }, 400);
+  const stored = await recordEvents(c.env.DB, currentUser(c).id, body.events as IncomingEvent[]);
+  return c.json({ stored });
 });

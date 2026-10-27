@@ -4,6 +4,7 @@
 
 import type { Context, MiddlewareHandler } from 'hono';
 import type { Env } from '../env';
+import { recordActivity } from './activity';
 import type { UserRow } from './dto';
 import type { UserTokenRow } from './spotify';
 
@@ -28,6 +29,7 @@ export const requireAuth: MiddlewareHandler<AuthVars> = async (c, next) => {
   const user = await findUserByAuthToken(c.env.DB, token);
   if (!user) return c.json({ error: 'unauthorized' }, 401);
   c.set('user', user);
+  c.executionCtx.waitUntil(recordActivity(c.env.DB, user.id, 'app'));
   await next();
 };
 

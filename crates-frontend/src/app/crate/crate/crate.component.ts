@@ -20,6 +20,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { RemoveAlbumModalComponent } from '../shared/modal/remove-album/remove-album-modal.component';
 import { ListType } from '../../shared/model/list-type.model';
 import { PublicLinkService } from '../../shared/services/public-link.service';
+import { AnalyticsService } from '../../shared/services/analytics.service';
 import { selectUser } from '../../user/store/selectors/user.selectors';
 import { User } from '../../user/shared/model/user.model';
 import * as NavigationActions from '../../shared/store/actions/navigation.actions';
@@ -50,7 +51,8 @@ export class CrateComponent implements OnInit, OnDestroy {
               private store: Store,
               private modal: NgbModal,
               private router: Router,
-              private publicLinkService: PublicLinkService) {
+              private publicLinkService: PublicLinkService,
+              private analytics: AnalyticsService) {
     this.loadCrate();
     this.page = Pageable.of(0, DEFAULT_PAGE_SIZE);
 
@@ -151,6 +153,7 @@ export class CrateComponent implements OnInit, OnDestroy {
 
   // https://open.spotify.com/album/2TklWyQdmNHg7d2Xmam8G8?si=660e00a203414f19
   openAlbum(album: Album) {
+    this.analytics.track({ type: 'album_play', crateId: this.crate?.id, albumId: album.id }, { immediate: true });
     window.location.href = `https://open.spotify.com/album/${album.spotifyId}`;
   }
 

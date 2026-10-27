@@ -5,7 +5,7 @@ import { authRoutes } from './auth';
 import { autoCategorizeRoutes } from './auto-categorize';
 import { crateRoutes } from './crates';
 import { libraryRoutes } from './library';
-import { albumRoutes, feedbackRoutes, searchRoutes } from './misc';
+import { albumRoutes, eventRoutes, feedbackRoutes, searchRoutes } from './misc';
 import { publicApi } from './public';
 import { userRoutes } from './users';
 
@@ -22,6 +22,7 @@ api.route('/user', userRoutes);
 api.route('/search', searchRoutes);
 api.route('/album', albumRoutes);
 api.route('/feedback', feedbackRoutes);
+api.route('/events', eventRoutes);
 api.route('/auto-categorize', autoCategorizeRoutes);
 
 api.get('/health', async (c) => {

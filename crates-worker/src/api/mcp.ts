@@ -17,6 +17,7 @@ import {
   storeCodeVerifier,
   validateApiKey,
 } from '../lib/mcp-auth';
+import { recordActivity } from '../lib/activity';
 import { getServiceToken, spSearchAlbums, tokenRequest } from '../lib/spotify';
 import type { UserRow } from '../lib/dto';
 
@@ -210,7 +211,11 @@ async function authedUser(c: { env: Env; req: { header: (n: string) => string | 
   if (!header || !header.startsWith('Bearer ')) return null;
   const key = await validateApiKey(c.env, header.slice(7));
   if (!key) return null;
-  return c.env.DB.prepare('SELECT * FROM spotify_user WHERE spotify_id = ?').bind(key.user_id).first<UserRow>();
+  const user = await c.env.DB.prepare('SELECT * FROM spotify_user WHERE spotify_id = ?')
+    .bind(key.user_id)
+    .first<UserRow>();
+  if (user) await recordActivity(c.env.DB, user.id, 'mcp');
+  return user;
 }
 
 /** LibraryServiceImpl.formatReleaseYear — pre-1980 albums collapse to a decade. */
