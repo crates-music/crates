@@ -65,17 +65,24 @@ export { LibrarySyncWorkflow } from './workflows/library-sync';
 // Timestamps are epoch ms; integer division by 86400000 floors to whole days
 // (matching ChronoUnit.DAYS).
 const TRENDING_SQL = `
-UPDATE crate SET
-  trending_score = ROUND(
-    ((SELECT count(*) FROM crate_view cv WHERE cv.crate_id = crate.id AND cv.viewed_at > ?2) * 5.0 +
-     (SELECT count(*) FROM crate_view cv WHERE cv.crate_id = crate.id AND cv.viewed_at > ?3) * 2.0)
+WITH scored AS (
+  SELECT c.id, ROUND(
+    ((SELECT count(*) FROM crate_view cv WHERE cv.crate_id = c.id AND cv.viewed_at > ?2) * 5.0 +
+     (SELECT count(*) FROM crate_view cv WHERE cv.crate_id = c.id AND cv.viewed_at > ?3) * 2.0)
     * MAX(0.1, 1.0 - (((?1 - COALESCE(
-        (SELECT MAX(cv.viewed_at) FROM crate_view cv WHERE cv.crate_id = crate.id),
-        crate.created_at, ?1)) / 86400000) / 90.0)),
-    4),
+        (SELECT MAX(cv.viewed_at) FROM crate_view cv WHERE cv.crate_id = c.id),
+        c.created_at, ?1)) / 86400000) / 90.0)),
+    4) AS score
+  FROM crate c
+  WHERE c.state = 'ACTIVE' AND c.public = 1
+    AND c.user_id IN (SELECT id FROM spotify_user WHERE private_profile = 0)
+)
+UPDATE crate SET
+  trending_score = scored.score,
   last_trending_update = ?1
-WHERE crate.state = 'ACTIVE' AND crate.public = 1
-  AND crate.user_id IN (SELECT id FROM spotify_user WHERE private_profile = 0)`;
+FROM scored
+WHERE crate.id = scored.id
+  AND crate.trending_score IS NOT scored.score`;
 
 const STUCK_SYNC_MS = 6 * 3_600_000;
 
